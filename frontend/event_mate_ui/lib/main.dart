@@ -1,4 +1,3 @@
-import 'package:event_mate/modules/screens/profile_screen.dart';
 import 'package:flutter/material.dart';
 
 import 'modules/screens/home_screen.dart';
