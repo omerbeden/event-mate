@@ -1,1 +1,2 @@
-Postgress docker = https://www.transposit.com/docs/references/create-readme/
+Postgress docker = https://www.pgadmin.org/docs/pgadmin4/latest/container_deployment.html
+
