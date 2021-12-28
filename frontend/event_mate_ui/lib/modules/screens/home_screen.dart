@@ -1,6 +1,7 @@
-import 'dart:developer';
 
 
+import 'package:event_mate/modules/screens/add_event_screen.dart';
+import 'package:event_mate/modules/screens/events_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -30,46 +31,45 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: PageView(controller: pageController, children: [
-        Container(
-          color: Colors.red,
-        ),
-        Container(color: Colors.blue),
-        Container(
-          color: Colors.white,
-        ),
-        Container(color: Colors.yellow),
-        const ProfileScreen(),
-      ]),
-      bottomNavigationBar: CupertinoTabBar(
-        backgroundColor: Colors.white,
-        items: <BottomNavigationBarItem>[
+    return CupertinoTabScaffold(
+      tabBar: CupertinoTabBar(
+        items: const [
           BottomNavigationBarItem(
-              icon: Icon(Icons.home,
-                  color: (_page == 0) ? Colors.black : Colors.grey),
-              backgroundColor: Colors.white),
+            label: 'Events',
+            icon: Icon(Icons.music_note),
+          ),
           BottomNavigationBarItem(
-              icon: Icon(Icons.search,
-                  color: (_page == 1) ? Colors.black : Colors.grey),
-              backgroundColor: Colors.white),
+            label: 'Add',
+            icon: Icon(Icons.add),
+          ),
           BottomNavigationBarItem(
-              icon: Icon(Icons.add_circle,
-                  color: (_page == 2) ? Colors.black : Colors.grey),
-              backgroundColor: Colors.white),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.mode_comment,
-                  color: (_page == 3) ? Colors.black : Colors.grey),
-              backgroundColor: Colors.white),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.person,
-                  color: (_page == 4) ? Colors.black : Colors.grey),
-              backgroundColor: Colors.white),
+            label: 'Profile',
+            icon: Icon(Icons.person_off_outlined),
+          ),
         ],
-        currentIndex: _page,
-        onTap: navigationTapped,
-        activeColor: Theme.of(context).primaryColor,
       ),
+      tabBuilder: (context, index) {
+        switch (index) {
+          case 0:
+            return CupertinoTabView(
+              defaultTitle: 'Events',
+              builder: (context) => const EventsScreen(),
+            );
+          case 1:
+            return CupertinoTabView(
+              defaultTitle: 'Organize Event',
+              builder: (context) => const AddEventScreen(),
+            );
+          case 2:
+            return CupertinoTabView(
+              defaultTitle: 'Profile',
+              builder: (context) => const ProfileScreen(),
+            );
+          default:
+            assert(false, 'Unexpected tab');
+            return const SizedBox.shrink();
+        }
+      },
     );
   }
 

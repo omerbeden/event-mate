@@ -1,0 +1,86 @@
+
+
+import 'package:flutter/material.dart';
+
+import '../../widgets/animatedsongcard.dart';
+import 'event_detail_screen.dart';
+
+class EventsScreen extends StatefulWidget{
+  const EventsScreen({Key? key, this.androidDrawer}) : super(key: key);
+
+
+
+  final Widget? androidDrawer;
+
+
+  
+  @override
+  State<StatefulWidget> createState() => _EventsScreenState();
+
+}
+
+
+class _EventsScreenState extends State<EventsScreen>{
+  final _androidRefreshKey = GlobalKey<RefreshIndicatorState>();
+  static const _itemsLength = 50;
+
+
+   Future<void> _refreshData() {
+    return Future.delayed(
+      // This is just an arbitrary delay that simulates some network activity.
+      const Duration(seconds: 2),
+      () => setState(() {
+
+      }),
+    );
+  }
+
+  Widget _listBuilder(BuildContext context, int index) {
+    if (index >= _itemsLength) return Container();
+
+    // Show a slightly different color palette. Show poppy-ier colors on iOS
+    // due to lighter contrasting bars and tone it down on Android.
+
+
+    return SafeArea(
+      top: false,
+      bottom: false,
+      child: Hero(
+        tag: index,
+        child: HeroAnimatingSongCard(
+          song: 'songNames[index]',
+          color: Colors.amber,
+          heroAnimation: const AlwaysStoppedAnimation(0),
+          onPressed: () => Navigator.of(context).push<void>(
+            MaterialPageRoute(
+              builder: (context) => EventDetailScreen(
+                id: index
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+  return Scaffold(
+      appBar: AppBar(
+        title: const Text('SongsTab.title'),
+
+      ),
+      drawer: widget.androidDrawer,
+      body: RefreshIndicator(
+        onRefresh: _refreshData,
+        child: ListView.builder(
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          itemCount: _itemsLength,
+          itemBuilder: _listBuilder,
+        ),
+      ),
+    );
+
+  }
+
+}
