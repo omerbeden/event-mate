@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+package event.v1;
+
+option go_package="./genproto";
+
+service EventService{
+    rpc CreateEvent(CreateEventRequest) returns (CreateEventResponse){}
+    rpc ListAllEvent(Empty) returns  (ListAllEventResponse){}
+    rpc GetEvent(GetEventRequest) returns (GetEventResponse){}
+}
+
+message Empty {}
+
+message Event{
+    string id=1;
+    string title=2;
+    string category =3;
+    string start_date=4;
+    string end_date=5;
+    string start_time=6;
+    string end_time=7;
+}
+
+message CreateEventRequest{
+    string user_id=1;
+    Event event = 2;
+
+}
+message CreateEventResponse{
+    bool status=1;
+    string message=2;
+}
+
+message ListAllEventResponse{
+    repeated  Event events=1;  
+}
+
+message GetEventRequest{
+    string event_id=1;   
+}
+
+message GetEventResponse{
+    Event event = 1;
+}
+
+
+
