@@ -1,4 +1,7 @@
+import 'package:event_mate/widgets/date_picker_widget.dart';
 import 'package:flutter/material.dart';
+
+import '../../widgets/time_picker_widget.dart';
 
 class AddEventScreen extends StatefulWidget {
   const AddEventScreen({Key? key}) : super(key: key);
@@ -25,8 +28,69 @@ class AddEventScreenState extends State<AddEventScreen> {
     return Form(
       key: _formKey,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          const TextField(
+            textAlign: TextAlign.center,
+            decoration: InputDecoration(
+              border: OutlineInputBorder(),
+              hintText: 'Enter an event title',
+                            
+            ),
+          ),
+          //TODO:this will be list view
+          const TextField(
+            decoration: InputDecoration(
+              
+              border: OutlineInputBorder(),
+              hintText: 'select category',
+            ),
+          ),
+          const Text(
+            'Start Date',
+            style: TextStyle(
+              color: Colors.black,
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          DatePickerWidget(),
+          const Text(
+            "End Date",
+            style: TextStyle(
+              color: Colors.black,
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          DatePickerWidget(),
+          const Text(
+            "Start Time",
+            style: TextStyle(
+              color: Colors.black,
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          TimePickerWidget(),
+          const Text(
+            "End Time",
+            style: TextStyle(
+              color: Colors.black,
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          TimePickerWidget(),
+          const Text(
+            "Adress",
+            style: TextStyle(
+              color: Colors.black,
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          //TODO:this could be map picker
           TextFormField(
             // The validator receives the text that the user has entered.
             validator: (value) {
