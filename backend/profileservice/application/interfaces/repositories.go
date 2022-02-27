@@ -7,7 +7,8 @@ import (
 type UserRepository interface {
 	//TODO: do implement in infra
 	GetUsers() []core.User
-	InsertUser()
-	UpdateUser()
-	DeleteUser()
+	GetUserById(id uint)
+	InsertUser(user *core.User)
+	UpdateUser(user *core.User)
+	DeleteUserById(id uint)
 }
