@@ -1,6 +1,9 @@
 package core
 
+import "gorm.io/gorm"
+
 type UserAdress struct {
-	ID   int64
-	City string
+	gorm.Model
+	City   string
+	UserID uint
 }

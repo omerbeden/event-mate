@@ -1,19 +1,22 @@
 package database
 
 import (
-	"database/sql"
-	"time"
-
-	_ "github.com/uptrace/bun/driver/pgdriver"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
-func NewConn() {
-	dsn := "postgres://postgres:@localhost:5432/test" //test
-	db, err := sql.Open("pg", dsn)
+func NewConnPG() *gorm.DB {
+	dsn := "postgres://postgres:password@localhost:5432/test" //test
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 
 	if err != nil {
-		panic(err)
+		panic("failed to connect database")
 	}
 
-	db.SetConnMaxLifetime(time.Minute * 10) // test
+	return db
+}
+
+func InitMigration(models ...interface{}) {
+	db := NewConnPG()
+	db.AutoMigrate(models...)
 }

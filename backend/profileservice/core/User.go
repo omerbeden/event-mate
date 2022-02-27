@@ -1,7 +1,9 @@
 package core
 
+import "gorm.io/gorm"
+
 type User struct {
-	ID       int64
+	gorm.Model
 	Name     string
 	LastName string
 	About    string
