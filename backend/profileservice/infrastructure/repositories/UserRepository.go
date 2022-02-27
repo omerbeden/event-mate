@@ -2,51 +2,53 @@ package repositories
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/omerbeden/event-mate/backend/profileservice/core"
 	"github.com/omerbeden/event-mate/backend/profileservice/infrastructure/database"
 	"gorm.io/gorm"
 )
 
-//TODO: do implement
 type UserRepositoryImpl struct{}
 
 func NewUserRepo() *UserRepositoryImpl {
 	return &UserRepositoryImpl{}
 }
 
-func (repo *UserRepositoryImpl) GetUsers() *[]core.User {
-	dbConn := database.NewConnPG()
+func (repo *UserRepositoryImpl) GetUsers() (*[]core.User, error) {
+	db := database.NewConnPG()
 	var users []core.User
-	dbConn.Find(&users)
-	return &users
+	if err := db.Find(&users).Error; err != nil {
+		return &users, err
+	}
+	return &users, nil
 }
 
 func (repo *UserRepositoryImpl) GetUserById(id uint) (core.User, error) {
 	db := database.NewConnPG()
 	var user core.User
-	if result := db.Preload("Adress").First(&user, id); result.Error != nil {
-		fmt.Printf("can not get user by id %d", id)
-		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-		}
+	if err := db.Preload("Adress").First(&user, id).Error; err != nil {
 		return user, gorm.ErrRecordNotFound
 	}
 
 	return user, nil
 }
 
-func (repo *UserRepositoryImpl) InsertUser(user *core.User) {
-	dbConn := database.NewConnPG()
-	dbConn.Create(user)
+func (repo *UserRepositoryImpl) InsertUser(user *core.User) error {
+	db := database.NewConnPG()
+	if err := db.Create(user).Error; err != nil {
+		db.Logger.Error(nil, "Error occurred while inserting User")
+		return err
+	}
+
+	return nil
 }
 
 func (repo *UserRepositoryImpl) UpdateUser(usertoUpdate *core.User) error {
 	if usertoUpdate.ID == 0 {
 		return errors.New("ID has not been set")
 	}
-	_, err := repo.GetUserById(usertoUpdate.ID)
-	if err != nil {
+
+	if _, err := repo.GetUserById(usertoUpdate.ID); err != nil {
 		return err
 	}
 
