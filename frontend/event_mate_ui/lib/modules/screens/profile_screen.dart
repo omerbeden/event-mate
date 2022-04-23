@@ -1,3 +1,4 @@
+import 'package:event_mate/widgets/animatedsongcard.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:event_mate/modules/models/user.dart';
@@ -6,6 +7,8 @@ import 'package:event_mate/widgets/appbar_widget.dart';
 import 'package:event_mate/widgets/numbers_widget.dart';
 import 'package:event_mate/widgets/profile_widget.dart';
 import 'package:event_mate/modules/screens/edit_profile_screen.dart';
+
+import 'event_detail_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
@@ -37,11 +40,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
           const SizedBox(height: 24),
           NumbersWidget(),
           const SizedBox(height: 48),
-          buildEventsAttended(user),
-          const SizedBox(height: 48),
           buildAbout(user),
           const SizedBox(height: 48),
-          buildHobies(user),
+          buildAttendedEvents(),
+          const SizedBox(height: 48),
         ],
       ),
     );
@@ -84,39 +86,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
       );
 
-  Widget buildEventsAttended(User user) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 48),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: const [
-            Text(
-              'EventAttended',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+  Widget buildAttendedEvents() {
+    return Container(child: FutureBuilder<List<int>>(
+      builder: (context, snapshot) {
+        return SafeArea(
+          top: false,
+          bottom: false,
+          child: Hero(
+            tag: 0,
+            child: HeroAnimatingSongCard(
+              song: 'Event Title',
+              color: Colors.amber,
+              heroAnimation: const AlwaysStoppedAnimation(0),
+              onPressed: () => Navigator.of(context).push<void>(
+                MaterialPageRoute(
+                  builder: (context) => EventDetailScreen(id: 0),
+                ),
+              ),
             ),
-            SizedBox(height: 16),
-            Text(
-              'Bisiklet sürmek eventi burası text olmayacak event card ına adress olacak',
-              style: TextStyle(fontSize: 16, height: 1.4),
-            ),
-          ],
-        ),
-      );
-
-  Widget buildHobies(User user) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 48),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: const [
-            Text(
-              'Hobies',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 16),
-            Text(
-              'Bisiklet sürmek burası text olmayacak event card ına adress olacak',
-              style: TextStyle(fontSize: 16, height: 1.4),
-            ),
-          ],
-        ),
-      );
+          ),
+        );
+      },
+    ));
+  }
 }
