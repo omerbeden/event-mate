@@ -4,6 +4,6 @@ import "gorm.io/gorm"
 
 type UserProfileAdress struct {
 	gorm.Model
-	City   string
-	UserID uint
+	City          string
+	UserProfileID uint
 }
