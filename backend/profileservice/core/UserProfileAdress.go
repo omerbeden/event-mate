@@ -2,7 +2,7 @@ package core
 
 import "gorm.io/gorm"
 
-type UserAdress struct {
+type UserProfileAdress struct {
 	gorm.Model
 	City   string
 	UserID uint

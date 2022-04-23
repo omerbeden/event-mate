@@ -7,5 +7,5 @@ type UserProfile struct {
 	Name     string
 	LastName string
 	About    string
-	Adress   UserAdress
+	Adress   UserProfileAdress
 }

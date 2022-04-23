@@ -11,7 +11,7 @@ import (
 func main() {
 	// test code
 	//TODO refeactor later
-	database.InitMigration(&core.UserProfile{}, &core.UserAdress{})
+	database.InitMigration(&core.UserProfile{}, &core.UserProfileAdress{})
 
 	repo := repositories.NewUserRepo()
 
@@ -19,7 +19,7 @@ func main() {
 		Name:     "omer",
 		LastName: "beden",
 		About:    "about about",
-		Adress: core.UserAdress{
+		Adress: core.UserProfileAdress{
 			City: "Sakarya",
 		},
 	}
