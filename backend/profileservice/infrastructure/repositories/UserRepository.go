@@ -14,18 +14,18 @@ func NewUserRepo() *UserRepositoryImpl {
 	return &UserRepositoryImpl{}
 }
 
-func (repo *UserRepositoryImpl) GetUsers() (*[]core.User, error) {
+func (repo *UserRepositoryImpl) GetUsers() (*[]core.UserProfile, error) {
 	db := database.NewConnPG()
-	var users []core.User
+	var users []core.UserProfile
 	if err := db.Find(&users).Error; err != nil {
 		return &users, err
 	}
 	return &users, nil
 }
 
-func (repo *UserRepositoryImpl) GetUserById(id uint) (core.User, error) {
+func (repo *UserRepositoryImpl) GetUserById(id uint) (core.UserProfile, error) {
 	db := database.NewConnPG()
-	var user core.User
+	var user core.UserProfile
 	if err := db.Preload("Adress").First(&user, id).Error; err != nil {
 		return user, gorm.ErrRecordNotFound
 	}
@@ -33,7 +33,7 @@ func (repo *UserRepositoryImpl) GetUserById(id uint) (core.User, error) {
 	return user, nil
 }
 
-func (repo *UserRepositoryImpl) InsertUser(user *core.User) error {
+func (repo *UserRepositoryImpl) InsertUser(user *core.UserProfile) error {
 	db := database.NewConnPG()
 	if err := db.Create(user).Error; err != nil {
 		db.Logger.Error(nil, "Error occurred while inserting User")
@@ -43,7 +43,7 @@ func (repo *UserRepositoryImpl) InsertUser(user *core.User) error {
 	return nil
 }
 
-func (repo *UserRepositoryImpl) UpdateUser(usertoUpdate *core.User) error {
+func (repo *UserRepositoryImpl) UpdateUser(usertoUpdate *core.UserProfile) error {
 	if usertoUpdate.ID == 0 {
 		return errors.New("ID has not been set")
 	}

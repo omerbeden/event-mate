@@ -2,7 +2,7 @@ package core
 
 import "gorm.io/gorm"
 
-type User struct {
+type UserProfile struct {
 	gorm.Model
 	Name     string
 	LastName string

@@ -11,11 +11,11 @@ import (
 func main() {
 	// test code
 	//TODO refeactor later
-	database.InitMigration(&core.User{}, &core.UserAdress{})
+	database.InitMigration(&core.UserProfile{}, &core.UserAdress{})
 
 	repo := repositories.NewUserRepo()
 
-	user := &core.User{
+	user := &core.UserProfile{
 		Name:     "omer",
 		LastName: "beden",
 		About:    "about about",
@@ -27,7 +27,7 @@ func main() {
 
 	repo.InsertUser(user)
 
-	users := repo.GetUsers()
+	users, _ := repo.GetUsers()
 	fmt.Printf("%+v", users)
 
 }
