@@ -5,10 +5,17 @@ import (
 )
 
 type UserRepository interface {
-	//TODO: do implement in infra
 	GetUsers() []core.UserProfile
 	GetUserById(id uint)
 	InsertUser(user *core.UserProfile)
 	UpdateUser(user *core.UserProfile)
 	DeleteUserById(id uint)
+}
+
+type EventRepository interface {
+	GetUserEvent(userId int) ([]core.Event, error)
+}
+
+type UserStatRepository interface {
+	GetUserStat(userId int) (core.UserProfileStat, error)
 }
