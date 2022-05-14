@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+package = package profile.v1;
+
+option go_package = "./profilepb";
+
+
+service ProfileService{
+    rpc GetUser(GetUserEventRequest) returns GetUserEventResponse{}
+}
+
+message GetUserEventRequest{
+    int32 userId=1; 
+}
+
+message User{
+    int32 UserId = 1;
+    string Name   = 2;         
+	string LastName  =3;     
+	string About = 4;          
+	string Photo = 5;          
+	repeated Event AttandedEvents = 6;
+	UserProfileAdress Adress =7;
+	 
+}
+message UserProfileAdress{
+    string UserId = 1;
+    string  City = 2;
+    
+}
+
+message  Event{
+    string Name=1;
+    string CoverPhoto=2;
+}
+message GetUserEventResponse{
+    User user =1;
+}
