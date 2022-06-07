@@ -5,10 +5,12 @@ import (
 
 	"github.com/omerbeden/event-mate/backend/profileservice/core"
 	"github.com/omerbeden/event-mate/backend/profileservice/infrastructure/database"
+	mgrpc "github.com/omerbeden/event-mate/backend/profileservice/infrastructure/grpc"
 	"github.com/omerbeden/event-mate/backend/profileservice/infrastructure/repositories"
 )
 
 func main() {
+
 	// test code
 	//TODO refeactor later
 	database.InitMigration(&core.UserProfile{}, &core.UserProfileAdress{})
@@ -29,5 +31,8 @@ func main() {
 
 	users, _ := repo.GetUsers()
 	fmt.Printf("%+v", users)
+
+	//GRPC SERVER
+	mgrpc.StartGRPCServer()
 
 }
