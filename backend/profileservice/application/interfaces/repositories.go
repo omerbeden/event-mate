@@ -5,10 +5,10 @@ import (
 )
 
 type UserRepository interface {
-	GetUsers() []core.UserProfile
-	GetUserById(id uint)
-	InsertUser(user *core.UserProfile)
-	UpdateUser(user *core.UserProfile)
+	GetUsers() ([]core.UserProfile, error)
+	GetUserById(id uint) (core.UserProfile, error)
+	InsertUser(user *core.UserProfile) error
+	UpdateUser(user *core.UserProfile) error
 	DeleteUserById(id uint)
 }
 

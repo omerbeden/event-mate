@@ -1,10 +1,13 @@
 package repositories
 
 import (
+	"github.com/omerbeden/event-mate/backend/profileservice/application/interfaces"
 	"github.com/omerbeden/event-mate/backend/profileservice/core"
 	"github.com/omerbeden/event-mate/backend/profileservice/infrastructure/database"
 	"gorm.io/gorm"
 )
+
+var _ interfaces.EventRepository = (*EventRepo)(nil)
 
 type EventRepo struct{}
 

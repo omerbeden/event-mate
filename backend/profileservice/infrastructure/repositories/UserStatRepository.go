@@ -1,12 +1,15 @@
 package repositories
 
 import (
+	"github.com/omerbeden/event-mate/backend/profileservice/application/interfaces"
 	"github.com/omerbeden/event-mate/backend/profileservice/core"
 	"github.com/omerbeden/event-mate/backend/profileservice/infrastructure/database"
 	"gorm.io/gorm"
 )
 
 type UserStatRepo struct{}
+
+var _ interfaces.UserStatRepository = (*UserStatRepo)(nil)
 
 func (r *UserStatRepo) GetUserStat(userId int) (core.UserProfileStat, error) {
 	db := database.NewConnPG()

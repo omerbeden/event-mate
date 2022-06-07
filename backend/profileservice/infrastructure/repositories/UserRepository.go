@@ -3,6 +3,7 @@ package repositories
 import (
 	"errors"
 
+	"github.com/omerbeden/event-mate/backend/profileservice/application/interfaces"
 	"github.com/omerbeden/event-mate/backend/profileservice/core"
 	"github.com/omerbeden/event-mate/backend/profileservice/infrastructure/database"
 	"gorm.io/gorm"
@@ -10,17 +11,24 @@ import (
 
 type UserRepositoryImpl struct{}
 
+// DeleteUserById implements interfaces.UserRepository
+func (*UserRepositoryImpl) DeleteUserById(id uint) {
+	panic("unimplemented")
+}
+
+var _ interfaces.UserRepository = (*UserRepositoryImpl)(nil)
+
 func NewUserRepo() *UserRepositoryImpl {
 	return &UserRepositoryImpl{}
 }
 
-func (repo *UserRepositoryImpl) GetUsers() (*[]core.UserProfile, error) {
+func (repo *UserRepositoryImpl) GetUsers() ([]core.UserProfile, error) {
 	db := database.NewConnPG()
 	var users []core.UserProfile
 	if err := db.Find(&users).Error; err != nil {
-		return &users, err
+		return users, err
 	}
-	return &users, nil
+	return users, nil
 }
 
 func (repo *UserRepositoryImpl) GetUserById(id uint) (core.UserProfile, error) {
