@@ -1,12 +1,9 @@
 syntax = "proto3";
 
-package = package profile.v1;
-
-option go_package = "./profilepb";
-
+option go_package = "/backend/profileservice/infrastructure/grpc/pb";
 
 service ProfileService{
-    rpc GetUser(GetUserEventRequest) returns GetUserEventResponse{}
+    rpc GetUser(GetUserEventRequest) returns (GetUserEventResponse){}
 }
 
 message GetUserEventRequest{
