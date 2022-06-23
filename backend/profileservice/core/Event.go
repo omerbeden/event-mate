@@ -1,7 +1,10 @@
 package core
 
+import "gorm.io/gorm"
+
 type Event struct {
-	EventId    uint
-	CoverPhoto string
-	Name       string
+	gorm.Model
+	CoverPhoto    string
+	Name          string
+	UserProfileID uint
 }
