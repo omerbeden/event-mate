@@ -17,11 +17,20 @@ class EditProfileScreen extends StatefulWidget {
 class _EditProfileScreenState extends State<EditProfileScreen> {
   late User user;
 
+  late TextEditingController controller;
+
   @override
   void initState() {
     super.initState();
 
     final user = UserPreferences.myUser;
+    controller = TextEditingController(text: "text");
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
   }
 
   @override
@@ -42,6 +51,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             'About',
             style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
+          const SizedBox(height: 8),
+          TextField(
+            controller: controller,
+          )
         ],
       ),
     );
