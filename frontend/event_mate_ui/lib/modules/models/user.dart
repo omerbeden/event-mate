@@ -8,18 +8,19 @@ class User {
   final UserProfileAdress adress;
   final String job;
   final bool isDarkMode;
+  final UserProfileStat stat;
 
-  const User({
-    required this.userName,
-    required this.name,
-    required this.lastName,
-    required this.about,
-    required this.imagePath,
-    required this.attandedEvents,
-    required this.adress,
-    required this.job,
-    required this.isDarkMode,
-  });
+  const User(
+      {required this.userName,
+      required this.name,
+      required this.lastName,
+      required this.about,
+      required this.imagePath,
+      required this.attandedEvents,
+      required this.adress,
+      required this.job,
+      required this.isDarkMode,
+      required this.stat});
 }
 
 class UserProfileStat {
