@@ -2,7 +2,8 @@ import 'package:grpc/grpc.dart';
 import 'package:event_mate/pb/profile-service.pbgrpc.dart';
 import 'package:event_mate/pb/profile-service.pb.dart';
 
-Future<void> GetUserFromProfileService(List<String> args) async {
+//TODO refeactor et , class a yada fonk a cevir bu sekilde cmd den dart client.dart komutu ile calisiyor
+Future<void> main() async {
   final channel = ClientChannel(
     'localhost',
     port: 50051,

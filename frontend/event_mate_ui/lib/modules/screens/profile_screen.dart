@@ -1,5 +1,4 @@
 import 'package:event_mate/widgets/animatedsongcard.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:event_mate/modules/models/user.dart';
 import 'package:event_mate/utils/user_preference.dart';
@@ -58,6 +57,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
           const SizedBox(height: 4),
           Text(
             user.name,
+            style: const TextStyle(color: Colors.grey),
+          ),
+          Text(
+            user.lastName,
             style: const TextStyle(color: Colors.grey),
           ),
           const SizedBox(height: 4),
