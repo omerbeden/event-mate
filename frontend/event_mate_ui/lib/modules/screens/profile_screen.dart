@@ -1,6 +1,7 @@
 import 'dart:html';
 
 import 'package:event_mate/widgets/animatedsongcard.dart';
+import 'package:event_mate/widgets/event_card_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:event_mate/modules/models/user.dart';
 import 'package:event_mate/utils/user_preference.dart';
@@ -93,28 +94,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
       );
 
   Widget buildAttendedEvents() {
-    return Container(
-      child: FutureBuilder<List<int>>(
-        builder: (context, snapshot) {
-          return SafeArea(
-            top: false,
-            bottom: false,
-            child: Hero(
-              tag: 0,
-              child: HeroAnimatingSongCard(
-                song: 'Event Title',
-                color: Colors.amber,
-                heroAnimation: const AlwaysStoppedAnimation(0),
-                onPressed: () => Navigator.of(context).push<void>(
-                  MaterialPageRoute(
-                    builder: (context) => EventDetailScreen(id: 0),
-                  ),
-                ),
-              ),
-            ),
-          );
-        },
-      ),
+    //future builder ile olabilr
+    return GridView.count(
+      crossAxisCount: 3,
+      childAspectRatio: 1.0,
+      padding: const EdgeInsets.all(0.5),
+      mainAxisSpacing: 1.5,
+      crossAxisSpacing: 1.5,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      children: [
+        GridTile(child: EventCard()),
+        GridTile(child: EventCard()),
+        GridTile(child: EventCard()),
+        GridTile(child: EventCard()),
+        GridTile(child: EventCard())
+      ],
     );
   }
 
