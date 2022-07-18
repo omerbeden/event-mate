@@ -7,7 +7,28 @@ class UserPreferences {
       userName: 'Sarah123',
       name: 'Sarah Abs',
       adress: UserProfileAdress(city: "Sakarya"),
-      attandedEvents: Event(coverPhoto: "coverPhoto", name: "Bisiklet sürmece"),
+      attandedEvents: [
+        Event(
+            description: "description",
+            title: "Bisiklet sürmece",
+            location: 'Sakarya',
+            duration: '2 days'),
+        Event(
+            description: "description",
+            title: "Dağ tırmanısi",
+            location: 'Sakarya',
+            duration: '2 days'),
+        Event(
+            description: "description",
+            title: "Bisiklet sürmece",
+            location: 'Sakarya',
+            duration: '2 days'),
+        Event(
+            description: "description",
+            title: "piknik",
+            location: 'Sakarya',
+            duration: '2 days'),
+      ],
       lastName: "beden",
       job: "Teacher",
       about:

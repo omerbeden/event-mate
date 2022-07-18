@@ -1,10 +1,12 @@
+import 'dart:html';
+
 class User {
   final String userName;
   final String name;
   final String lastName;
   final String about;
   final String imagePath;
-  final Event attandedEvents;
+  final List<Event> attandedEvents;
   final UserProfileAdress adress;
   final String job;
   final bool isDarkMode;
@@ -43,8 +45,14 @@ class UserProfileAdress {
 
 //user profiledaki gösterilecek olan event
 class Event {
-  final String coverPhoto;
-  final String name;
+  final String title;
+  final String description;
+  final String location;
+  final String duration;
 
-  const Event({required this.coverPhoto, required this.name});
+  const Event(
+      {required this.title,
+      required this.description,
+      required this.location,
+      required this.duration});
 }
