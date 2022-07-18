@@ -3,6 +3,19 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 
 class EventCard extends StatelessWidget {
+  final String title;
+  final String description;
+  final String location;
+  final String duration;
+
+  const EventCard({
+    Key? key,
+    required this.title,
+    required this.description,
+    required this.location,
+    required this.duration,
+  }) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -17,34 +30,53 @@ class EventCard extends StatelessWidget {
               onTap: () {
                 debugPrint('Card tapped.');
               },
-              child: const ListTile(
-                leading: Icon(Icons.arrow_circle_down),
+              child: ListTile(
+                leading: const Icon(Icons.arrow_circle_down),
                 title: Text(
-                  'Card Title',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                  title,
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold, fontSize: 16),
                 ),
                 subtitle: Text('created by'),
                 dense: true,
-                trailing: Icon(Icons.coffee_maker),
               ),
             ),
-            const Text('data'),
+            const SizedBox(
+              width: 20,
+            ),
+            Text(description),
+            const SizedBox(
+              height: 20,
+            ),
             Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              clipBehavior: Clip.antiAlias,
               children: [
-                const Icon(Icons.location_on),
-                const Text('location data'),
-                const Icon(Icons.timelapse_sharp),
-                const Text('duration data'),
-                IconButton(
-                  onPressed: () {},
-                  icon: const Icon(Icons.heart_broken),
+                Wrap(
+                  children: [
+                    const Icon(Icons.location_on),
+                    Text(location),
+                    const Icon(Icons.timelapse_sharp),
+                    Text(duration),
+                  ],
                 ),
-                IconButton(
-                  onPressed: () {},
-                  icon: const Icon(Icons.share),
+                Wrap(
+                  children: [
+                    IconButton(
+                      onPressed: () {},
+                      icon: const Icon(Icons.heart_broken),
+                    ),
+                    IconButton(
+                      onPressed: () {},
+                      icon: const Icon(Icons.share),
+                    ),
+                  ],
                 ),
               ],
-            )
+            ),
+            const SizedBox(
+              width: 20,
+            ),
           ],
         ),
       ),

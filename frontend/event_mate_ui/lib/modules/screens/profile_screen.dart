@@ -19,10 +19,17 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  late Future<List<Event>> events;
+  final user = UserPreferences.myUser;
+
+  @override
+  void initState() {
+    super.initState();
+    events = getAttendedEvents();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final user = UserPreferences.myUser;
-
     return Scaffold(
       appBar: buildAppBar(context),
       body: ListView(
@@ -94,23 +101,33 @@ class _ProfileScreenState extends State<ProfileScreen> {
       );
 
   Widget buildAttendedEvents() {
-    //future builder ile olabilr
-    return GridView.count(
-      crossAxisCount: 3,
-      childAspectRatio: 1.0,
-      padding: const EdgeInsets.all(0.5),
-      mainAxisSpacing: 1.5,
-      crossAxisSpacing: 1.5,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      children: [
-        GridTile(child: EventCard()),
-        GridTile(child: EventCard()),
-        GridTile(child: EventCard()),
-        GridTile(child: EventCard()),
-        GridTile(child: EventCard())
-      ],
-    );
+    return FutureBuilder<List<Event>>(
+        future: events,
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            return GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              padding: const EdgeInsets.all(0.5),
+              itemCount: snapshot.data?.length,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 4,
+                childAspectRatio: 1.0,
+                mainAxisSpacing: 1.5,
+                crossAxisSpacing: 1.5,
+              ),
+              itemBuilder: (context, index) {
+                return EventCard(
+                    title: snapshot.data![index].title,
+                    description: snapshot.data![index].description,
+                    location: snapshot.data![index].location,
+                    duration: snapshot.data![index].duration);
+              },
+            );
+          } else {
+            return const Text('waiting data');
+          }
+        });
   }
 
   Widget buildStats(User user) {
@@ -184,5 +201,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ],
       ),
     );
+  }
+
+  Future<List<Event>> getAttendedEvents() async {
+    //TODO:Get this from api
+    return user.attandedEvents;
   }
 }
