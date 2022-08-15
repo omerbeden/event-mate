@@ -28,6 +28,16 @@ class UserPreferences {
             title: "piknik",
             location: 'Sakarya',
             duration: '2 days'),
+        Event(
+            description: "description",
+            title: "piknik",
+            location: 'Sakarya',
+            duration: '2 days'),
+        Event(
+            description: "description",
+            title: "piknik",
+            location: 'Sakarya',
+            duration: '2 days'),
       ],
       lastName: "beden",
       job: "Teacher",
