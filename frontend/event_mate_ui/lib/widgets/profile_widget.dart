@@ -21,7 +21,7 @@ class ProfileWidget extends StatelessWidget {
           Positioned(
             bottom: 0,
             right: 4,
-            child: buildEditIcon(color),
+            child: buildEditButton(color),
           ),
         ],
       ),
@@ -39,36 +39,26 @@ class ProfileWidget extends StatelessWidget {
           fit: BoxFit.cover,
           width: 128,
           height: 128,
-          child: InkWell(onTap: onClicked),
         ),
       ),
     );
   }
 
-  Widget buildEditIcon(Color color) => buildCircle(
-        color: Colors.white,
-        all: 3,
-        child: buildCircle(
-          color: color,
-          all: 8,
-          child: const Icon(
-            Icons.edit,
-            color: Colors.white,
-            size: 20,
-          ),
-        ),
-      );
-
-  Widget buildCircle({
-    required Widget child,
-    required double all,
-    required Color color,
-  }) =>
-      ClipOval(
-        child: Container(
-          padding: EdgeInsets.all(all),
-          color: color,
-          child: child,
-        ),
-      );
+  Widget buildEditButton(Color color) => ElevatedButton(
+      onPressed: onClicked,
+      child: Icon(
+        Icons.edit,
+        size: 20,
+        semanticLabel: 'edit',
+      ),
+      style: ButtonStyle(
+        shape: MaterialStateProperty.all(CircleBorder()),
+        padding: MaterialStateProperty.all(EdgeInsets.all(20)),
+        backgroundColor: MaterialStateProperty.all(Colors.transparent),
+        overlayColor: MaterialStateProperty.resolveWith<Color?>((states) {
+          if (states.contains(MaterialState.pressed)) {
+            return Colors.red;
+          } // <-- Splash color
+        }),
+      ));
 }
