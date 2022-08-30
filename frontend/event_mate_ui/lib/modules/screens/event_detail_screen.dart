@@ -1,8 +1,6 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../../widgets/animatedsongcard.dart';
-
 
 /// Page shown when a card in the songs tab is tapped.
 ///
@@ -15,7 +13,6 @@ class EventDetailScreen extends StatelessWidget {
   }) : super(key: key);
 
   final int id;
-
 
   Widget _buildBody() {
     return SafeArea(
@@ -75,7 +72,6 @@ class EventDetailScreen extends StatelessWidget {
     );
   }
 
-
   Widget _buildAndroid(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('song')),
@@ -85,10 +81,6 @@ class EventDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-return _buildBody();
+    return _buildBody();
   }
-
-
-
-
 }

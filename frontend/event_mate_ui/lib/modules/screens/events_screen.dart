@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../widgets/Post_widget.dart';
-import '../../widgets/animatedsongcard.dart';
 import 'event_detail_screen.dart';
 
 class EventsScreen extends StatefulWidget {

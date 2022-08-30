@@ -1,6 +1,3 @@
-import 'dart:html';
-
-import 'package:event_mate/widgets/animatedsongcard.dart';
 import 'package:event_mate/widgets/event_card_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:event_mate/modules/models/user.dart';

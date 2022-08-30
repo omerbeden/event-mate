@@ -1,15 +1,15 @@
-
-
 import 'package:event_mate/modules/screens/add_event_screen.dart';
 import 'package:event_mate/modules/screens/events_screen.dart';
+import 'package:event_mate/modules/screens/login_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key, required this.title}) : super(key: key);
-  final String title;
+  const HomeScreen({Key? key, required this.firebaseUser}) : super(key: key);
+  final User firebaseUser;
 
   @override
   _HomeScreenState createState() => _HomeScreenState();
@@ -58,7 +58,7 @@ class _HomeScreenState extends State<HomeScreen> {
           case 1:
             return CupertinoTabView(
               defaultTitle: 'Organize Event',
-              builder: (context) => const AddEventScreen(),
+              builder: (context) => LogInScreen(),
             );
           case 2:
             return CupertinoTabView(
