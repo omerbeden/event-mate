@@ -37,6 +37,10 @@ dependencies:
   protobuf: ^2.1.0
   grpc: ^3.0.2
   image_picker: ^0.8.5+3
+  firebase_core: ^1.21.1
+
+  firebase_auth: ^3.4.2
+  google_sign_in: ^5.4.1
 
 dev_dependencies:
   flutter_test:
