@@ -1,3 +1,5 @@
+import 'package:event_mate/modules/screens/login_screen.dart';
+import 'package:event_mate/utils/Authentication.dart';
 import 'package:event_mate/widgets/event_card_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:event_mate/modules/models/user.dart';
@@ -18,6 +20,7 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   late Future<List<Event>> events;
   final user = UserPreferences.myUser;
+  bool _isSigningOut = false;
 
   @override
   void initState() {
@@ -29,6 +32,33 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: buildAppBar(context),
+      endDrawer: Drawer(
+          child: SingleChildScrollView(
+        padding: EdgeInsets.zero,
+        child: SingleChildScrollView(
+            child: Container(
+          child: Column(children: [
+            const DrawerHeader(
+              decoration: BoxDecoration(
+                color: Colors.blue,
+              ),
+              child: Text('Settings'),
+            ),
+            ListTile(
+              title: const Text('Log Out'),
+              onTap: () {
+                setState(() {
+                  _isSigningOut = true;
+                });
+                Authentication.signOut(context: context);
+                Navigator.pop(context);
+                Navigator.of(context, rootNavigator: true)
+                    .pushReplacement(_routeToLogInSecreen());
+              },
+            )
+          ]),
+        )),
+      )),
       body: ListView(
         physics: const BouncingScrollPhysics(),
         children: [
@@ -108,7 +138,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               padding: const EdgeInsets.all(0.5),
               itemCount: snapshot.data?.length,
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 4,
+                crossAxisCount: 2,
                 childAspectRatio: 1.0,
                 mainAxisSpacing: 1.5,
                 crossAxisSpacing: 1.5,
@@ -203,5 +233,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<List<Event>> getAttendedEvents() async {
     //TODO:Get this from api
     return user.attandedEvents;
+  }
+
+  Route _routeToLogInSecreen() {
+    return PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) => LogInScreen(),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        var begin = Offset(-1.0, 0.0);
+        var end = Offset.zero;
+        var curve = Curves.ease;
+
+        var tween =
+            Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+
+        return SlideTransition(
+          position: animation.drive(tween),
+          child: child,
+        );
+      },
+    );
   }
 }

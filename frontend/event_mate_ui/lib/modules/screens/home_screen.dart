@@ -58,7 +58,7 @@ class _HomeScreenState extends State<HomeScreen> {
           case 1:
             return CupertinoTabView(
               defaultTitle: 'Organize Event',
-              builder: (context) => LogInScreen(),
+              builder: (context) => AddEventScreen(),
             );
           case 2:
             return CupertinoTabView(
