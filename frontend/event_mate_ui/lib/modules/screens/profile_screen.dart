@@ -7,11 +7,11 @@ import 'package:event_mate/utils/user_preference.dart';
 import 'package:event_mate/widgets/appbar_widget.dart';
 import 'package:event_mate/widgets/profile_widget.dart';
 import 'package:event_mate/modules/screens/edit_profile_screen.dart';
-
-import 'event_detail_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart' as fbu;
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({Key? key}) : super(key: key);
+  const ProfileScreen({Key? key, required this.firebaseUser}) : super(key: key);
+  final fbu.User firebaseUser;
 
   @override
   _ProfileScreenState createState() => _ProfileScreenState();
@@ -63,7 +63,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         physics: const BouncingScrollPhysics(),
         children: [
           ProfileWidget(
-            imagePath: user.imagePath,
+            imagePath: widget.firebaseUser.photoURL.toString(),
             onClicked: () async {
               await Navigator.of(context).push(
                 MaterialPageRoute(builder: (context) => EditProfileScreen()),

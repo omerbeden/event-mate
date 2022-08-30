@@ -63,7 +63,8 @@ class _HomeScreenState extends State<HomeScreen> {
           case 2:
             return CupertinoTabView(
               defaultTitle: 'Profile',
-              builder: (context) => const ProfileScreen(),
+              builder: (context) =>
+                  ProfileScreen(firebaseUser: widget.firebaseUser),
             );
           default:
             assert(false, 'Unexpected tab');
