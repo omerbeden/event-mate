@@ -2,11 +2,10 @@ syntax = "proto3";
 
 package event.v1;
 
-option go_package="./genproto";
+option go_package="./backend/eventservice/infra/grpc/pb";
 
 service EventService{
     rpc CreateEvent(CreateEventRequest) returns (CreateEventResponse){}
-    rpc ListAllEvent(Empty) returns  (ListAllEventResponse){}
     rpc GetEvent(GetEventRequest) returns (GetEventResponse){}
 }
 
@@ -30,10 +29,6 @@ message CreateEventRequest{
 message CreateEventResponse{
     bool status=1;
     string message=2;
-}
-
-message ListAllEventResponse{
-    repeated  Event events=1;  
 }
 
 message GetEventRequest{
