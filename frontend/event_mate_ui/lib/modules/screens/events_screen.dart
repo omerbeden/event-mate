@@ -1,3 +1,4 @@
+import 'package:event_mate/widgets/appbar_widget.dart';
 import 'package:flutter/material.dart';
 
 import '../../widgets/Post_widget.dart';
@@ -37,6 +38,7 @@ class _EventsScreenState extends State<EventsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       drawer: widget.androidDrawer,
+      appBar: buildEventScreenAppBar(context),
       body: RefreshIndicator(
         onRefresh: _refreshData,
         child: ListView.builder(
