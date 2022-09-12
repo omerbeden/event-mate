@@ -4,5 +4,5 @@ import "github.com/omerbeden/event-mate/backend/eventservice/internal/app/domain
 
 type Repository interface {
 	CreateEvent(event model.Event) error
-	GetEvent() (error, event model.Event)
+	GetEvent() (model.Event, error)
 }
