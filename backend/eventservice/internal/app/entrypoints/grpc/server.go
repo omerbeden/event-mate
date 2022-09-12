@@ -5,7 +5,7 @@ import (
 	"log"
 	"net"
 
-	"github.com/omerbeden/event-mate/backend/eventservice/infra/grpc/pb"
+	"github.com/omerbeden/event-mate/backend/eventservice/internal/infra/grpc/pb"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )

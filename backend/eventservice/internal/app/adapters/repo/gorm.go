@@ -1,6 +1,6 @@
 package adapters
 
-import "github.com/omerbeden/event-mate/backend/eventservice/domain/model"
+import "github.com/omerbeden/event-mate/backend/eventservice/internal/app/domain/model"
 
 type Repositories struct{}
 
