@@ -1,6 +1,6 @@
 module github.com/omerbeden/event-mate/backend/eventservice
 
-go 1.17
+go 1.19
 
 require (
 	github.com/go-pg/pg/v10 v10.10.6
