@@ -5,6 +5,8 @@ import (
 	"log"
 	"net"
 
+	commandhandler "github.com/omerbeden/event-mate/backend/eventservice/internal/app/command_handler"
+	"github.com/omerbeden/event-mate/backend/eventservice/internal/app/commands"
 	"github.com/omerbeden/event-mate/backend/eventservice/internal/app/ports/repo"
 	"github.com/omerbeden/event-mate/backend/eventservice/internal/infra/grpc/pb"
 	"google.golang.org/grpc"
@@ -17,10 +19,19 @@ type server struct {
 }
 
 func (s *server) CreateEvent(ctx context.Context, req *pb.CreateEventRequest) (*pb.CreateEventResponse, error) {
-	//TODO: istead of mapping here , maybe commands can be used here to map grpc event to domain event and call repo.CreateEvent correctly
-	//s.repo.CreateEvent(req.Event)
-	return nil, nil
+	createCommand := &commands.CreateCommand{
+		Repo:  s.repo,
+		Event: req.GetEvent(),
+	}
+	commandResult, err := commandhandler.HandleCommand[bool](createCommand)
+
+	return &pb.CreateEventResponse{
+		Status:  commandResult,
+		Message: "created",
+	}, err
+
 }
+
 func (s *server) GetEvent(ctx context.Context, req *pb.GetEventRequest) (*pb.GetEventResponse, error) {
 
 	return nil, nil
