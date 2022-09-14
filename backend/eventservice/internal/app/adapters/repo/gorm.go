@@ -6,7 +6,7 @@ import (
 )
 
 type EventRepository struct {
-	db database.Postgres
+	db database.PostgresAdapter
 }
 
 func (r *EventRepository) CreateEvent(event model.Event) error {
