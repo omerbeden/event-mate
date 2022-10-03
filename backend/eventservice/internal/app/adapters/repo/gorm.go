@@ -27,3 +27,13 @@ func (r *EventRepository) GetEvent(id int32) (model.Event, error) {
 	}
 	return event, nil
 }
+
+func (r *EventRepository) UpdateEvent(event model.Event) (bool, error) {
+	db := r.db.NewConnection()
+	if err := db.Save(&event).Error; err != nil {
+		db.Logger.Error(nil, "Error occurred while updating Event")
+		return false, err
+	}
+	return true, nil
+
+}
