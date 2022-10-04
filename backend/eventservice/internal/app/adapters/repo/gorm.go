@@ -13,7 +13,7 @@ type EventRepository struct {
 
 func (r *EventRepository) CreateEvent(event model.Event) (bool, error) {
 
-	if err := r.DB.Create(event).Error; err != nil {
+	if err := r.DB.Create(&event).Error; err != nil {
 		r.DB.Logger.Error(context.TODO(), "Error occurred while Creating Event")
 		return false, err
 	}
@@ -29,8 +29,18 @@ func (r *EventRepository) GetEventByID(id int32) (model.Event, error) {
 	return event, nil
 }
 
-func (r *EventRepository) UpdateEvent(event model.Event) (bool, error) {
-	if err := r.DB.Save(&event).Error; err != nil {
+func (r *EventRepository) UpdateEventByID(id int32, event model.Event) (bool, error) {
+
+	var eventTobeUpdated model.Event
+
+	if err := r.DB.First(&eventTobeUpdated, id).Error; err != nil {
+		return false, err
+	}
+
+	eventTobeUpdated.Category = event.Category
+	eventTobeUpdated.Title = event.Title
+
+	if err := r.DB.Save(&eventTobeUpdated).Error; err != nil {
 		r.DB.Logger.Error(context.TODO(), "Error occurred while updating Event")
 		return false, err
 	}

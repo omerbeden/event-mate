@@ -1,6 +1,8 @@
 package commands
 
 import (
+	"strconv"
+
 	"github.com/omerbeden/event-mate/backend/eventservice/internal/app/domain/model"
 	"github.com/omerbeden/event-mate/backend/eventservice/internal/app/ports/repo"
 	"github.com/omerbeden/event-mate/backend/eventservice/internal/infra/grpc/pb"
@@ -17,5 +19,6 @@ func (uc *UpdateCommand) Handle() (bool, error) {
 		Category: uc.Event.Category,
 	}
 
-	return uc.Repo.UpdateEvent(*model)
+	intID, _ := strconv.Atoi(uc.Event.GetId())
+	return uc.Repo.UpdateEventByID(int32(intID), *model)
 }
