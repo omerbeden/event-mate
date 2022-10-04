@@ -10,9 +10,7 @@ import (
 	"gorm.io/gorm/logger"
 )
 
-type PostgresAdapter struct{}
-
-func (p *PostgresAdapter) NewConnection() *gorm.DB {
+func InitPostgressConnection() *gorm.DB {
 
 	dsn := "postgres://postgres:password@localhost:5432/test" //test
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
