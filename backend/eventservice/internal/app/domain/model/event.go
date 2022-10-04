@@ -6,5 +6,5 @@ type Event struct {
 	gorm.Model
 	Title     string
 	Category  string
-	CreatedBy User
+	CreatedBy User `gorm:"foreignKey:ID"`
 }

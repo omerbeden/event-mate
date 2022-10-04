@@ -6,67 +6,79 @@ import (
 	"github.com/omerbeden/event-mate/backend/eventservice/internal/app/adapters/database"
 	adapters "github.com/omerbeden/event-mate/backend/eventservice/internal/app/adapters/repo"
 	"github.com/omerbeden/event-mate/backend/eventservice/internal/app/domain/model"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
 )
 
-func TestCreateEvent(t *testing.T) {
+type EventRepositoryTestSuite struct {
+	suite.Suite
+	repo *adapters.EventRepository
+}
 
-	model := model.Event{
+func (suite *EventRepositoryTestSuite) SetupTest() {
+	suite.repo = &adapters.EventRepository{
+		DB: database.InitPostgressConnection(),
+	}
+}
+
+func (suite *EventRepositoryTestSuite) TearDownTest() {
+	suite.repo = nil
+}
+
+func TestEventRepository(t *testing.T) {
+	suite.Run(t, new(EventRepositoryTestSuite))
+}
+
+func (suite *EventRepositoryTestSuite) TestCreateEvent() {
+
+	event := model.Event{
 		Title:     "TEST",
 		Category:  "TEST",
 		CreatedBy: model.User{},
 	}
 
-	repo := adapters.EventRepository{
-		DB: database.InitPostgressConnection(),
-	}
-
-	res, err := repo.CreateEvent(model)
-
-	assert.True(t, res)
-	assert.Nil(t, err)
-	assert.NotNil(t, res)
+	res, err := suite.repo.CreateEvent(event)
+	suite.True(res)
+	suite.Nil(err)
+	suite.NotNil(res)
 
 }
 
-func TestGetEventByID(t *testing.T) {
-	repo := adapters.EventRepository{
-		DB: database.InitPostgressConnection(),
-	}
+func (suite *EventRepositoryTestSuite) TestGetEventByID() {
 
-	res, err := repo.GetEventByID(1)
+	var lastItem model.Event
+	suite.repo.DB.Last(&lastItem)
+	res, err := suite.repo.GetEventByID(int32(lastItem.ID))
 
-	assert.Nil(t, err)
-	assert.NotNil(t, res)
-	assert.NotEmpty(t, res)
+	suite.Nil(err)
+	suite.NotNil(res)
+	suite.NotEmpty(res)
 }
 
-func TestUpdateEvent(t *testing.T) {
-	repo := adapters.EventRepository{
-		DB: database.InitPostgressConnection(),
-	}
+func (suite *EventRepositoryTestSuite) TestUpdateEvent() {
 
 	eventTobeUpdated := model.Event{
 		Title:    "Updated title",
 		Category: "Updated Category",
 	}
-	res, err := repo.UpdateEvent(eventTobeUpdated)
 
-	assert.True(t, res)
-	assert.Nil(t, err)
-	assert.NotNil(t, res)
+	var lastItem model.Event
+	suite.repo.DB.Last(&lastItem)
+	res, err := suite.repo.UpdateEventByID(int32(lastItem.ID), eventTobeUpdated)
+
+	suite.True(res)
+	suite.Nil(err)
+	suite.NotNil(res)
 
 }
 
-func TestDeleteEventByID(t *testing.T) {
-	repo := adapters.EventRepository{
-		DB: database.InitPostgressConnection(),
-	}
+func (suite *EventRepositoryTestSuite) TestDeleteEventByID() {
 
-	res, err := repo.DeleteEventByID(1)
+	var lastItem model.Event
+	suite.repo.DB.Last(&lastItem)
+	res, err := suite.repo.DeleteEventByID(int32(lastItem.ID))
 
-	assert.True(t, res)
-	assert.Nil(t, err)
-	assert.NotNil(t, res)
+	suite.True(res)
+	suite.Nil(err)
+	suite.NotNil(res)
 
 }
