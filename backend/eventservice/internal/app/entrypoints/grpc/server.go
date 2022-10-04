@@ -7,10 +7,10 @@ import (
 
 	"github.com/omerbeden/event-mate/backend/eventservice/internal/app/adapters/database"
 	adapters "github.com/omerbeden/event-mate/backend/eventservice/internal/app/adapters/repo"
-	commandhandler "github.com/omerbeden/event-mate/backend/eventservice/internal/app/command_handler"
-	"github.com/omerbeden/event-mate/backend/eventservice/internal/app/commands"
+	commandhandler "github.com/omerbeden/event-mate/backend/eventservice/internal/app/domain/command_handler"
+	"github.com/omerbeden/event-mate/backend/eventservice/internal/app/domain/commands"
 	"github.com/omerbeden/event-mate/backend/eventservice/internal/app/domain/model"
-	"github.com/omerbeden/event-mate/backend/eventservice/internal/app/ports/repo"
+	"github.com/omerbeden/event-mate/backend/eventservice/internal/app/domain/ports/repo"
 	"github.com/omerbeden/event-mate/backend/eventservice/internal/infra/grpc/pb"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"

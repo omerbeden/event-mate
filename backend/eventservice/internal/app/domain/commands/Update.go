@@ -4,7 +4,7 @@ import (
 	"strconv"
 
 	"github.com/omerbeden/event-mate/backend/eventservice/internal/app/domain/model"
-	"github.com/omerbeden/event-mate/backend/eventservice/internal/app/ports/repo"
+	"github.com/omerbeden/event-mate/backend/eventservice/internal/app/domain/ports/repo"
 	"github.com/omerbeden/event-mate/backend/eventservice/internal/infra/grpc/pb"
 )
 
