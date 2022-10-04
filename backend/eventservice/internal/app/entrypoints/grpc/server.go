@@ -5,8 +5,11 @@ import (
 	"log"
 	"net"
 
+	"github.com/omerbeden/event-mate/backend/eventservice/internal/app/adapters/database"
+	adapters "github.com/omerbeden/event-mate/backend/eventservice/internal/app/adapters/repo"
 	commandhandler "github.com/omerbeden/event-mate/backend/eventservice/internal/app/command_handler"
 	"github.com/omerbeden/event-mate/backend/eventservice/internal/app/commands"
+	"github.com/omerbeden/event-mate/backend/eventservice/internal/app/domain/model"
 	"github.com/omerbeden/event-mate/backend/eventservice/internal/app/ports/repo"
 	"github.com/omerbeden/event-mate/backend/eventservice/internal/infra/grpc/pb"
 	"google.golang.org/grpc"
@@ -33,8 +36,16 @@ func (s *server) CreateEvent(ctx context.Context, req *pb.CreateEventRequest) (*
 }
 
 func (s *server) GetEvent(ctx context.Context, req *pb.GetEventRequest) (*pb.GetEventResponse, error) {
+	getCommand := &commands.GetCommand{
+		Repo:    s.repo,
+		EventID: req.GetEventId(),
+	}
 
-	return nil, nil
+	commandResult, err := commandhandler.HandleCommand[model.Event](getCommand)
+	return &pb.GetEventResponse{
+		Event: &pb.Event{Title: commandResult.Title, Category: commandResult.Category},
+	}, err
+
 }
 
 func StartGRPCServer() {
@@ -45,7 +56,11 @@ func StartGRPCServer() {
 	}
 
 	s := grpc.NewServer()
-	pb.RegisterEventServiceServer(s, &server{})
+	pb.RegisterEventServiceServer(s, &server{
+		repo: &adapters.EventRepository{
+			DB: database.InitPostgressConnection(),
+		},
+	})
 	reflection.Register(s)
 
 	if err := s.Serve(lis); err != nil {
