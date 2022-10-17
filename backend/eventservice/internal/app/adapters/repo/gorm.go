@@ -28,6 +28,16 @@ func (r *EventRepository) GetEventByID(id int32) (model.Event, error) {
 	}
 	return event, nil
 }
+func (r *EventRepository) GetEventByLocation(loc *model.Location) ([]model.Event, error) {
+
+	//komple city yi ceksin ama gosterirken country e oncelik versin
+	var event []model.Event
+	if err := r.DB.Find(&event, loc.City).Error; err != nil {
+		r.DB.Logger.Error(context.TODO(), "Error occurred while Getting Event")
+		return event, err
+	}
+	return event, nil
+}
 
 func (r *EventRepository) UpdateEventByID(id int32, event model.Event) (bool, error) {
 

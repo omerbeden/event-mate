@@ -8,3 +8,8 @@ type Event struct {
 	Category  string
 	CreatedBy User `gorm:"foreignKey:ID"`
 }
+
+type Location struct {
+	City   string
+	County string
+}

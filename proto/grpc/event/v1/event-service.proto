@@ -2,11 +2,12 @@ syntax = "proto3";
 
 package event.v1;
 
-option go_package="./backend/eventservice/infra/grpc/pb";
+option go_package="./backend/eventservice/internal/infra/grpc/pb";
 
 service EventService{
     rpc CreateEvent(CreateEventRequest) returns (CreateEventResponse){}
     rpc GetEvent(GetEventRequest) returns (GetEventResponse){}
+    rpc GetFeed(GetFeedByLocationRequest) returns(GetFeedByLocationResponse){}
 }
 
 message Empty {}
@@ -19,6 +20,11 @@ message Event{
     string end_date=5;
     string start_time=6;
     string end_time=7;
+}
+
+message Location{
+    string city =1;
+    string county=2;
 }
 
 message CreateEventRequest{
@@ -37,6 +43,13 @@ message GetEventRequest{
 
 message GetEventResponse{
     Event event = 1;
+}
+
+message GetFeedByLocationRequest{
+     Location location = 1;
+}
+message GetFeedByLocationResponse{
+     repeated Event event =1;
 }
 
 

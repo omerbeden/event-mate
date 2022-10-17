@@ -48,6 +48,23 @@ func (s *server) GetEvent(ctx context.Context, req *pb.GetEventRequest) (*pb.Get
 
 }
 
+func (s *server) GetFeed(ctx context.Context, req *pb.GetFeedByLocationRequest) (*pb.GetFeedByLocationResponse, error) {
+	//todo:refactor
+	location := &model.Location{
+		City:   req.GetLocation().GetCity(),
+		County: req.GetLocation().GetCounty(),
+	}
+	getFeedCommand := &commands.GetFeedCommand{
+		Repo:     s.repo,
+		Location: location,
+	}
+
+	_, err := commandhandler.HandleCommand[[]model.Event](getFeedCommand)
+
+	return nil, err
+
+}
+
 func StartGRPCServer() {
 	lis, err := net.Listen("tcp", "0.0.0.0:50051")
 

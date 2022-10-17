@@ -26,3 +26,23 @@ func (gc *GetCommand) Handle() (model.Event, error) {
 
 	return result, nil
 }
+
+type GetFeedCommand struct {
+	Repo     repo.Repository
+	Location *model.Location
+}
+
+func (gf *GetFeedCommand) Handle() ([]model.Event, error) {
+
+	events, err := gf.Repo.GetEventByLocation(gf.Location)
+	if err != nil {
+		fmt.Println("Errror ocurred")
+		return nil, err
+	}
+
+	//filter events , by category
+	//cache
+
+	return events, nil
+
+}
