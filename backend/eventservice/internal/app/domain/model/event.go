@@ -7,6 +7,7 @@ type Event struct {
 	Title     string
 	Category  string
 	CreatedBy User `gorm:"foreignKey:ID"`
+	Location  Location
 }
 
 type Location struct {

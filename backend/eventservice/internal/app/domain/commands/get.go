@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strconv"
 
+	cacheadapter "github.com/omerbeden/event-mate/backend/eventservice/internal/app/adapters/cacheAdapter"
 	"github.com/omerbeden/event-mate/backend/eventservice/internal/app/domain/model"
 	"github.com/omerbeden/event-mate/backend/eventservice/internal/app/domain/ports/repo"
 )
@@ -30,19 +31,25 @@ func (gc *GetCommand) Handle() (model.Event, error) {
 type GetFeedCommand struct {
 	Repo     repo.Repository
 	Location *model.Location
+	Redis    *cacheadapter.RedisAdapter
 }
 
-func (gf *GetFeedCommand) Handle() ([]model.Event, error) {
+func (gf *GetFeedCommand) Handle() (*model.GetFeedCommandResult, error) {
 
-	events, err := gf.Repo.GetEventByLocation(gf.Location)
-	if err != nil {
-		fmt.Println("Errror ocurred")
-		return nil, err
+	isExist := cacheadapter.Exist(gf.Location.City, gf.Redis)
+
+	if isExist {
+		cacheResult, cacheErr := cacheadapter.GetPosts(gf.Location.City, gf.Redis)
+		if cacheErr != nil {
+			return nil, cacheErr
+		}
+		return &model.GetFeedCommandResult{Events: &cacheResult, CacheHit: true}, nil
+	} else {
+		events, err := gf.Repo.GetEventByLocation(gf.Location)
+		if err != nil {
+			fmt.Println("Errror ocurred")
+			return nil, err
+		}
+		return &model.GetFeedCommandResult{Events: &events, CacheHit: true}, nil
 	}
-
-	//filter events , by category
-	//cache
-
-	return events, nil
-
 }

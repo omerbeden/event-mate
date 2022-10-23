@@ -6,47 +6,53 @@ import (
 	"github.com/go-redis/cache/v8"
 	"github.com/go-redis/redis/v8"
 	"github.com/omerbeden/event-mate/backend/eventservice/internal/app/domain/model"
-	"github.com/omerbeden/event-mate/backend/eventservice/internal/app/domain/ports/caching"
 )
 
 type RedisAdapter struct {
-	config redisConfig
+	cache *cache.Cache
 }
 
-func Set(key string, value interface{}, cacher caching.Cache) error {
-	return cacher.AddToCache(key, value)
+func InitRedis(redisConfig redisConfig) *cache.Cache {
+	client := redis.NewClient(&redis.Options{
+		Addr: redisConfig.resourceName,
+	})
+
+	return cache.New(&cache.Options{
+		Redis: client,
+	})
 }
 
 func (redisA *RedisAdapter) AddToCache(key string, value interface{}) error {
-	client := redis.NewClient(&redis.Options{
-		Addr: redisA.config.resourceName,
-	})
 
-	mycache := cache.New(&cache.Options{
-		Redis: client,
-	})
-
-	if err := mycache.Set(&cache.Item{Key: key, Value: value}); err != nil {
+	if err := redisA.cache.Set(&cache.Item{Key: key, Value: value}); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (redisA *RedisAdapter) GetPostsFromCache(key string) ([]*model.Event, error) {
-	client := redis.NewClient(&redis.Options{
-		Addr: redisA.config.resourceName,
-	})
+func (redisA *RedisAdapter) GetFromCache(key string) (interface{}, error) {
 
-	mycache := cache.New(&cache.Options{
-		Redis: client,
-	})
-
-	var wanted []*model.Event
-	if err := mycache.Get(context.TODO(), key, wanted); err != nil {
+	var wanted []model.Event
+	if err := redisA.cache.Get(context.TODO(), key, wanted); err != nil {
 		return nil, err
 	}
 
 	return wanted, nil
 }
 
-//todo: event modelinin icinde location bilgisi eklenecek, redis ve testler refactor edilip  tamamlanacak
+func (redisA *RedisAdapter) UpdateCache(key string, value interface{}) error {
+
+	if err := redisA.cache.Delete(context.TODO(), key); err != nil {
+		return err
+	}
+	if err := redisA.cache.Set(&cache.Item{Key: key, Value: value}); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (redisA *RedisAdapter) Exist(key string) bool {
+
+	return redisA.cache.Exists(context.TODO(), key)
+}
