@@ -5,6 +5,7 @@ import (
 	"log"
 	"net"
 
+	cacheadapter "github.com/omerbeden/event-mate/backend/eventservice/internal/app/adapters/cacheAdapter"
 	"github.com/omerbeden/event-mate/backend/eventservice/internal/app/adapters/database"
 	adapters "github.com/omerbeden/event-mate/backend/eventservice/internal/app/adapters/repo"
 	commandhandler "github.com/omerbeden/event-mate/backend/eventservice/internal/app/domain/command_handler"
@@ -22,9 +23,17 @@ type server struct {
 }
 
 func (s *server) CreateEvent(ctx context.Context, req *pb.CreateEventRequest) (*pb.CreateEventResponse, error) {
+
+	event := model.Event{
+		Title:     req.GetEvent().GetTitle(),
+		Category:  req.GetEvent().GetCategory(),
+		CreatedBy: model.User{},
+		Location:  model.Location{City: "sakarya", County: "Hendek"},
+	}
+
 	createCommand := &commands.CreateCommand{
 		Repo:  s.repo,
-		Event: req.GetEvent(),
+		Event: event,
 	}
 	commandResult, err := commandhandler.HandleCommand[bool](createCommand)
 
@@ -49,7 +58,6 @@ func (s *server) GetEvent(ctx context.Context, req *pb.GetEventRequest) (*pb.Get
 }
 
 func (s *server) GetFeed(ctx context.Context, req *pb.GetFeedByLocationRequest) (*pb.GetFeedByLocationResponse, error) {
-	//todo:refactor
 	location := &model.Location{
 		City:   req.GetLocation().GetCity(),
 		County: req.GetLocation().GetCounty(),
@@ -59,7 +67,19 @@ func (s *server) GetFeed(ctx context.Context, req *pb.GetFeedByLocationRequest) 
 		Location: location,
 	}
 
-	_, err := commandhandler.HandleCommand[[]model.Event](getFeedCommand)
+	cmdResult, err := commandhandler.HandleCommand[*model.GetFeedCommandResult](getFeedCommand)
+
+	if !cmdResult.CacheHit {
+		updateCacheCommand := &commands.UpdateCacheCommand{
+			Redis: &cacheadapter.RedisAdapter{},
+			Key:   location.City,
+			Posts: *cmdResult.Events,
+		}
+		_, updateErr := commandhandler.HandleCommand[bool](updateCacheCommand)
+		if updateErr != nil {
+			return nil, err
+		}
+	}
 
 	return nil, err
 
