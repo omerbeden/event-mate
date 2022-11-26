@@ -70,13 +70,13 @@ func (s *server) GetFeed(ctx context.Context, req *pb.GetFeedByLocationRequest) 
 	cmdResult, err := commandhandler.HandleCommand[*model.GetFeedCommandResult](getFeedCommand)
 
 	if !cmdResult.CacheHit {
-		updateCacheCommand := &commands.UpdateCacheCommand{
+		createCacheCommand := &commands.CreateCacheCommand{
 			Redis: &cacheadapter.RedisAdapter{},
 			Key:   location.City,
 			Posts: *cmdResult.Events,
 		}
-		_, updateErr := commandhandler.HandleCommand[bool](updateCacheCommand)
-		if updateErr != nil {
+		_, createErr := commandhandler.HandleCommand[bool](createCacheCommand)
+		if createErr != nil {
 			return nil, err
 		}
 	}

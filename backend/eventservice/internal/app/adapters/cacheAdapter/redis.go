@@ -2,57 +2,62 @@ package cacheadapter
 
 import (
 	"context"
+	"encoding/json"
 
-	"github.com/go-redis/cache/v8"
 	"github.com/go-redis/redis/v8"
 	"github.com/omerbeden/event-mate/backend/eventservice/internal/app/domain/model"
 )
 
 type RedisAdapter struct {
-	cache *cache.Cache
+	client *redis.Client
 }
 
-func InitRedis(redisConfig redisConfig) *cache.Cache {
-	client := redis.NewClient(&redis.Options{
-		Addr: redisConfig.resourceName,
-	})
-
-	return cache.New(&cache.Options{
-		Redis: client,
-	})
-}
-
-func (redisA *RedisAdapter) AddToCache(key string, value interface{}) error {
-
-	if err := redisA.cache.Set(&cache.Item{Key: key, Value: value}); err != nil {
-		return err
+func NewRedisAdapter(options *redis.Options) *RedisAdapter {
+	client := redis.NewClient(options)
+	return &RedisAdapter{
+		client: client,
 	}
-	return nil
+}
+
+func (redisA *RedisAdapter) AddToCache(key string, values interface{}) error {
+	valJson, jsonErr := json.Marshal(values)
+	if jsonErr != nil {
+		return jsonErr
+	}
+	_, err := redisA.client.LPush(context.TODO(), key, valJson).Result()
+	return err
 }
 
 func (redisA *RedisAdapter) GetFromCache(key string) (interface{}, error) {
 
-	var wanted []model.Event
-	if err := redisA.cache.Get(context.TODO(), key, wanted); err != nil {
+	var events []model.Event
+	res, err := redisA.client.LRange(context.TODO(), key, 0, -1).Result()
+	if err != nil {
 		return nil, err
 	}
 
-	return wanted, nil
+	if err := json.Unmarshal([]byte(res[0]), &events); err != nil {
+		return nil, err
+	}
+
+	return events, nil
 }
 
-func (redisA *RedisAdapter) UpdateCache(key string, value interface{}) error {
+func (redisA *RedisAdapter) UpdateCache(key string, value interface{}, newValue interface{}) error {
 
-	if err := redisA.cache.Delete(context.TODO(), key); err != nil {
+	if _, err := redisA.client.LRem(context.TODO(), key, 1, value).Result(); err != nil {
 		return err
 	}
-	if err := redisA.cache.Set(&cache.Item{Key: key, Value: value}); err != nil {
+	if _, err := redisA.client.LPush(context.TODO(), key, newValue).Result(); err != nil {
 		return err
 	}
-
 	return nil
 }
 
-func (redisA *RedisAdapter) Exist(key string) bool {
+func (redisA *RedisAdapter) Exist(key string) (bool, error) {
 
-	return redisA.cache.Exists(context.TODO(), key)
+	if _, err := redisA.client.Exists(context.TODO(), key).Result(); err != nil {
+		return false, err
+	}
+	return true, nil
 }
