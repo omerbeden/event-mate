@@ -36,12 +36,12 @@ type GetFeedCommand struct {
 
 func (gf *GetFeedCommand) Handle() (*model.GetFeedCommandResult, error) {
 
-	isExist, err := cacheadapter.Exist(gf.Location.City, gf.Redis)
+	isCacheExist, err := cacheadapter.Exist(gf.Location.City, gf.Redis)
 	if err != nil {
 		return nil, err
 	}
 
-	if isExist {
+	if isCacheExist {
 		cacheResult, cacheErr := cacheadapter.GetPosts(gf.Location.City, gf.Redis)
 		if cacheErr != nil {
 			return nil, cacheErr

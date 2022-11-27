@@ -11,6 +11,5 @@ type Event struct {
 }
 
 type Location struct {
-	City   string
-	County string
+	City string
 }

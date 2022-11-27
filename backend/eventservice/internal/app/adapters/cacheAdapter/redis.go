@@ -19,7 +19,7 @@ func NewRedisAdapter(options *redis.Options) *RedisAdapter {
 	}
 }
 
-func (redisA *RedisAdapter) AddToCache(key string, values interface{}) error {
+func (redisA *RedisAdapter) Push(key string, values interface{}) error {
 	valJson, jsonErr := json.Marshal(values)
 	if jsonErr != nil {
 		return jsonErr
@@ -28,7 +28,7 @@ func (redisA *RedisAdapter) AddToCache(key string, values interface{}) error {
 	return err
 }
 
-func (redisA *RedisAdapter) GetFromCache(key string) (interface{}, error) {
+func (redisA *RedisAdapter) GetPosts(key string) ([]model.Event, error) {
 
 	var events []model.Event
 	res, err := redisA.client.LRange(context.TODO(), key, 0, -1).Result()
@@ -41,17 +41,6 @@ func (redisA *RedisAdapter) GetFromCache(key string) (interface{}, error) {
 	}
 
 	return events, nil
-}
-
-func (redisA *RedisAdapter) UpdateCache(key string, value interface{}, newValue interface{}) error {
-
-	if _, err := redisA.client.LRem(context.TODO(), key, 1, value).Result(); err != nil {
-		return err
-	}
-	if _, err := redisA.client.LPush(context.TODO(), key, newValue).Result(); err != nil {
-		return err
-	}
-	return nil
 }
 
 func (redisA *RedisAdapter) Exist(key string) (bool, error) {

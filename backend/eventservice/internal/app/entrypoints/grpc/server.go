@@ -22,18 +22,20 @@ type server struct {
 	pb.UnimplementedEventServiceServer
 }
 
-func (s *server) CreateEvent(ctx context.Context, req *pb.CreateEventRequest) (*pb.CreateEventResponse, error) {
+var redisOption = cacheadapter.RedisOption()
 
+func (s *server) CreateEvent(ctx context.Context, req *pb.CreateEventRequest) (*pb.CreateEventResponse, error) {
 	event := model.Event{
 		Title:     req.GetEvent().GetTitle(),
 		Category:  req.GetEvent().GetCategory(),
 		CreatedBy: model.User{},
-		Location:  model.Location{City: "sakarya", County: "Hendek"},
+		Location:  model.Location{City: "sakarya"},
 	}
 
 	createCommand := &commands.CreateCommand{
 		Repo:  s.repo,
 		Event: event,
+		Redis: cacheadapter.NewRedisAdapter(redisOption),
 	}
 	commandResult, err := commandhandler.HandleCommand[bool](createCommand)
 
@@ -59,9 +61,9 @@ func (s *server) GetEvent(ctx context.Context, req *pb.GetEventRequest) (*pb.Get
 
 func (s *server) GetFeed(ctx context.Context, req *pb.GetFeedByLocationRequest) (*pb.GetFeedByLocationResponse, error) {
 	location := &model.Location{
-		City:   req.GetLocation().GetCity(),
-		County: req.GetLocation().GetCounty(),
+		City: req.GetLocation().GetCity(),
 	}
+
 	getFeedCommand := &commands.GetFeedCommand{
 		Repo:     s.repo,
 		Location: location,
@@ -71,7 +73,7 @@ func (s *server) GetFeed(ctx context.Context, req *pb.GetFeedByLocationRequest) 
 
 	if !cmdResult.CacheHit {
 		createCacheCommand := &commands.CreateCacheCommand{
-			Redis: &cacheadapter.RedisAdapter{},
+			Redis: cacheadapter.NewRedisAdapter(redisOption),
 			Key:   location.City,
 			Posts: *cmdResult.Events,
 		}

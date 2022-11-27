@@ -24,7 +24,6 @@ message Event{
 
 message Location{
     string city =1;
-    string county=2;
 }
 
 message CreateEventRequest{

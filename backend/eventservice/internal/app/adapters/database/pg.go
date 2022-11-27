@@ -12,7 +12,7 @@ import (
 
 func InitPostgressConnection() *gorm.DB {
 
-	dsn := "postgres://postgres:password@localhost:5432/test" //test
+	dsn := "postgres://postgres:password@localhost:5432/test"
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
 		Logger: logger.New(
 			log.New(os.Stdout, "\r\n", log.LstdFlags),

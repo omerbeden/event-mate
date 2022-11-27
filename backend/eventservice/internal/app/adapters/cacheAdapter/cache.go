@@ -5,13 +5,13 @@ import (
 	"github.com/omerbeden/event-mate/backend/eventservice/internal/app/domain/ports/caching"
 )
 
-func Set(key string, value interface{}, cacher caching.Cache) error {
-	return cacher.AddToCache(key, value)
+func Push(key string, values interface{}, cacher caching.Cache) error {
+	return cacher.Push(key, values)
 }
 
 func GetPosts(key string, cacher caching.Cache) ([]model.Event, error) {
-	posts, err := cacher.GetFromCache(key)
-	return posts.([]model.Event), err
+	posts, err := cacher.GetPosts(key)
+	return posts, err
 }
 func Exist(key string, cacher caching.Cache) (bool, error) {
 	return cacher.Exist(key)
