@@ -14,7 +14,9 @@ import (
 	"github.com/omerbeden/event-mate/backend/eventservice/internal/app/domain/ports/repo"
 	"github.com/omerbeden/event-mate/backend/eventservice/internal/infra/grpc/pb"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/reflection"
+	"google.golang.org/grpc/status"
 )
 
 type server struct {
@@ -32,17 +34,25 @@ func (s *server) CreateEvent(ctx context.Context, req *pb.CreateEventRequest) (*
 		Location:  model.Location{City: "sakarya"},
 	}
 
-	createCommand := &commands.CreateCommand{
+	createCmd := &commands.CreateCommand{
 		Repo:  s.repo,
 		Event: event,
 		Redis: cacheadapter.NewRedisAdapter(redisOption),
 	}
-	commandResult, err := commandhandler.HandleCommand[bool](createCommand)
+
+	createCmdResult, err := commandhandler.HandleCommand[bool](createCmd)
+
+	if err != nil {
+		return &pb.CreateEventResponse{
+			Status:  createCmdResult,
+			Message: "event could not created",
+		}, status.Error(codes.Unknown, "event could not created")
+	}
 
 	return &pb.CreateEventResponse{
-		Status:  commandResult,
+		Status:  createCmdResult,
 		Message: "created",
-	}, err
+	}, nil
 
 }
 
@@ -54,6 +64,9 @@ func (s *server) GetEvent(ctx context.Context, req *pb.GetEventRequest) (*pb.Get
 	}
 
 	commandResult, err := commandhandler.HandleCommand[model.Event](getCommand)
+	if err != nil {
+		return nil, status.Error(codes.NotFound, "not found") //TODO refactor error matching
+	}
 	return &pb.GetEventResponse{
 		Event: &pb.Event{Title: commandResult.Title, Category: commandResult.Category},
 	}, err

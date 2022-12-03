@@ -21,6 +21,7 @@ func NewRedisAdapter(options *redis.Options) *RedisAdapter {
 
 func (redisA *RedisAdapter) Push(key string, values interface{}) error {
 	valJson, jsonErr := json.Marshal(values)
+
 	if jsonErr != nil {
 		return jsonErr
 	}

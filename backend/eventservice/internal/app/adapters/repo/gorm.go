@@ -23,7 +23,7 @@ func (r *EventRepository) CreateEvent(event model.Event) (bool, error) {
 func (r *EventRepository) GetEventByID(id int32) (model.Event, error) {
 	var event model.Event
 	if err := r.DB.First(&event, id).Error; err != nil {
-		r.DB.Logger.Error(context.TODO(), "Error occurred while Getting Event")
+		r.DB.Logger.Error(context.TODO(), "Error occurred while Getting Event by ID")
 		return event, err
 	}
 	return event, nil
@@ -31,7 +31,7 @@ func (r *EventRepository) GetEventByID(id int32) (model.Event, error) {
 func (r *EventRepository) GetEventByLocation(loc *model.Location) ([]model.Event, error) {
 	var event []model.Event
 	if err := r.DB.Find(&event, loc.City).Error; err != nil {
-		r.DB.Logger.Error(context.TODO(), "Error occurred while Getting Event")
+		r.DB.Logger.Error(context.TODO(), "Error occurred while Getting Event by Location")
 		return event, err
 	}
 	return event, nil

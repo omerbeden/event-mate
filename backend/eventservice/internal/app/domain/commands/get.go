@@ -20,7 +20,7 @@ func (gc *GetCommand) Handle() (model.Event, error) {
 
 	intID, err := strconv.Atoi(gc.EventID)
 	if err != nil {
-		fmt.Printf("Err: TODO")
+		return model.Event{}, fmt.Errorf("get command: %w", err)
 	}
 
 	isCacheExist, err := cacheadapter.Exist(gc.EventCity, gc.Redis)
