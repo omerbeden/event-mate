@@ -10,8 +10,10 @@ import (
 )
 
 type GetCommand struct {
-	EventID string
-	Repo    repo.Repository
+	EventID   string
+	EventCity string
+	Repo      repo.Repository
+	Redis     *cacheadapter.RedisAdapter
 }
 
 func (gc *GetCommand) Handle() (model.Event, error) {
@@ -20,12 +22,17 @@ func (gc *GetCommand) Handle() (model.Event, error) {
 	if err != nil {
 		fmt.Printf("Err: TODO")
 	}
-	result, err := gc.Repo.GetEventByID(int32(intID))
-	if err != nil {
-		fmt.Printf("Err: TODO")
-	}
 
-	return result, nil
+	isCacheExist, err := cacheadapter.Exist(gc.EventCity, gc.Redis)
+	if err != nil {
+		return model.Event{}, err
+	}
+	if isCacheExist {
+		return cacheadapter.GetEvent(intID, gc.EventCity, gc.Redis)
+
+	} else {
+		return gc.Repo.GetEventByID(int32(intID))
+	}
 }
 
 type GetFeedCommand struct {
@@ -53,6 +60,6 @@ func (gf *GetFeedCommand) Handle() (*model.GetFeedCommandResult, error) {
 			fmt.Println("Errror ocurred")
 			return nil, err
 		}
-		return &model.GetFeedCommandResult{Events: &events, CacheHit: true}, nil
+		return &model.GetFeedCommandResult{Events: &events, CacheHit: false}, nil
 	}
 }

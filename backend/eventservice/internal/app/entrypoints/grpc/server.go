@@ -48,8 +48,9 @@ func (s *server) CreateEvent(ctx context.Context, req *pb.CreateEventRequest) (*
 
 func (s *server) GetEvent(ctx context.Context, req *pb.GetEventRequest) (*pb.GetEventResponse, error) {
 	getCommand := &commands.GetCommand{
-		Repo:    s.repo,
-		EventID: req.GetEventId(),
+		Repo:      s.repo,
+		EventID:   req.GetEventId(),
+		EventCity: req.GetEventCity(),
 	}
 
 	commandResult, err := commandhandler.HandleCommand[model.Event](getCommand)

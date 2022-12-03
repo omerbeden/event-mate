@@ -37,7 +37,8 @@ message CreateEventResponse{
 }
 
 message GetEventRequest{
-    string event_id=1;   
+    string event_id=1; 
+    string event_city=2;  
 }
 
 message GetEventResponse{

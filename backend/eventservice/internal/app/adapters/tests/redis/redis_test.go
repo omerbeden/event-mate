@@ -7,6 +7,7 @@ import (
 	cacheadapter "github.com/omerbeden/event-mate/backend/eventservice/internal/app/adapters/cacheAdapter"
 	"github.com/omerbeden/event-mate/backend/eventservice/internal/app/domain/model"
 	"github.com/stretchr/testify/assert"
+	"gorm.io/gorm"
 )
 
 type MockRedis struct {
@@ -19,7 +20,15 @@ func (*MockRedis) Exist(key string) (bool, error) {
 func (*MockRedis) GetPosts(key string) ([]model.Event, error) {
 	fmt.Println("Getting from cache")
 	posts := []model.Event{
-		{Title: "test1", Category: "category1"},
+		{
+			Model: gorm.Model{
+				ID: 1,
+			},
+			Title:     "test1",
+			Category:  "category1",
+			CreatedBy: model.User{},
+			Location:  model.Location{},
+		},
 		{Title: "test2", Category: "category2"},
 		{Title: "test3", Category: "category3"},
 	}
@@ -45,7 +54,7 @@ func TestSet(t *testing.T) {
 	assert.NoError(t, sut)
 }
 
-func TestGet(t *testing.T) {
+func TestGetPosts(t *testing.T) {
 	mockRedis := &MockRedis{}
 
 	sut, err := cacheadapter.GetPosts("Sakarya", mockRedis)
@@ -54,6 +63,17 @@ func TestGet(t *testing.T) {
 	assert.NotNil(t, sut)
 	assert.NoError(t, err)
 	assert.Greater(t, len(sut), 0)
+
+}
+
+func TestGetEvent(t *testing.T) {
+	mockRedis := &MockRedis{}
+
+	sut, err := cacheadapter.GetEvent(1, "city", mockRedis)
+
+	assert.NotEmpty(t, sut)
+	assert.NotNil(t, sut)
+	assert.NoError(t, err)
 
 }
 
