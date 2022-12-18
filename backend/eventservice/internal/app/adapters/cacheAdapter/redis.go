@@ -3,6 +3,7 @@ package cacheadapter
 import (
 	"context"
 	"encoding/json"
+	"strings"
 
 	"github.com/go-redis/redis/v8"
 	"github.com/omerbeden/event-mate/backend/eventservice/internal/app/domain/model"
@@ -36,7 +37,11 @@ func (redisA *RedisAdapter) GetPosts(key string) ([]model.Event, error) {
 		return nil, err
 	}
 
-	if err := json.Unmarshal([]byte(res[0]), &events); err != nil {
+	separeted := strings.Join(res, ",")
+	first := append([]string{"["}, separeted)
+	result := append(first, "]")
+
+	if err := json.Unmarshal([]byte(strings.Join(result, "")), &events); err != nil {
 		return nil, err
 	}
 
