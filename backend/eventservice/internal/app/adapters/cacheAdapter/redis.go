@@ -12,8 +12,7 @@ type RedisAdapter struct {
 	client *redis.Client
 }
 
-func NewRedisAdapter(options *redis.Options) *RedisAdapter {
-	client := redis.NewClient(options)
+func NewRedisAdapter(client *redis.Client) *RedisAdapter {
 	return &RedisAdapter{
 		client: client,
 	}

@@ -5,6 +5,7 @@ import (
 	"log"
 	"net"
 
+	"github.com/go-redis/redis/v8"
 	cacheadapter "github.com/omerbeden/event-mate/backend/eventservice/internal/app/adapters/cacheAdapter"
 	"github.com/omerbeden/event-mate/backend/eventservice/internal/app/adapters/database"
 	adapters "github.com/omerbeden/event-mate/backend/eventservice/internal/app/adapters/repo"
@@ -20,7 +21,8 @@ import (
 )
 
 type server struct {
-	repo repo.Repository
+	repo        repo.Repository
+	redisOption *redis.Options
 	pb.UnimplementedEventServiceServer
 }
 
@@ -31,17 +33,18 @@ func (s *server) CreateEvent(ctx context.Context, req *pb.CreateEventRequest) (*
 		Title:     req.GetEvent().GetTitle(),
 		Category:  req.GetEvent().GetCategory(),
 		CreatedBy: model.User{},
-		Location:  model.Location{City: "sakarya"},
+		Location:  model.Location{City: req.GetEvent().GetLocation().City},
 	}
 
+	client := redis.NewClient(redisOption)
 	createCmd := &commands.CreateCommand{
 		Repo:  s.repo,
 		Event: event,
-		Redis: cacheadapter.NewRedisAdapter(redisOption),
+		Redis: cacheadapter.NewRedisAdapter(client),
 	}
+	defer client.Close()
 
 	createCmdResult, err := commandhandler.HandleCommand[bool](createCmd)
-
 	if err != nil {
 		return &pb.CreateEventResponse{
 			Status:  createCmdResult,
@@ -84,10 +87,11 @@ func (s *server) GetFeed(ctx context.Context, req *pb.GetFeedByLocationRequest) 
 	}
 
 	cmdResult, err := commandhandler.HandleCommand[*model.GetFeedCommandResult](getFeedCommand)
-
+	client := redis.NewClient(redisOption)
+	defer client.Close()
 	if !cmdResult.CacheHit {
 		createCacheCommand := &commands.CreateCacheCommand{
-			Redis: cacheadapter.NewRedisAdapter(redisOption),
+			Redis: cacheadapter.NewRedisAdapter(client),
 			Key:   location.City,
 			Posts: *cmdResult.Events,
 		}
@@ -101,7 +105,7 @@ func (s *server) GetFeed(ctx context.Context, req *pb.GetFeedByLocationRequest) 
 
 }
 
-func StartGRPCServer() {
+func StartGRPCServer(redisOpt *redis.Options) {
 	lis, err := net.Listen("tcp", "0.0.0.0:50051")
 
 	if err != nil {
@@ -113,6 +117,7 @@ func StartGRPCServer() {
 		repo: &adapters.EventRepository{
 			DB: database.InitPostgressConnection(),
 		},
+		redisOption: redisOpt,
 	})
 	reflection.Register(s)
 

@@ -18,6 +18,8 @@ func (suite *EventRepositoryTestSuite) SetupTest() {
 	suite.repo = &adapters.EventRepository{
 		DB: database.InitPostgressConnection(),
 	}
+
+	suite.repo.DB.AutoMigrate(&model.Event{}, &model.Location{})
 }
 
 func (suite *EventRepositoryTestSuite) TearDownTest() {
@@ -34,6 +36,7 @@ func (suite *EventRepositoryTestSuite) TestCreateEvent() {
 		Title:     "TEST",
 		Category:  "TEST",
 		CreatedBy: model.User{},
+		Location:  model.Location{City: "Sakarya"},
 	}
 
 	res, err := suite.repo.CreateEvent(event)

@@ -16,10 +16,7 @@ message Event{
     string id=1;
     string title=2;
     string category =3;
-    string start_date=4;
-    string end_date=5;
-    string start_time=6;
-    string end_time=7;
+    Location Location=4;
 }
 
 message Location{

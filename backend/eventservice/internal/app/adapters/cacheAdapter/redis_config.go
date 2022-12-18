@@ -2,7 +2,8 @@ package cacheadapter
 
 import "github.com/go-redis/redis/v8"
 
-const Adress = "Localhost:6349"
+// TODO read from env
+const Adress = "Localhost:6379"
 const Password = ""
 const DB = 0
 

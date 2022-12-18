@@ -6,10 +6,12 @@ type Event struct {
 	gorm.Model
 	Title     string
 	Category  string
-	CreatedBy User `gorm:"foreignKey:ID"`
+	CreatedBy User
 	Location  Location
 }
 
 type Location struct {
-	City string
+	gorm.Model
+	City    string
+	EventID uint
 }
