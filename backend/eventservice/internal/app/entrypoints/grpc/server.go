@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"net"
+	"strconv"
 
 	"github.com/go-redis/redis/v8"
 	cacheadapter "github.com/omerbeden/event-mate/backend/eventservice/internal/app/adapters/cacheAdapter"
@@ -93,7 +94,7 @@ func (s *server) GetFeed(ctx context.Context, req *pb.GetFeedByLocationRequest) 
 		createCacheCommand := &commands.CreateCacheCommand{
 			Redis: cacheadapter.NewRedisAdapter(client),
 			Key:   location.City,
-			Posts: *cmdResult.Events,
+			Posts: cmdResult.Events,
 		}
 		_, createErr := commandhandler.HandleCommand[bool](createCacheCommand)
 		if createErr != nil {
@@ -101,7 +102,19 @@ func (s *server) GetFeed(ctx context.Context, req *pb.GetFeedByLocationRequest) 
 		}
 	}
 
-	return nil, err
+	var events []*pb.Event
+	for i := range cmdResult.Events {
+		events[i] = &pb.Event{
+			Id:       strconv.FormatUint(uint64(cmdResult.Events[i].ID), 10),
+			Title:    cmdResult.Events[i].Title,
+			Category: cmdResult.Events[i].Category,
+			Location: &pb.Location{City: cmdResult.Events[i].Location.City},
+		}
+	}
+
+	return &pb.GetFeedByLocationResponse{
+		Event: events,
+	}, err
 
 }
 

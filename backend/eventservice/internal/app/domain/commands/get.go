@@ -53,13 +53,13 @@ func (gf *GetFeedCommand) Handle() (*model.GetFeedCommandResult, error) {
 		if cacheErr != nil {
 			return nil, cacheErr
 		}
-		return &model.GetFeedCommandResult{Events: &cacheResult, CacheHit: true}, nil
+		return &model.GetFeedCommandResult{Events: cacheResult, CacheHit: true}, nil
 	} else {
 		events, err := gf.Repo.GetEventByLocation(gf.Location)
 		if err != nil {
 			fmt.Println("Errror ocurred")
 			return nil, err
 		}
-		return &model.GetFeedCommandResult{Events: &events, CacheHit: false}, nil
+		return &model.GetFeedCommandResult{Events: events, CacheHit: false}, nil
 	}
 }

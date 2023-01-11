@@ -1,6 +1,6 @@
 package model
 
 type GetFeedCommandResult struct {
-	Events   *[]Event
+	Events   []Event
 	CacheHit bool
 }
