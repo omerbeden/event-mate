@@ -1,7 +1,13 @@
 package commands
 
 import (
+	"context"
+	"fmt"
+
+	"github.com/aws/aws-sdk-go-v2/service/sns"
+	"github.com/aws/aws-sdk-go/aws"
 	cacheadapter "github.com/omerbeden/event-mate/backend/eventservice/internal/app/adapters/cacheAdapter"
+	snsadapter "github.com/omerbeden/event-mate/backend/eventservice/internal/app/adapters/eventbus/snsAdapter"
 	"github.com/omerbeden/event-mate/backend/eventservice/internal/app/domain/model"
 	"github.com/omerbeden/event-mate/backend/eventservice/internal/app/domain/ports/caching"
 	"github.com/omerbeden/event-mate/backend/eventservice/internal/app/domain/ports/repo"
@@ -19,7 +25,24 @@ func (ccmd *CreateCommand) Handle() (bool, error) {
 		return false, err
 	}
 
-	return ccmd.Repo.CreateEvent(ccmd.Event)
+	isAddedToDB, err := ccmd.Repo.CreateEvent(ccmd.Event)
+	if err != nil {
+		return false, err
+	}
+	if isAddedToDB {
+		input := &sns.PublishInput{
+			Message:  aws.String(fmt.Sprintf("event created with id : %d", ccmd.Event.ID)),
+			TopicArn: aws.String("topic"),
+		}
+
+		_, err := snsadapter.PublishMessage(context.Background(), &snsadapter.SNSAdapter{Topic: "topic_test"}, input)
+		if err != nil {
+			return false, err // todo db ye eklendi aslında oluyor, transaction ını rollback yapmak lazım
+		}
+
+	}
+
+	return true, nil
 
 }
 

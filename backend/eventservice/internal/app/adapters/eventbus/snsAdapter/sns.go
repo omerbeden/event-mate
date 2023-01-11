@@ -21,7 +21,7 @@ func SubscribeTopic(ctx context.Context, bus eventbus.SNSEventBus, input *sns.Su
 	return bus.Subscribe(ctx, input)
 }
 
-func (snsA *SNSAdapter) Publish(ctx context.Context, input *sns.PublishInput) (*sns.PublishOutput, error) {
+func (snsA *SNSAdapter) Publish(ctx context.Context, input *sns.PublishInput, optFns ...func(*sns.Options)) (*sns.PublishOutput, error) {
 	cfg, err := config.LoadDefaultConfig(context.TODO())
 	if err != nil {
 		panic("configuration error, " + err.Error())
@@ -39,7 +39,7 @@ func (snsA *SNSAdapter) Publish(ctx context.Context, input *sns.PublishInput) (*
 
 }
 
-func (snsA *SNSAdapter) Subscribe(ctx context.Context, input *sns.SubscribeInput) (*sns.SubscribeOutput, error) {
+func (snsA *SNSAdapter) Subscribe(ctx context.Context, input *sns.SubscribeInput, optFns ...func(*sns.Options)) (*sns.SubscribeOutput, error) {
 
 	cfg, err := config.LoadDefaultConfig(context.TODO())
 	if err != nil {
