@@ -1,9 +1,9 @@
-import 'package:event_mate/modules/screens/events_screen.dart';
+import 'package:event_mate/modules/screens/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class AddEventScreen extends StatefulWidget {
-  AddEventScreen({
+  const AddEventScreen({
     Key? key,
   }) : super(key: key);
 
@@ -145,10 +145,9 @@ class AddEventScreenState extends State<AddEventScreen> {
           ElevatedButton(
               onPressed: () {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                      content: Text('Processing Data, ana ekrana yönlendir')),
+                  const SnackBar(content: Text('Creating Event')),
                 );
-                Navigator.pop(context);
+                pageController.jumpToPage(0);
               },
               child: const Text("Create"))
         ],

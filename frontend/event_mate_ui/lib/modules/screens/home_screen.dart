@@ -1,6 +1,5 @@
 import 'package:event_mate/modules/screens/add_event_screen.dart';
 import 'package:event_mate/modules/screens/events_screen.dart';
-import 'package:event_mate/modules/screens/login_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -31,47 +30,45 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoTabScaffold(
-      tabBar: CupertinoTabBar(
-        items: const [
-          BottomNavigationBarItem(
-            label: 'Events',
-            icon: Icon(Icons.music_note),
-          ),
-          BottomNavigationBarItem(
-            label: 'Add',
-            icon: Icon(Icons.add),
-          ),
-          BottomNavigationBarItem(
-            label: 'Profile',
-            icon: Icon(Icons.person_off_outlined),
-          ),
-        ],
-      ),
-      tabBuilder: (context, index) {
-        switch (index) {
-          case 0:
-            return CupertinoTabView(
-              defaultTitle: 'Events',
-              builder: (context) => const EventsScreen(),
-            );
-          case 1:
-            return CupertinoTabView(
-              defaultTitle: 'Organize Event',
-              builder: (context) => AddEventScreen(),
-            );
-          case 2:
-            return CupertinoTabView(
-              defaultTitle: 'Profile',
-              builder: (context) =>
-                  ProfileScreen(firebaseUser: widget.firebaseUser),
-            );
-          default:
-            assert(false, 'Unexpected tab');
-            return const SizedBox.shrink();
-        }
-      },
-    );
+    return Scaffold(
+        body: PageView(
+          children: [
+            Container(
+              color: Colors.white,
+              child: const EventsScreen(),
+            ),
+            Container(
+              color: Colors.white,
+              child: const AddEventScreen(),
+            ),
+            Container(
+                color: Colors.white,
+                child: ProfileScreen(firebaseUser: widget.firebaseUser)),
+          ],
+          controller: pageController,
+          physics: NeverScrollableScrollPhysics(),
+          onPageChanged: onPageChanged,
+        ),
+        bottomNavigationBar: CupertinoTabBar(
+          backgroundColor: Colors.white,
+          // ignore: prefer_const_literals_to_create_immutables
+          items: <BottomNavigationBarItem>[
+            const BottomNavigationBarItem(
+              label: 'Evets',
+              icon: Icon(Icons.event),
+            ),
+            const BottomNavigationBarItem(
+              label: 'Add',
+              icon: Icon(Icons.add),
+            ),
+            const BottomNavigationBarItem(
+              label: 'Profile',
+              icon: Icon(Icons.person_off_outlined),
+            ),
+          ],
+          onTap: navigationTapped,
+          currentIndex: _page,
+        ));
   }
 
   void navigationTapped(int page) {
@@ -82,5 +79,11 @@ class _HomeScreenState extends State<HomeScreen> {
     });
 
     pageController.jumpToPage(page);
+  }
+
+  void onPageChanged(int page) {
+    setState(() {
+      this._page = page;
+    });
   }
 }
