@@ -1,11 +1,11 @@
-import 'package:event_mate/widgets/date_picker_widget.dart';
+import 'package:event_mate/modules/screens/events_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../widgets/time_picker_widget.dart';
-
 class AddEventScreen extends StatefulWidget {
-  const AddEventScreen({Key? key}) : super(key: key);
+  AddEventScreen({
+    Key? key,
+  }) : super(key: key);
 
   @override
   AddEventScreenState createState() {
@@ -15,9 +15,10 @@ class AddEventScreen extends StatefulWidget {
 
 class AddEventScreenState extends State<AddEventScreen> {
   final TextEditingController titleController = TextEditingController();
-  final TextEditingController categoryController = TextEditingController();
   String selectedCity = "";
+  String selectedCategory = "";
   final List<String> cities = <String>['One', 'Two', 'Three', 'Four'];
+  final List<String> categories = <String>['Concert', 'Trip', 'game', 'cycle'];
 
   @override
   Widget build(BuildContext context) {
@@ -74,12 +75,7 @@ class AddEventScreenState extends State<AddEventScreen> {
               color: Colors.grey[200],
               borderRadius: BorderRadius.circular(15),
             ),
-            child: TextFormField(
-              controller: categoryController,
-              keyboardType: TextInputType.name,
-              inputFormatters: [
-                LengthLimitingTextInputFormatter(5),
-              ],
+            child: DropdownButtonFormField(
               decoration: const InputDecoration(
                 border: InputBorder.none,
                 contentPadding:
@@ -94,12 +90,15 @@ class AddEventScreenState extends State<AddEventScreen> {
                   color: Colors.grey,
                 ),
               ),
-              onChanged: (value) {
+              items: categories.map<DropdownMenuItem<String>>((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
+              onChanged: (String? value) {
                 setState(() {
-                  categoryController.value = categoryController.value.copyWith(
-                      text: value,
-                      selection: TextSelection.collapsed(offset: value.length),
-                      composing: TextRange.empty);
+                  selectedCategory = value!;
                 });
               },
             ),
