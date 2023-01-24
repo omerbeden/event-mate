@@ -46,7 +46,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: ProfileScreen(firebaseUser: widget.firebaseUser)),
           ],
           controller: pageController,
-          physics: NeverScrollableScrollPhysics(),
+          physics: const NeverScrollableScrollPhysics(),
           onPageChanged: onPageChanged,
         ),
         bottomNavigationBar: CupertinoTabBar(
@@ -72,10 +72,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void navigationTapped(int page) {
-    //Animating Page
-    print(page);
     setState(() {
-      this._page = page;
+      _page = page;
     });
 
     pageController.jumpToPage(page);
@@ -83,7 +81,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void onPageChanged(int page) {
     setState(() {
-      this._page = page;
+      _page = page;
     });
   }
 }

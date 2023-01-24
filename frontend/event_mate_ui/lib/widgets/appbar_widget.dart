@@ -1,5 +1,4 @@
 import 'package:event_mate/modules/screens/message_screen.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../modules/screens/search_secreen.dart';
@@ -16,9 +15,8 @@ AppBar buildAppBar(BuildContext context) {
 
 AppBar buildEventScreenAppBar(BuildContext context) {
   return AppBar(
-    title: Text("Event Mate"),
+    title: const Text("Event Mate"),
     automaticallyImplyLeading: false,
-    elevation: 1,
     actions: [
       IconButton(
         icon: Icon(Icons.search),

@@ -2,21 +2,16 @@ import 'package:event_mate/widgets/appbar_widget.dart';
 import 'package:flutter/material.dart';
 
 import '../../widgets/Post_widget.dart';
-import 'event_detail_screen.dart';
 
 class EventsScreen extends StatefulWidget {
-  const EventsScreen({Key? key, this.androidDrawer}) : super(key: key);
-
-  final Widget? androidDrawer;
+  const EventsScreen({Key? key}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _EventsScreenState();
 }
 
 class _EventsScreenState extends State<EventsScreen> {
-  final _androidRefreshKey = GlobalKey<RefreshIndicatorState>();
   static const _itemsLength = 50;
-
   Future<void> _refreshData() {
     return Future.delayed(
       // This is just an arbitrary delay that simulates some network activity.
@@ -37,7 +32,6 @@ class _EventsScreenState extends State<EventsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: widget.androidDrawer,
       appBar: buildEventScreenAppBar(context),
       body: RefreshIndicator(
         onRefresh: _refreshData,
