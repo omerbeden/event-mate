@@ -8,27 +8,18 @@ class PostWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Wrap(
       children: [
-        Padding(
-          padding: EdgeInsets.all(8),
-          child: Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              color: Colors.blue,
-              shape: BoxShape.circle,
-            ),
-            child: ClipRect(
-              child: Icon(Icons.portable_wifi_off_outlined),
-            ),
-          ),
-        ),
-        Padding(
+        const Padding(
+            padding: EdgeInsets.all(8),
+            child: CircleAvatar(
+              backgroundColor: Colors.amber,
+            )),
+        const Padding(
           padding: EdgeInsets.all(8),
           child: Text("user name"),
         ),
         Container(
             height: 200,
-            child: EventCard(
+            child: const EventCard(
                 title: 'Title',
                 description: 'Description',
                 location: 'location',

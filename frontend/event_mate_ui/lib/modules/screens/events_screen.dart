@@ -22,10 +22,6 @@ class _EventsScreenState extends State<EventsScreen> {
 
   Widget _listBuilder(BuildContext context, int index) {
     if (index >= _itemsLength) return Container();
-
-    // Show a slightly different color palette. Show poppy-ier colors on iOS
-    // due to lighter contrasting bars and tone it down on Android.
-
     return PostWidget();
   }
 
