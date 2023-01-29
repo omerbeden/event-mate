@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:event_mate/modules/screens/event_detail_screen.dart';
 import 'package:flutter/material.dart';
 
 class EventCard extends StatelessWidget {
@@ -18,66 +19,134 @@ class EventCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      margin: const EdgeInsets.all(10),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      child: ListView(
-        children: [
-          InkWell(
-            splashColor: Colors.blue.withAlpha(50),
-            onTap: () {
-              debugPrint('Card tapped.');
-            },
-            child: ListTile(
-              leading: const Icon(Icons.arrow_circle_down),
-              title: Text(
-                title,
-                style:
-                    const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-              ),
-              subtitle: Text('created by'),
-              dense: true,
-            ),
-          ),
-          const SizedBox(
-            width: 20,
-          ),
-          Text(description),
-          const SizedBox(
-            height: 20,
-          ),
-          Wrap(
-            alignment: WrapAlignment.spaceBetween,
-            clipBehavior: Clip.antiAlias,
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        vertical: 10,
+      ),
+      child: Column(children: [
+        // Header Section
+        Container(
+          decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              color: Theme.of(context).secondaryHeaderColor),
+          padding: const EdgeInsets.symmetric(
+            vertical: 4,
+            horizontal: 16,
+          ).copyWith(right: 0),
+          child: Row(
             children: [
-              Wrap(
-                children: [
-                  const Icon(Icons.location_on),
-                  Text(location),
-                  const Icon(Icons.timelapse_sharp),
-                  Text(duration),
-                ],
+              Icon(Icons.pedal_bike),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.only(
+                    left: 8,
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    // ignore: prefer_const_literals_to_create_immutables
+                    children: [
+                      Text(
+                        title,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      )
+                    ],
+                  ),
+                ),
               ),
-              Wrap(
-                children: [
-                  IconButton(
-                    onPressed: () {},
-                    icon: const Icon(Icons.heart_broken),
-                  ),
-                  IconButton(
-                    onPressed: () {},
-                    icon: const Icon(Icons.share),
-                  ),
-                ],
+              IconButton(
+                onPressed: () {
+                  showDialog(
+                      context: context,
+                      builder: (context) => Dialog(
+                            child: ListView(
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 16,
+                              ),
+                              shrinkWrap: true,
+                              children: [
+                                'Delete',
+                              ]
+                                  .map((e) => InkWell(
+                                        onTap: () async {},
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 12,
+                                            vertical: 16,
+                                          ),
+                                          child: Text(e),
+                                        ),
+                                      ))
+                                  .toList(),
+                            ),
+                          ));
+                },
+                icon: const Icon(
+                  Icons.more_vert,
+                ),
               ),
             ],
           ),
-          const SizedBox(
-            width: 20,
-          ),
-        ],
-      ),
+        ),
+
+        Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          // ignore: prefer_const_literals_to_create_immutables
+          children: [
+            const Icon(Icons.timelapse),
+            const Text("Start Date"),
+            const SizedBox(
+              width: 10.0,
+            ),
+            const Text("-",
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 30.0,
+                )),
+            const SizedBox(
+              width: 10.0,
+            ),
+            const Text("End Date"),
+          ],
+        ),
+        GestureDetector(
+          onTap: () {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => EventDetailScreen(id: 1)));
+          },
+          child: const Text("test"),
+        ),
+        const SizedBox(
+          height: 15,
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            Column(
+              // ignore: prefer_const_literals_to_create_immutables
+              children: [
+                const Icon(
+                  Icons.location_on,
+                ),
+                Text(location),
+              ],
+            ),
+            Row(
+              children: [
+                IconButton(
+                    onPressed: () {}, icon: Icon(Icons.person_add_alt_rounded)),
+                const Text("10"),
+              ],
+            ),
+            IconButton(onPressed: () {}, icon: Icon(Icons.share))
+          ],
+        ),
+        Divider(color: Theme.of(context).dividerColor)
+      ]),
     );
   }
 }

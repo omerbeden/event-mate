@@ -1,7 +1,6 @@
 import 'package:event_mate/widgets/appbar_widget.dart';
+import 'package:event_mate/widgets/event_card_widget.dart';
 import 'package:flutter/material.dart';
-
-import '../../widgets/Post_widget.dart';
 
 class EventsScreen extends StatefulWidget {
   const EventsScreen({Key? key}) : super(key: key);
@@ -22,7 +21,12 @@ class _EventsScreenState extends State<EventsScreen> {
 
   Widget _listBuilder(BuildContext context, int index) {
     if (index >= _itemsLength) return Container();
-    return PostWidget();
+    return const EventCard(
+      title: "title",
+      description: "desc",
+      location: "loc",
+      duration: "duration",
+    );
   }
 
   @override
