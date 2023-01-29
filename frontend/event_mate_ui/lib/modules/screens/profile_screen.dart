@@ -140,15 +140,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
                 childAspectRatio: 1.0,
-                mainAxisSpacing: 1.5,
-                crossAxisSpacing: 1.5,
+                mainAxisSpacing: 0.0,
+                crossAxisSpacing: 0.0,
               ),
               itemBuilder: (context, index) {
-                return EventCard(
-                    title: snapshot.data![index].title,
-                    description: snapshot.data![index].description,
-                    location: snapshot.data![index].location,
-                    duration: snapshot.data![index].duration);
+                return Wrap(
+                  clipBehavior: Clip.antiAlias,
+                  children: [
+                    Padding(
+                        padding: EdgeInsets.symmetric(),
+                        child: EventCard(
+                            title: snapshot.data![index].title,
+                            description: snapshot.data![index].description,
+                            location: snapshot.data![index].location,
+                            duration: snapshot.data![index].duration))
+                  ],
+                );
               },
             );
           } else {
