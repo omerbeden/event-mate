@@ -5,10 +5,10 @@ import '../modules/screens/search_secreen.dart';
 
 AppBar buildAppBar(BuildContext context) {
   return AppBar(
+    iconTheme: Theme.of(context).iconTheme,
     leading: BackButton(
       color: Colors.black12,
     ),
-    backgroundColor: Colors.transparent,
     elevation: 1,
   );
 }
