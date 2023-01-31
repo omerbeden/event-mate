@@ -6,6 +6,7 @@ import '../modules/screens/search_secreen.dart';
 AppBar buildAppBar(BuildContext context) {
   return AppBar(
     iconTheme: Theme.of(context).iconTheme,
+    backgroundColor: Colors.white10,
     leading: BackButton(
       color: Colors.black12,
     ),
@@ -13,10 +14,20 @@ AppBar buildAppBar(BuildContext context) {
   );
 }
 
+AppBar buildEvetDetailScreenAppBar(BuildContext context) {
+  return AppBar(
+    title: const Text("Event Mate"),
+    iconTheme: Theme.of(context).iconTheme,
+    backgroundColor: Colors.white10,
+  );
+}
+
 AppBar buildEventScreenAppBar(BuildContext context) {
   return AppBar(
     title: const Text("Event Mate"),
     automaticallyImplyLeading: false,
+    backgroundColor: Colors.white10,
+    iconTheme: Theme.of(context).iconTheme,
     actions: [
       IconButton(
         icon: Icon(Icons.search),

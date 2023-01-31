@@ -22,7 +22,7 @@ class _EventsScreenState extends State<EventsScreen> {
   Widget _listBuilder(BuildContext context, int index) {
     if (index >= _itemsLength) return Container();
     return const EventCard(
-      title: "title",
+      title: "Bisiklet Sürmece",
       description: "desc",
       location: "loc",
       duration: "duration",

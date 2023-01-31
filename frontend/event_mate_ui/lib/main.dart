@@ -19,26 +19,12 @@ class EventMate extends StatelessWidget {
   }
 }
 
-final ThemeData myTheme = ThemeData(
-  primarySwatch: MaterialColor(4289265919, {
-    50: Color(0xfff6e5ff),
-    100: Color(0xffeeccff),
-    200: Color(0xffdd99ff),
-    300: Color(0xffcb66ff),
-    400: Color(0xffba33ff),
-    500: Color(0xffa900ff),
-    600: Color(0xff8700cc),
-    700: Color(0xff650099),
-    800: Color(0xff440066),
-    900: Color(0xff220033)
-  }),
+ThemeData myTheme = ThemeData(
+  primarySwatch: Colors.purple,
   brightness: Brightness.light,
-  primaryColor: Color(0xffa900ff),
-  primaryColorBrightness: Brightness.dark,
-  primaryColorLight: Color(0xffeeccff),
-  primaryColorDark: Color(0xff650099),
-  accentColor: Color(0xffa900ff),
-  accentColorBrightness: Brightness.dark,
+  primaryColor: Color(0xff9c27b0),
+  primaryColorLight: Color(0xffe1bee7),
+  primaryColorDark: Color(0xff7b1fa2),
   canvasColor: Color(0xfffafafa),
   scaffoldBackgroundColor: Color(0xfffafafa),
   bottomAppBarColor: Color(0xffffffff),
@@ -49,15 +35,11 @@ final ThemeData myTheme = ThemeData(
   selectedRowColor: Color(0xfff5f5f5),
   unselectedWidgetColor: Color(0x8a000000),
   disabledColor: Color(0x61000000),
-  buttonColor: Color(0xffe0e0e0),
-  toggleableActiveColor: Color(0xff8700cc),
-  secondaryHeaderColor: Color(0xfff6e5ff),
-  textSelectionColor: Color(0xffdd99ff),
-  cursorColor: Color(0xff4285f4),
-  textSelectionHandleColor: Color(0xffcb66ff),
-  backgroundColor: Color(0xffdd99ff),
+  toggleableActiveColor: Color(0xff8e24aa),
+  secondaryHeaderColor: Color(0xfff3e5f5),
+  backgroundColor: Color(0xffce93d8),
   dialogBackgroundColor: Color(0xffffffff),
-  indicatorColor: Color(0xffa900ff),
+  indicatorColor: Color(0xff9c27b0),
   hintColor: Color(0x8a000000),
   errorColor: Color(0xffd32f2f),
   buttonTheme: ButtonThemeData(
@@ -81,12 +63,10 @@ final ThemeData myTheme = ThemeData(
     focusColor: Color(0x1f000000),
     hoverColor: Color(0x0a000000),
     colorScheme: ColorScheme(
-      primary: Color(0xffa900ff),
-      primaryVariant: Color(0xff650099),
-      secondary: Color(0xffa900ff),
-      secondaryVariant: Color(0xff650099),
+      primary: Color(0xff9c27b0),
+      secondary: Color.fromARGB(255, 86, 45, 94),
       surface: Color(0xffffffff),
-      background: Color(0xffdd99ff),
+      background: Color(0xffce93d8),
       error: Color(0xffd32f2f),
       onPrimary: Color(0xffffffff),
       onSecondary: Color(0xffffffff),
@@ -194,38 +174,20 @@ final ThemeData myTheme = ThemeData(
       borderRadius: BorderRadius.all(Radius.circular(4.0)),
     ),
   ),
-  // ignore: prefer_const_constructors
   iconTheme: IconThemeData(
-    color: const Color(0xdd000000),
+    color: Color(0xdd000000),
     opacity: 1,
-    size: 17,
+    size: 24,
   ),
-  // ignore: prefer_const_constructors
   primaryIconTheme: IconThemeData(
-    color: const Color(0xffffffff),
+    color: Color(0xffffffff),
     opacity: 1,
-    size: 17,
+    size: 24,
   ),
-  sliderTheme: SliderThemeData(
-    activeTrackColor: null,
-    inactiveTrackColor: null,
-    disabledActiveTrackColor: null,
-    disabledInactiveTrackColor: null,
-    activeTickMarkColor: null,
-    inactiveTickMarkColor: null,
-    disabledActiveTickMarkColor: null,
-    disabledInactiveTickMarkColor: null,
-    thumbColor: null,
-    disabledThumbColor: null,
-    overlayColor: null,
-    valueIndicatorColor: null,
-    showValueIndicator: null,
-    valueIndicatorTextStyle: TextStyle(
-      color: Color(0xffffffff),
-      fontSize: null,
-      fontWeight: FontWeight.w400,
-      fontStyle: FontStyle.normal,
-    ),
+  accentIconTheme: IconThemeData(
+    color: Color(0xffffffff),
+    opacity: 1,
+    size: 24,
   ),
   tabBarTheme: TabBarTheme(
     indicatorSize: TabBarIndicatorSize.tab,
@@ -251,7 +213,7 @@ final ThemeData myTheme = ThemeData(
       fontWeight: FontWeight.w400,
       fontStyle: FontStyle.normal,
     ),
-    secondarySelectedColor: Color(0x3da900ff),
+    secondarySelectedColor: Color(0x3d9c27b0),
     selectedColor: Color(0x3d000000),
     shape: StadiumBorder(
         side: BorderSide(

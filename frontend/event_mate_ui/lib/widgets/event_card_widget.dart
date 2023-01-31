@@ -27,8 +27,8 @@ class EventCard extends StatelessWidget {
         // Header Section
         Container(
           decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              color: Theme.of(context).secondaryHeaderColor),
+            borderRadius: BorderRadius.circular(10),
+          ),
           padding: const EdgeInsets.symmetric(
             vertical: 4,
             horizontal: 16,
@@ -50,7 +50,15 @@ class EventCard extends StatelessWidget {
                         title,
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
+                          fontSize: 30,
                         ),
+                      ),
+                      Text(
+                        "Omer tarafından oluşturuldu",
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 10,
+                            color: Colors.grey),
                       )
                     ],
                   ),
@@ -91,61 +99,79 @@ class EventCard extends StatelessWidget {
           ),
         ),
 
-        Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          // ignore: prefer_const_literals_to_create_immutables
-          children: [
-            const Icon(Icons.timelapse),
-            const Text("Start Date"),
-            const SizedBox(
-              width: 10.0,
+        //body
+
+        Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
             ),
-            const Text("-",
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 30.0,
-                )),
-            const SizedBox(
-              width: 10.0,
+            padding: const EdgeInsets.symmetric(
+              vertical: 4,
+              horizontal: 16,
             ),
-            const Text("End Date"),
-          ],
-        ),
-        GestureDetector(
-          onTap: () {
-            Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => EventDetailScreen(id: 1)));
-          },
-          child: const Text("test"),
-        ),
-        const SizedBox(
-          height: 15,
-        ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            Column(
-              // ignore: prefer_const_literals_to_create_immutables
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                const Icon(
-                  Icons.location_on,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  // ignore: prefer_const_literals_to_create_immutables
+                  children: [
+                    const Icon(Icons.timelapse),
+                    const Text("Start Date"),
+                    const SizedBox(
+                      width: 10.0,
+                    ),
+                    const Text("-",
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 30.0,
+                        )),
+                    const SizedBox(
+                      width: 10.0,
+                    ),
+                    const Text("End Date"),
+                  ],
                 ),
-                Text(location),
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => EventDetailScreen(id: 1)));
+                  },
+                  child: const Text(
+                      "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum."),
+                ),
+                const SizedBox(
+                  height: 15,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    Column(
+                      // ignore: prefer_const_literals_to_create_immutables
+                      children: [
+                        const Icon(
+                          Icons.location_on,
+                        ),
+                        Text(location),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        IconButton(
+                            onPressed: () {},
+                            icon: Icon(Icons.person_add_alt_rounded)),
+                        const Text("10"),
+                      ],
+                    ),
+                    IconButton(onPressed: () {}, icon: Icon(Icons.share))
+                  ],
+                ),
               ],
-            ),
-            Row(
-              children: [
-                IconButton(
-                    onPressed: () {}, icon: Icon(Icons.person_add_alt_rounded)),
-                const Text("10"),
-              ],
-            ),
-            IconButton(onPressed: () {}, icon: Icon(Icons.share))
-          ],
-        ),
-        Divider(color: Theme.of(context).dividerColor)
+            )),
+        Divider(color: Theme.of(context).primaryColor)
       ]),
     );
   }
