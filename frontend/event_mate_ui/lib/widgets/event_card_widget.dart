@@ -24,83 +24,9 @@ class EventCard extends StatelessWidget {
         vertical: 10,
       ),
       child: Column(children: [
-        // Header Section
-        Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-          ),
-          padding: const EdgeInsets.symmetric(
-            vertical: 4,
-            horizontal: 16,
-          ).copyWith(right: 0),
-          child: Row(
-            children: [
-              Icon(Icons.pedal_bike),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.only(
-                    left: 8,
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    // ignore: prefer_const_literals_to_create_immutables
-                    children: [
-                      Text(
-                        title,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 30,
-                        ),
-                      ),
-                      Text(
-                        "Omer tarafından oluşturuldu",
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 10,
-                            color: Colors.grey),
-                      )
-                    ],
-                  ),
-                ),
-              ),
-              IconButton(
-                onPressed: () {
-                  showDialog(
-                      context: context,
-                      builder: (context) => Dialog(
-                            child: ListView(
-                              padding: const EdgeInsets.symmetric(
-                                vertical: 16,
-                              ),
-                              shrinkWrap: true,
-                              children: [
-                                'Delete',
-                              ]
-                                  .map((e) => InkWell(
-                                        onTap: () async {},
-                                        child: Container(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 12,
-                                            vertical: 16,
-                                          ),
-                                          child: Text(e),
-                                        ),
-                                      ))
-                                  .toList(),
-                            ),
-                          ));
-                },
-                icon: const Icon(
-                  Icons.more_vert,
-                ),
-              ),
-            ],
-          ),
-        ),
+        eventCardHeader(title, context),
 
         //body
-
         Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(10),
@@ -175,4 +101,81 @@ class EventCard extends StatelessWidget {
       ]),
     );
   }
+}
+
+Widget eventCardHeader(String title, BuildContext context) {
+  return // Header Section
+      Container(
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.circular(10),
+    ),
+    padding: const EdgeInsets.symmetric(
+      vertical: 4,
+      horizontal: 16,
+    ).copyWith(right: 0),
+    child: Row(
+      children: [
+        const Icon(Icons.pedal_bike),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.only(
+              left: 8,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              // ignore: prefer_const_literals_to_create_immutables
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 30,
+                  ),
+                ),
+                const Text(
+                  "Omer tarafından oluşturuldu",
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 10,
+                      color: Colors.grey),
+                )
+              ],
+            ),
+          ),
+        ),
+        IconButton(
+          onPressed: () {
+            showDialog(
+                context: context,
+                builder: (context) => Dialog(
+                      child: ListView(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 16,
+                        ),
+                        shrinkWrap: true,
+                        children: [
+                          'this will be custom for the aspect of the person event creted and just viewing',
+                        ]
+                            .map((e) => InkWell(
+                                  onTap: () async {},
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 16,
+                                    ),
+                                    child: Text(e),
+                                  ),
+                                ))
+                            .toList(),
+                      ),
+                    ));
+          },
+          icon: const Icon(
+            Icons.more_vert,
+          ),
+        ),
+      ],
+    ),
+  );
 }

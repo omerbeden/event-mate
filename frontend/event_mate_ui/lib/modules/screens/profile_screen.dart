@@ -9,6 +9,8 @@ import 'package:event_mate/widgets/profile_widget.dart';
 import 'package:event_mate/modules/screens/edit_profile_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fbu;
 
+import 'event_detail_screen.dart';
+
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key, required this.firebaseUser}) : super(key: key);
   final fbu.User firebaseUser;
@@ -79,8 +81,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           const SizedBox(height: 48),
           const Text('Attanded Events',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-          buildAttendedEvents(),
-          const SizedBox(height: 48),
+          Expanded(child: buildAttendedEvents()),
         ],
       ),
     );
@@ -132,28 +133,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
         future: events,
         builder: (context, snapshot) {
           if (snapshot.hasData) {
-            return GridView.builder(
+            return ListView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               padding: const EdgeInsets.all(0.5),
               itemCount: snapshot.data?.length,
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                childAspectRatio: 1.0,
-                mainAxisSpacing: 0.0,
-                crossAxisSpacing: 0.0,
-              ),
               itemBuilder: (context, index) {
                 return Wrap(
-                  clipBehavior: Clip.antiAlias,
+                  clipBehavior: Clip.antiAliasWithSaveLayer,
                   children: [
-                    Padding(
-                        padding: EdgeInsets.symmetric(),
-                        child: EventCard(
-                            title: snapshot.data![index].title,
-                            description: snapshot.data![index].description,
-                            location: snapshot.data![index].location,
-                            duration: snapshot.data![index].duration))
+                    GestureDetector(
+                      child:
+                          eventCardHeader(snapshot.data![index].title, context),
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    EventDetailScreen(id: 1)));
+                      },
+                    ),
+                    Divider(color: Theme.of(context).primaryColor)
                   ],
                 );
               },
