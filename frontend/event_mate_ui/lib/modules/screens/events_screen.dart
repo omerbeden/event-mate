@@ -1,6 +1,9 @@
+import 'package:event_mate/utils/user_preference.dart';
 import 'package:event_mate/widgets/appbar_widget.dart';
 import 'package:event_mate/widgets/event_card_widget.dart';
 import 'package:flutter/material.dart';
+
+import '../models/user.dart';
 
 class EventsScreen extends StatefulWidget {
   const EventsScreen({Key? key}) : super(key: key);
@@ -10,7 +13,8 @@ class EventsScreen extends StatefulWidget {
 }
 
 class _EventsScreenState extends State<EventsScreen> {
-  static const _itemsLength = 50;
+  late Future<List<Event>> events;
+
   Future<void> _refreshData() {
     return Future.delayed(
       // This is just an arbitrary delay that simulates some network activity.
@@ -19,14 +23,14 @@ class _EventsScreenState extends State<EventsScreen> {
     );
   }
 
-  Widget _listBuilder(BuildContext context, int index) {
-    if (index >= _itemsLength) return Container();
-    return const EventCard(
-      title: "Bisiklet Sürmece",
-      description: "desc",
-      location: "loc",
-      duration: "duration",
-    );
+  Future<List<Event>> getAttendedEvents() async {
+    return UserPreferences.myUser.attandedEvents;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    events = getAttendedEvents();
   }
 
   @override
@@ -34,13 +38,27 @@ class _EventsScreenState extends State<EventsScreen> {
     return Scaffold(
       appBar: buildEventScreenAppBar(context),
       body: RefreshIndicator(
-        onRefresh: _refreshData,
-        child: ListView.builder(
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          itemCount: _itemsLength,
-          itemBuilder: _listBuilder,
-        ),
-      ),
+          onRefresh: _refreshData,
+          child: FutureBuilder<List<Event>>(
+              future: events,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
+                return ListView.builder(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    itemCount: snapshot.data?.length,
+                    itemBuilder: (context, index) {
+                      return EventCard(
+                        title: snapshot.data![index].title,
+                        description: snapshot.data![index].description,
+                        location: snapshot.data![index].location,
+                        duration: snapshot.data![index].duration,
+                      );
+                    });
+              })),
     );
   }
 }
