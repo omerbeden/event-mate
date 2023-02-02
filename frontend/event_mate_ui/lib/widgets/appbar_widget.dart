@@ -5,21 +5,26 @@ import '../modules/screens/search_secreen.dart';
 
 AppBar buildAppBar(BuildContext context) {
   return AppBar(
+    title: const Text("Event Mate"),
     iconTheme: Theme.of(context).iconTheme,
     backgroundColor: Colors.white10,
-    leading: BackButton(
-      color: Colors.black12,
-    ),
-    elevation: 1,
   );
 }
 
 AppBar buildEvetDetailScreenAppBar(BuildContext context) {
   return AppBar(
-    title: const Text("Event Mate"),
-    iconTheme: Theme.of(context).iconTheme,
-    backgroundColor: Colors.white10,
-  );
+      title: const Text("Event Mate"),
+      iconTheme: Theme.of(context).iconTheme,
+      backgroundColor: Colors.white10,
+      leading: InkWell(
+        onTap: () {
+          Navigator.pop(context);
+        },
+        child: Icon(
+          Icons.arrow_back_ios,
+          color: Colors.black54,
+        ),
+      ));
 }
 
 AppBar buildEventScreenAppBar(BuildContext context) {
