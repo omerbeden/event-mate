@@ -1,5 +1,4 @@
 import 'package:event_mate/modules/screens/login_screen.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -31,7 +30,6 @@ ThemeData myTheme = ThemeData(
   cardColor: Color(0xffffffff),
   dividerColor: Color(0x1f000000),
   highlightColor: Color(0x66bcbcbc),
-  splashColor: Color(0x66c8c8c8),
   selectedRowColor: Color(0xfff5f5f5),
   unselectedWidgetColor: Color(0x8a000000),
   disabledColor: Color(0x61000000),
@@ -59,7 +57,6 @@ ThemeData myTheme = ThemeData(
     buttonColor: Color(0xffe0e0e0),
     disabledColor: Color(0x61000000),
     highlightColor: Color(0x29000000),
-    splashColor: Color(0x1f000000),
     focusColor: Color(0x1f000000),
     hoverColor: Color(0x0a000000),
     colorScheme: ColorScheme(

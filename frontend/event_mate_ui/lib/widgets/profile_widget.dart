@@ -58,7 +58,7 @@ class ProfileWidget extends StatelessWidget {
         overlayColor: MaterialStateProperty.resolveWith<Color?>((states) {
           if (states.contains(MaterialState.pressed)) {
             return Colors.red;
-          } // <-- Splash color
+          }
         }),
       ));
 }

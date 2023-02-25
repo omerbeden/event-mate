@@ -1,10 +1,19 @@
 import 'package:event_mate/firebase_options.dart';
 import 'package:event_mate/modules/screens/home_screen.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  // If you're going to use other Firebase services in the background, such as Firestore,
+  // make sure you call `initializeApp` before using other Firebase services.
+
+  print("Handling a background message: ${message.messageId}");
+}
 
 class Authentication {
   static SnackBar customSnackBar({required String content}) {
@@ -35,6 +44,33 @@ class Authentication {
         ),
       );
     }
+    final fcmToken = await FirebaseMessaging.instance.getToken();
+    print("token$fcmToken");
+    FirebaseMessaging.instance.onTokenRefresh.listen((fcmToken) {
+      // TODO: If necessary send token to application server.
+
+      // Note: This callback is fired at each app startup and whenever a new
+      // token is generated.
+      print("token$fcmToken");
+    }).onError((err) {
+      // Error getting token.
+      print("err$err");
+    });
+
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
+    FirebaseMessaging messaging = FirebaseMessaging.instance;
+
+    NotificationSettings settings = await messaging.requestPermission(
+      alert: true,
+      badge: true,
+      provisional: false,
+      sound: true,
+    );
+
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      print("on message");
+    });
 
     return firebaseApp;
   }
