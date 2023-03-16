@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+
+package notifier.v1;
+
+option go_package="./backend/notifierservice/internal/infra/grpc/pb";
+
+service NotifierService{
+    rpc PersistDeviceToken(PersistDeviceTokenRequest) returns (PersistDeviceTokenResponse){}
+}
+
+
+message PersistDeviceTokenRequest {
+    string user_id=1;
+    string device_token=2;
+}
+
+message PersistDeviceTokenResponse {
+    bool status = 1;
+}
+
+
+

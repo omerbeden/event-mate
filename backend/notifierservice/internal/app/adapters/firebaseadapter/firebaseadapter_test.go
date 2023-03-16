@@ -14,7 +14,7 @@ type mockNotifier struct {
 
 func (mockNotifier *mockNotifier) Send(message *model.PushMessage) (*model.PushMessageResponse, error) {
 	fmt.Println("Test notifier")
-	return &model.PushMessageResponse{true, "messageID"}, nil
+	return &model.PushMessageResponse{Success: true, MessageId: "messageID"}, nil
 }
 
 func TestSend(t *testing.T) {
