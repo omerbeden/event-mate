@@ -12,31 +12,31 @@ import (
 type GetCommand struct {
 	EventID   string
 	EventCity string
-	Repo      repo.Repository
+	Repo      repo.EventRepository
 	Redis     *cacheadapter.RedisAdapter
 }
 
-func (gc *GetCommand) Handle() (model.Event, error) {
+func (gc *GetCommand) Handle() (*model.Event, error) {
 
 	intID, err := strconv.Atoi(gc.EventID)
 	if err != nil {
-		return model.Event{}, fmt.Errorf("get command: %w", err)
+		return nil, fmt.Errorf("get command: %w", err)
 	}
 
 	isCacheExist, err := cacheadapter.Exist(gc.EventCity, gc.Redis)
 	if err != nil {
-		return model.Event{}, err
+		return nil, err
 	}
 	if isCacheExist {
 		return cacheadapter.GetEvent(intID, gc.EventCity, gc.Redis)
 
 	} else {
-		return gc.Repo.GetEventByID(int32(intID))
+		return gc.Repo.GetByID(int32(intID))
 	}
 }
 
 type GetFeedCommand struct {
-	Repo     repo.Repository
+	Repo     repo.EventRepository
 	Location *model.Location
 	Redis    *cacheadapter.RedisAdapter
 }
@@ -55,7 +55,7 @@ func (gf *GetFeedCommand) Handle() (*model.GetFeedCommandResult, error) {
 		}
 		return &model.GetFeedCommandResult{Events: cacheResult, CacheHit: true}, nil
 	} else {
-		events, err := gf.Repo.GetEventByLocation(gf.Location)
+		events, err := gf.Repo.GetByLocation(gf.Location)
 		if err != nil {
 			fmt.Println("Errror ocurred")
 			return nil, err

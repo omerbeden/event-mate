@@ -15,7 +15,7 @@ import (
 
 type CreateCommand struct {
 	Event model.Event
-	Repo  repo.Repository
+	Repo  repo.EventRepository
 	Redis caching.Cache
 }
 
@@ -25,7 +25,7 @@ func (ccmd *CreateCommand) Handle() (bool, error) {
 		return false, err
 	}
 
-	isAddedToDB, err := ccmd.Repo.CreateEvent(ccmd.Event)
+	isAddedToDB, err := ccmd.Repo.Create(ccmd.Event)
 	if err != nil {
 		return false, err
 	}

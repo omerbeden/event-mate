@@ -1,11 +1,7 @@
 package model
 
-import (
-	"gorm.io/gorm"
-)
-
 type Event struct {
-	gorm.Model
+	ID        int64
 	Title     string
 	Category  string
 	CreatedBy User
@@ -13,7 +9,6 @@ type Event struct {
 }
 
 type Location struct {
-	gorm.Model
 	City    string
 	EventID uint
 }

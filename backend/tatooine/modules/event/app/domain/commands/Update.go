@@ -10,7 +10,7 @@ import (
 
 type UpdateCommand struct {
 	Event *pb.Event
-	Repo  repo.Repository
+	Repo  repo.EventRepository
 }
 
 func (uc *UpdateCommand) Handle() (bool, error) {
@@ -20,5 +20,5 @@ func (uc *UpdateCommand) Handle() (bool, error) {
 	}
 
 	intID, _ := strconv.Atoi(uc.Event.GetId())
-	return uc.Repo.UpdateEventByID(int32(intID), *model)
+	return uc.Repo.UpdateByID(int32(intID), *model)
 }
