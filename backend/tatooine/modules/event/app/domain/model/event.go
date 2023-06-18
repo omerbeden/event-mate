@@ -9,6 +9,5 @@ type Event struct {
 }
 
 type Location struct {
-	City    string
-	EventID uint
+	City string
 }
