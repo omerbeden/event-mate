@@ -1,8 +1,8 @@
 package repositories
 
 import (
-	"github.com/omerbeden/event-mate/backend/profileservice/core"
-	"github.com/omerbeden/event-mate/backend/profileservice/infrastructure/repositories"
+	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/core"
+	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/infrastructure/repositories"
 )
 
 type UserRepoService struct {
@@ -17,7 +17,7 @@ func (s *UserRepoService) GetUserByID(ID uint) (core.UserProfile, error) {
 	return s.Repo.GetUserById(ID)
 }
 
-func (s *UserRepoService) InsertUser(user *core.UserProfile) error {
+func (s *UserRepoService) InsertUser(user core.UserProfile) error {
 	return s.Repo.InsertUser(user)
 }
 

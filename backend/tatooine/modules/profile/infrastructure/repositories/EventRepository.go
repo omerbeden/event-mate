@@ -3,8 +3,6 @@ package repositories
 import (
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/application/interfaces"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/core"
-	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/infrastructure/database"
-	"gorm.io/gorm"
 )
 
 var _ interfaces.EventRepository = (*EventRepo)(nil)
@@ -17,10 +15,10 @@ func NewEventRepo() *EventRepo {
 }
 
 func (r *EventRepo) GetUserEvent(userId int) ([]core.Event, error) {
-	db := database.NewConnPG()
+	// db := database.NewConnPG()
 	var events []core.Event
-	if err := db.First(&events, userId).Error; err != nil {
-		return events, gorm.ErrRecordNotFound
-	}
+	// if err := db.First(&events, userId).Error; err != nil {
+	// 	return events, gorm.ErrRecordNotFound
+	// }
 	return events, nil
 }

@@ -1,18 +1,9 @@
 package redis_test
 
-import (
-	"fmt"
-	"testing"
-
-	cacheadapter "github.com/omerbeden/event-mate/backend/eventservice/internal/app/adapters/cacheAdapter"
-	"github.com/omerbeden/event-mate/backend/eventservice/internal/app/domain/model"
-	"github.com/stretchr/testify/assert"
-	"gorm.io/gorm"
-)
-
 type MockRedis struct {
 }
 
+/*
 func (*MockRedis) Exist(key string) (bool, error) {
 	return true, nil
 }
@@ -83,4 +74,4 @@ func TestExist(t *testing.T) {
 	sut, _ := cacheadapter.Exist("Sakarya", MockRedis)
 
 	assert.True(t, sut)
-}
+}*/

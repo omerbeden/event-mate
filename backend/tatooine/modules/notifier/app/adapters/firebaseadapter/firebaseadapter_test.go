@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/omerbeden/event-mate/backend/notifierservice/internal/app/adapters/firebaseadapter"
-	"github.com/omerbeden/event-mate/backend/notifierservice/internal/app/domain/model"
+	"github.com/omerbeden/event-mate/backend/tatooine/modules/notifier/app/adapters/firebaseadapter"
+	"github.com/omerbeden/event-mate/backend/tatooine/modules/notifier/app/domain/model"
 	"github.com/stretchr/testify/assert"
 )
 

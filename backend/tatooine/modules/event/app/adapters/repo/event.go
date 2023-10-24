@@ -15,8 +15,8 @@ type Repository struct {
 }
 
 func New(cnnStr string) *Repository {
-	dbUrl := os.Getenv("Db_Conn_Str")
-	config, err := pgxpool.ParseConfig(dbUrl)
+	//dbUrl := os.Getenv("Db_Conn_Str")
+	config, err := pgxpool.ParseConfig(cnnStr)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "unable to parse config: %v\n", err)
 		os.Exit(1)
@@ -42,8 +42,8 @@ func (r *Repository) Create(event model.Event) (bool, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	q := `INSERT INTO ....`
-	_, err := r.pool.Exec(ctx, q)
+	q := `INSERT INTO events (title,category,createdbyuserid,locationid) Values($1,$2,$3,$4) `
+	_, err := r.pool.Exec(ctx, q, event.Title, event.Category, event.CreatedBy.ID, event.Location.ID)
 	if err != nil {
 		return false, fmt.Errorf("could not create %w", err)
 	}
@@ -54,9 +54,14 @@ func (r *Repository) GetByID(id int32) (*model.Event, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	q := `SELECT`
+	q := `SELECT e.id, e.title, e.category, e.created_by, e.location_city
+	FROM events e
+	LEFT JOIN users u ON e.created_by = u.user_id
+	LEFT JOIN locations l ON e.locationId = locations.id
+	Where u.user_id = $1	
+`
 	var event model.Event
-	err := r.pool.QueryRow(ctx, q).Scan(&event.Category, &event.CreatedBy, &event.Location, &event.Title)
+	err := r.pool.QueryRow(ctx, q, id).Scan(&event.Category, &event.CreatedBy, &event.Location, &event.Title)
 	if err != nil {
 		return nil, fmt.Errorf("could not get event by id: %d %w", id, err)
 	}
@@ -67,9 +72,13 @@ func (r *Repository) GetByLocation(loc *model.Location) ([]model.Event, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	q := `SELECT`
+	q := `SELECT e.id, e.title, e.category, e.created_by, e.location_city
+	FROM events e
+	LEFT JOIN users u ON e.created_by = u.user_id
+	LEFT JOIN locations l ON e.locationId = locations.id
+	Where l.city= $1`
 	var events []model.Event
-	rows, err := r.pool.Query(ctx, q)
+	rows, err := r.pool.Query(ctx, q, loc.City)
 	if err != nil {
 		return nil, fmt.Errorf("could not get event by loc: id: %s  %w", loc.City, err)
 	}
@@ -78,7 +87,7 @@ func (r *Repository) GetByLocation(loc *model.Location) ([]model.Event, error) {
 		var res model.Event
 		err := rows.Scan(&res.Category, &res.CreatedBy, &res.Location, &res.Title, &res)
 		if err != nil {
-			return nil, fmt.Errorf("err getting rows ", err)
+			return nil, fmt.Errorf("err getting rows %w ", err)
 		}
 		events = append(events, res)
 

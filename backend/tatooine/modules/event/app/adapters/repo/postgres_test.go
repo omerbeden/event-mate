@@ -8,6 +8,18 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestCreateLocation(t *testing.T) {
+
+	repository := repo.NewLoc("postgres://postgres:password@localhost:5432/test")
+	defer repository.Close()
+	res, err := repository.Create(
+		model.Location{City: "Istanbul"})
+
+	assert.NoError(t, err)
+	assert.True(t, res)
+
+}
+
 func TestCreateEvent(t *testing.T) {
 
 	repository := repo.New("postgres://postgres:password@localhost:5432/test")
@@ -16,7 +28,7 @@ func TestCreateEvent(t *testing.T) {
 		model.Event{ID: 1,
 			Title:     "test title",
 			Category:  "test category",
-			CreatedBy: model.User{UserID: 1},
+			CreatedBy: model.User{ID: 1},
 			Location:  model.Location{City: "Sakarya"}})
 
 	assert.NoError(t, err)

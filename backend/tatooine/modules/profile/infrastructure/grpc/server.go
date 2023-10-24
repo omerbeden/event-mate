@@ -25,7 +25,7 @@ func (s *server) GetUser(ctx context.Context, req *pb.GetUserEventRequest) (*pb.
 	}
 	return &pb.GetUserEventResponse{
 		User: &pb.User{
-			UserId:   int32(user.ID),
+			UserId:   int32(1),
 			Name:     user.Name,
 			LastName: user.LastName,
 			About:    user.About,

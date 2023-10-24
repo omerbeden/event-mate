@@ -8,12 +8,11 @@ import (
 
 	"github.com/go-redis/redis/v8"
 	cacheadapter "github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/adapters/cacheAdapter"
-	"github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/adapters/database"
 	adapters "github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/adapters/repo"
 	commandhandler "github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/domain/command_handler"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/domain/commands"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/domain/model"
-	"github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/domain/ports/repo"
+	repo "github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/domain/ports/repo"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/event/infra/grpc/pb"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -22,7 +21,7 @@ import (
 )
 
 type server struct {
-	repo        repo.Repository
+	repo        repo.EventRepository
 	redisOption *redis.Options
 	pb.UnimplementedEventServiceServer
 }
@@ -67,7 +66,7 @@ func (s *server) GetEvent(ctx context.Context, req *pb.GetEventRequest) (*pb.Get
 		EventCity: req.GetEventCity(),
 	}
 
-	commandResult, err := commandhandler.HandleCommand[model.Event](getCommand)
+	commandResult, err := commandhandler.HandleCommand[*model.Event](getCommand)
 	if err != nil {
 		return nil, status.Error(codes.NotFound, "not found") //TODO refactor error matching
 	}
@@ -127,9 +126,7 @@ func StartGRPCServer(redisOpt *redis.Options) {
 
 	s := grpc.NewServer()
 	pb.RegisterEventServiceServer(s, &server{
-		repo: &adapters.EventRepository{
-			DB: database.InitPostgressConnection(),
-		},
+		repo:        adapters.New(""),
 		redisOption: redisOpt,
 	})
 	reflection.Register(s)

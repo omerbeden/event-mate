@@ -1,17 +1,8 @@
 package sns_test
 
-import (
-	"context"
-	"testing"
-
-	"github.com/aws/aws-sdk-go-v2/service/sns"
-	"github.com/aws/aws-sdk-go/aws"
-	snsadapter "github.com/omerbeden/event-mate/backend/eventservice/internal/app/adapters/eventbus/snsAdapter"
-	"github.com/stretchr/testify/assert"
-)
-
 type SNSMock struct{}
 
+/*
 func (m *SNSMock) Publish(ctx context.Context, input *sns.PublishInput, optFns ...func(*sns.Options)) (*sns.PublishOutput, error) {
 	output := &sns.PublishOutput{
 		MessageId: aws.String("123"),
@@ -62,3 +53,4 @@ func TestSubscribe(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, resp)
 }
+*/

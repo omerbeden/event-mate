@@ -1,5 +1,5 @@
 package model
 
 type User struct {
-	UserID int64
+	ID int64
 }
