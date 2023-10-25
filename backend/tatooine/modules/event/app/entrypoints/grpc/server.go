@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/go-redis/redis/v8"
+	"github.com/jackc/pgx/v5/pgxpool"
 	cacheadapter "github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/adapters/cacheAdapter"
 	adapters "github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/adapters/repo"
 	commandhandler "github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/domain/command_handler"
@@ -14,6 +15,7 @@ import (
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/domain/model"
 	repo "github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/domain/ports/repo"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/event/infra/grpc/pb"
+	postgres "github.com/omerbeden/event-mate/backend/tatooine/pkg/database"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/reflection"
@@ -21,8 +23,9 @@ import (
 )
 
 type server struct {
-	repo        repo.EventRepository
-	redisOption *redis.Options
+	eventRepo    repo.EventRepository
+	locationRepo repo.LocationRepository
+	redisOption  *redis.Options
 	pb.UnimplementedEventServiceServer
 }
 
@@ -38,7 +41,7 @@ func (s *server) CreateEvent(ctx context.Context, req *pb.CreateEventRequest) (*
 
 	client := redis.NewClient(redisOption)
 	createCmd := &commands.CreateCommand{
-		Repo:  s.repo,
+		Repo:  s.eventRepo,
 		Event: event,
 		Redis: cacheadapter.NewRedisAdapter(client),
 	}
@@ -61,7 +64,7 @@ func (s *server) CreateEvent(ctx context.Context, req *pb.CreateEventRequest) (*
 
 func (s *server) GetEvent(ctx context.Context, req *pb.GetEventRequest) (*pb.GetEventResponse, error) {
 	getCommand := &commands.GetCommand{
-		Repo:      s.repo,
+		Repo:      s.eventRepo,
 		EventID:   req.GetEventId(),
 		EventCity: req.GetEventCity(),
 	}
@@ -82,7 +85,7 @@ func (s *server) GetFeed(ctx context.Context, req *pb.GetFeedByLocationRequest) 
 	}
 
 	getFeedCommand := &commands.GetFeedCommand{
-		Repo:     s.repo,
+		Repo:     s.eventRepo,
 		Location: location,
 	}
 
@@ -125,9 +128,11 @@ func StartGRPCServer(redisOpt *redis.Options) {
 	}
 
 	s := grpc.NewServer()
+	dbPool := postgres.NewConn(&postgres.PostgresConfig{ConnectionString: "", Config: pgxpool.Config{}})
 	pb.RegisterEventServiceServer(s, &server{
-		repo:        adapters.New(""),
-		redisOption: redisOpt,
+		eventRepo:    adapters.NewEventRepo(dbPool),
+		locationRepo: adapters.NewLocationRepo(dbPool),
+		redisOption:  redisOpt,
 	})
 	reflection.Register(s)
 

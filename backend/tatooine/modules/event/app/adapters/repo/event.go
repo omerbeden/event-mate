@@ -3,42 +3,26 @@ package repo
 import (
 	"context"
 	"fmt"
-	"os"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/domain/model"
 )
 
-type Repository struct {
+type EventRepository struct {
 	pool *pgxpool.Pool
 }
 
-func New(cnnStr string) *Repository {
-	//dbUrl := os.Getenv("Db_Conn_Str")
-	config, err := pgxpool.ParseConfig(cnnStr)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "unable to parse config: %v\n", err)
-		os.Exit(1)
-	}
-	config.MinConns = 5
-	config.MaxConns = 10
-	//later import db tracer
-
-	pool, err := pgxpool.NewWithConfig(context.Background(), config)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "unable to parse config: %v\n", err)
-		os.Exit(1)
-	}
-	return &Repository{
+func NewEventRepo(pool *pgxpool.Pool) *EventRepository {
+	return &EventRepository{
 		pool: pool,
 	}
 }
-func (r *Repository) Close() {
+func (r *EventRepository) Close() {
 	r.pool.Close()
 }
 
-func (r *Repository) Create(event model.Event) (bool, error) {
+func (r *EventRepository) Create(event model.Event) (bool, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
@@ -50,7 +34,7 @@ func (r *Repository) Create(event model.Event) (bool, error) {
 
 	return true, nil
 }
-func (r *Repository) GetByID(id int32) (*model.Event, error) {
+func (r *EventRepository) GetByID(id int32) (*model.Event, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
@@ -68,7 +52,7 @@ func (r *Repository) GetByID(id int32) (*model.Event, error) {
 
 	return &event, nil
 }
-func (r *Repository) GetByLocation(loc *model.Location) ([]model.Event, error) {
+func (r *EventRepository) GetByLocation(loc *model.Location) ([]model.Event, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
@@ -96,7 +80,7 @@ func (r *Repository) GetByLocation(loc *model.Location) ([]model.Event, error) {
 	return events, nil
 }
 
-func (r *Repository) UpdateByID(id int32, event model.Event) (bool, error) {
+func (r *EventRepository) UpdateByID(id int32, event model.Event) (bool, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
@@ -109,7 +93,7 @@ func (r *Repository) UpdateByID(id int32, event model.Event) (bool, error) {
 	return true, nil
 }
 
-func (r *Repository) DeleteByID(id int32) (bool, error) {
+func (r *EventRepository) DeleteByID(id int32) (bool, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 

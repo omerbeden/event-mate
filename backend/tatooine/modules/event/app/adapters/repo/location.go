@@ -3,7 +3,6 @@ package repo
 import (
 	"context"
 	"fmt"
-	"os"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -14,27 +13,14 @@ type LocationRepository struct {
 	pool *pgxpool.Pool
 }
 
-// TODO: bu tur ayarları bir kere set ediyor olmam lazım daha genel biryere tasi
-// daha sonra aslında repolar icin interface e gerek yok
-func NewLoc(cnnStr string) *LocationRepository {
-	//dbUrl := os.Getenv("Db_Conn_Str")
-	config, err := pgxpool.ParseConfig(cnnStr)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "unable to parse config: %v\n", err)
-		os.Exit(1)
-	}
-	config.MinConns = 5
-	config.MaxConns = 10
-	//later import db tracer
-
-	pool, err := pgxpool.NewWithConfig(context.Background(), config)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "unable to parse config: %v\n", err)
-		os.Exit(1)
-	}
+func NewLocationRepo(pool *pgxpool.Pool) *LocationRepository {
 	return &LocationRepository{
 		pool: pool,
 	}
+}
+
+func (r *LocationRepository) Close() {
+	r.pool.Close()
 }
 
 func (r *LocationRepository) Create(location model.Location) (bool, error) {
@@ -50,6 +36,27 @@ func (r *LocationRepository) Create(location model.Location) (bool, error) {
 	return true, nil
 }
 
-func (r *LocationRepository) Close() {
-	r.pool.Close()
+func (r *LocationRepository) DeleteByID(id int32) (bool, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond*5)
+	defer cancel()
+
+	q := ``
+	_, err := r.pool.Exec(ctx, q)
+	if err != nil {
+		return false, fmt.Errorf("could not delete %w", err)
+	}
+	return true, nil
+}
+
+func (r *LocationRepository) UpdateByID(id int32, loc model.Location) (bool, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	q := `UPDATE`
+	_, err := r.pool.Exec(ctx, q)
+	if err != nil {
+		return false, fmt.Errorf("could not update event id: %d %w", id, err)
+	}
+
+	return true, nil
 }

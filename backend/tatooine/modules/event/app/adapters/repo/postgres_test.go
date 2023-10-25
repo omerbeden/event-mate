@@ -3,14 +3,20 @@ package repo_test
 import (
 	"testing"
 
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/adapters/repo"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/domain/model"
+	postgres "github.com/omerbeden/event-mate/backend/tatooine/pkg/database"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestCreateLocation(t *testing.T) {
-
-	repository := repo.NewLoc("postgres://postgres:password@localhost:5432/test")
+	dbConfig := postgres.PostgresConfig{
+		ConnectionString: "postgres://postgres:password@localhost:5432/test",
+		Config:           pgxpool.Config{MinConns: 5, MaxConns: 10},
+	}
+	pool := postgres.NewConn(&dbConfig)
+	repository := repo.NewLocationRepo(pool)
 	defer repository.Close()
 	res, err := repository.Create(
 		model.Location{City: "Istanbul"})
@@ -22,7 +28,12 @@ func TestCreateLocation(t *testing.T) {
 
 func TestCreateEvent(t *testing.T) {
 
-	repository := repo.New("postgres://postgres:password@localhost:5432/test")
+	dbConfig := postgres.PostgresConfig{
+		ConnectionString: "postgres://postgres:password@localhost:5432/test",
+		Config:           pgxpool.Config{MinConns: 5, MaxConns: 10},
+	}
+	pool := postgres.NewConn(&dbConfig)
+	repository := repo.NewEventRepo(pool)
 	defer repository.Close()
 	res, err := repository.Create(
 		model.Event{ID: 1,
@@ -37,7 +48,12 @@ func TestCreateEvent(t *testing.T) {
 }
 
 func TestGetEventByID(t *testing.T) {
-	repository := repo.New("postgres://postgres:password@localhost:5432/test")
+	dbConfig := postgres.PostgresConfig{
+		ConnectionString: "postgres://postgres:password@localhost:5432/test",
+		Config:           pgxpool.Config{MinConns: 5, MaxConns: 10},
+	}
+	pool := postgres.NewConn(&dbConfig)
+	repository := repo.NewEventRepo(pool)
 	defer repository.Close()
 
 	res, err := repository.GetByID(1)
@@ -48,7 +64,12 @@ func TestGetEventByID(t *testing.T) {
 
 func TestUpdateEvent(t *testing.T) {
 
-	repository := repo.New("postgres://postgres:password@localhost:5432/test")
+	dbConfig := postgres.PostgresConfig{
+		ConnectionString: "postgres://postgres:password@localhost:5432/test",
+		Config:           pgxpool.Config{MinConns: 5, MaxConns: 10},
+	}
+	pool := postgres.NewConn(&dbConfig)
+	repository := repo.NewEventRepo(pool)
 	defer repository.Close()
 
 	eventTobeUpdated := model.Event{
@@ -64,7 +85,12 @@ func TestUpdateEvent(t *testing.T) {
 
 func TestDeleteEventByID(t *testing.T) {
 
-	repository := repo.New("postgres://postgres:password@localhost:5432/test")
+	dbConfig := postgres.PostgresConfig{
+		ConnectionString: "postgres://postgres:password@localhost:5432/test",
+		Config:           pgxpool.Config{MinConns: 5, MaxConns: 10},
+	}
+	pool := postgres.NewConn(&dbConfig)
+	repository := repo.NewEventRepo(pool)
 	defer repository.Close()
 
 	res, err := repository.DeleteByID(1)

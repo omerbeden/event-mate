@@ -9,3 +9,9 @@ type EventRepository interface {
 	UpdateByID(id int32, event model.Event) (bool, error)
 	DeleteByID(id int32) (bool, error)
 }
+
+type LocationRepository interface {
+	Create(loc model.Location) (bool, error)
+	UpdateByID(id int32, loc model.Location) (bool, error)
+	DeleteByID(id int32) (bool, error)
+}
