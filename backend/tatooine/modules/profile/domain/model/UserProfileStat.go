@@ -1,9 +1,9 @@
-package core
+package model
 
 type UserProfileStat struct {
 	Followers      int
 	Following      int
 	AttandedEvents int
 	Points         float32
-	UserProfileID  uint
+	//UserProfileID  uint
 }

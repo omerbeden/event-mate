@@ -10,11 +10,11 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	cacheadapter "github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/adapters/cacheAdapter"
 	adapters "github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/adapters/repo"
-	commandhandler "github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/domain/command_handler"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/domain/commands"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/domain/model"
 	repo "github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/domain/ports/repo"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/event/infra/grpc/pb"
+	"github.com/omerbeden/event-mate/backend/tatooine/pkg/command"
 	postgres "github.com/omerbeden/event-mate/backend/tatooine/pkg/database"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -47,7 +47,7 @@ func (s *server) CreateEvent(ctx context.Context, req *pb.CreateEventRequest) (*
 	}
 	defer client.Close()
 
-	createCmdResult, err := commandhandler.HandleCommand[bool](createCmd)
+	createCmdResult, err := command.HandleCommand[bool](createCmd)
 	if err != nil {
 		return &pb.CreateEventResponse{
 			Status:  createCmdResult,
@@ -69,7 +69,7 @@ func (s *server) GetEvent(ctx context.Context, req *pb.GetEventRequest) (*pb.Get
 		EventCity: req.GetEventCity(),
 	}
 
-	commandResult, err := commandhandler.HandleCommand[*model.Event](getCommand)
+	commandResult, err := command.HandleCommand[*model.Event](getCommand)
 	if err != nil {
 		return nil, status.Error(codes.NotFound, "not found") //TODO refactor error matching
 	}
@@ -89,7 +89,7 @@ func (s *server) GetFeed(ctx context.Context, req *pb.GetFeedByLocationRequest) 
 		Location: location,
 	}
 
-	cmdResult, err := commandhandler.HandleCommand[*model.GetFeedCommandResult](getFeedCommand)
+	cmdResult, err := command.HandleCommand[*model.GetFeedCommandResult](getFeedCommand)
 	client := redis.NewClient(redisOption)
 	defer client.Close()
 	if !cmdResult.CacheHit {
@@ -98,7 +98,7 @@ func (s *server) GetFeed(ctx context.Context, req *pb.GetFeedByLocationRequest) 
 			Key:   location.City,
 			Posts: cmdResult.Events,
 		}
-		_, createErr := commandhandler.HandleCommand[bool](createCacheCommand)
+		_, createErr := command.HandleCommand[bool](createCacheCommand)
 		if createErr != nil {
 			return nil, err
 		}
