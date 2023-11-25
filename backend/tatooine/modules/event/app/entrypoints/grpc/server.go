@@ -12,7 +12,7 @@ import (
 	adapters "github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/adapters/repo"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/domain/commands"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/domain/model"
-	repo "github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/domain/ports/repo"
+	repo "github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/domain/ports/repositories"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/event/infra/grpc/pb"
 	"github.com/omerbeden/event-mate/backend/tatooine/pkg/command"
 	postgres "github.com/omerbeden/event-mate/backend/tatooine/pkg/database"
