@@ -10,6 +10,6 @@ type Event struct {
 }
 
 type Location struct {
-	ID   int64
-	City string
+	EventId int64
+	City    string
 }

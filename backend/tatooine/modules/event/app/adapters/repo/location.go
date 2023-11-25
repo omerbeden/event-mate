@@ -9,34 +9,34 @@ import (
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/domain/model"
 )
 
-type LocationRepository struct {
+type LocationRepo struct {
 	pool *pgxpool.Pool
 }
 
-func NewLocationRepo(pool *pgxpool.Pool) *LocationRepository {
-	return &LocationRepository{
+func NewLocationRepo(pool *pgxpool.Pool) *LocationRepo {
+	return &LocationRepo{
 		pool: pool,
 	}
 }
 
-func (r *LocationRepository) Close() {
+func (r *LocationRepo) Close() {
 	r.pool.Close()
 }
 
-func (r *LocationRepository) Create(location model.Location) (bool, error) {
+func (r *LocationRepo) Create(location model.Location) (bool, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	q := `INSERT INTO locations (city) Values($1) `
-	_, err := r.pool.Exec(ctx, q, location.City)
+	ql := `INSERT INTO event_locations(event_id,City) Values($1,$2)`
+	_, err := r.pool.Exec(ctx, ql, location.EventId, location.City)
 	if err != nil {
-		return false, fmt.Errorf("could not create %w", err)
+		return false, fmt.Errorf("could not create location for event %d  %w", location.EventId, err)
 	}
 
 	return true, nil
 }
 
-func (r *LocationRepository) DeleteByID(id int32) (bool, error) {
+func (r *LocationRepo) DeleteByID(id int32) (bool, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond*5)
 	defer cancel()
 
@@ -48,7 +48,7 @@ func (r *LocationRepository) DeleteByID(id int32) (bool, error) {
 	return true, nil
 }
 
-func (r *LocationRepository) UpdateByID(id int32, loc model.Location) (bool, error) {
+func (r *LocationRepo) UpdateByID(id int32, loc model.Location) (bool, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 

@@ -4,7 +4,7 @@ import (
 	cacheadapter "github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/adapters/cacheAdapter"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/domain/model"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/domain/ports/caching"
-	"github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/domain/ports/repo"
+	repo "github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/domain/ports/repositories"
 )
 
 type CreateCommand struct {

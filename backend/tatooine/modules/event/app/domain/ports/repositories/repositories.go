@@ -1,4 +1,4 @@
-package repo
+package repositories
 
 import "github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/domain/model"
 

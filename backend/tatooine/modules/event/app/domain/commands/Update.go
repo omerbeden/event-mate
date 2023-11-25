@@ -4,7 +4,7 @@ import (
 	"strconv"
 
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/domain/model"
-	"github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/domain/ports/repo"
+	repo "github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/domain/ports/repositories"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/event/infra/grpc/pb"
 )
 
