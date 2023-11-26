@@ -8,27 +8,24 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/domain/model"
-	"github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/domain/ports/repositories"
 )
 
 const errlogprefix = "repo:event"
 
 type eventRepository struct {
-	pool    *pgxpool.Pool
-	locRepo repositories.LocationRepository
+	pool *pgxpool.Pool
 }
 
-func NewEventRepo(pool *pgxpool.Pool, locRepo repositories.LocationRepository) *eventRepository {
+func NewEventRepo(pool *pgxpool.Pool) *eventRepository {
 	return &eventRepository{
-		pool:    pool,
-		locRepo: locRepo,
+		pool: pool,
 	}
 }
 func (r *eventRepository) Close() {
 	r.pool.Close()
 }
 
-func (r *eventRepository) Create(event model.Event) (bool, error) {
+func (r *eventRepository) Create(event model.Event) (*model.Event, error) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
@@ -39,7 +36,7 @@ func (r *eventRepository) Create(event model.Event) (bool, error) {
 
 	if errInsertingEvent != nil {
 
-		return false, fmt.Errorf("%s could not insert event %w", errlogprefix, errInsertingEvent)
+		return nil, fmt.Errorf("%s could not insert event %w", errlogprefix, errInsertingEvent)
 	}
 
 	event.ID = ID
@@ -47,15 +44,10 @@ func (r *eventRepository) Create(event model.Event) (bool, error) {
 
 	errInsertParticipants := r.AddParticipants(event)
 	if errInsertParticipants != nil {
-		return false, fmt.Errorf("%s could not  insert paticipants %w", errlogprefix, errInsertParticipants)
+		return nil, fmt.Errorf("%s could not  insert paticipants %w", errlogprefix, errInsertParticipants)
 	}
 
-	_, errInsertLocation := r.locRepo.Create(event.Location)
-	if errInsertLocation != nil {
-		return false, errInsertLocation
-	}
-
-	return true, nil
+	return &event, nil
 }
 
 func (r *eventRepository) AddParticipants(event model.Event) error {

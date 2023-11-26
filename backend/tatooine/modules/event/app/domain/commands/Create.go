@@ -8,9 +8,10 @@ import (
 )
 
 type CreateCommand struct {
-	Event model.Event
-	Repo  repo.EventRepository
-	Redis caching.Cache
+	Event   model.Event
+	Repo    repo.EventRepository
+	LocRepo repo.LocationRepository
+	Redis   caching.Cache
 }
 
 func (ccmd *CreateCommand) Handle() (bool, error) {
@@ -19,22 +20,26 @@ func (ccmd *CreateCommand) Handle() (bool, error) {
 		return false, err
 	}
 
-	isAddedToDB, err := ccmd.Repo.Create(ccmd.Event)
+	_, errCreate := ccmd.Repo.Create(ccmd.Event)
+	if errCreate != nil {
+		return false, errCreate
+	}
+	_, errLoc := ccmd.LocRepo.Create(&ccmd.Event.Location)
 	if err != nil {
-		return false, err
+		return false, errLoc
 	}
-	if isAddedToDB {
-		// input := &sns.PublishInput{
-		// 	Message:  aws.String(fmt.Sprintf("event created with id : %d", ccmd.Event.ID)),
-		// 	TopicArn: aws.String("topic"),
-		// }
+	// if isAddedToDB {
+	// 	// input := &sns.PublishInput{
+	// 	// 	Message:  aws.String(fmt.Sprintf("event created with id : %d", ccmd.Event.ID)),
+	// 	// 	TopicArn: aws.String("topic"),
+	// 	// }
 
-		//_, err := snsadapter.PublishMessage(context.Background(), &snsadapter.SNSAdapter{Topic: "topic_test"}, input)
-		if err != nil {
-			return false, err // todo db ye eklendi aslında oluyor, transaction ını rollback yapmak lazım
-		}
+	// 	//_, err := snsadapter.PublishMessage(context.Background(), &snsadapter.SNSAdapter{Topic: "topic_test"}, input)
+	// 	if err != nil {
+	// 		return false, err // todo db ye eklendi aslında oluyor, transaction ını rollback yapmak lazım
+	// 	}
 
-	}
+	// }
 
 	return true, nil
 

@@ -41,9 +41,10 @@ func (s *server) CreateEvent(ctx context.Context, req *pb.CreateEventRequest) (*
 
 	client := redis.NewClient(redisOption)
 	createCmd := &commands.CreateCommand{
-		Repo:  s.eventRepo,
-		Event: event,
-		Redis: cacheadapter.NewRedisAdapter(client),
+		Repo:    s.eventRepo,
+		LocRepo: s.locationRepo,
+		Event:   event,
+		Redis:   cacheadapter.NewRedisAdapter(client),
 	}
 	defer client.Close()
 
@@ -130,7 +131,7 @@ func StartGRPCServer(redisOpt *redis.Options) {
 	s := grpc.NewServer()
 	dbPool := postgres.NewConn(&postgres.PostgresConfig{ConnectionString: "", Config: pgxpool.Config{}})
 	pb.RegisterEventServiceServer(s, &server{
-		eventRepo:    adapters.NewEventRepo(dbPool, adapters.NewLocationRepo(dbPool)), // need to be refactored
+		eventRepo:    adapters.NewEventRepo(dbPool), // need to be refactored
 		locationRepo: adapters.NewLocationRepo(dbPool),
 		redisOption:  redisOpt,
 	})

@@ -25,7 +25,7 @@ func (r *LocationRepo) Close() {
 	r.pool.Close()
 }
 
-func (r *LocationRepo) Create(location model.Location) (bool, error) {
+func (r *LocationRepo) Create(location *model.Location) (bool, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
