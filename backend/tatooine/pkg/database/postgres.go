@@ -21,7 +21,6 @@ func NewConn(config *PostgresConfig) *pgxpool.Pool {
 	}
 	configFrom.MinConns = config.MinConns
 	configFrom.MaxConns = config.MaxConns
-	configFrom.ConnConfig.ConnectTimeout = config.ConnConfig.ConnectTimeout
 
 	//later import db tracer
 
