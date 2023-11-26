@@ -36,18 +36,6 @@ func (r *LocationRepo) Create(location model.Location) (bool, error) {
 	return true, nil
 }
 
-func (r *LocationRepo) DeleteByID(id int32) (bool, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond*5)
-	defer cancel()
-
-	q := ``
-	_, err := r.pool.Exec(ctx, q)
-	if err != nil {
-		return false, fmt.Errorf("could not delete %w", err)
-	}
-	return true, nil
-}
-
 func (r *LocationRepo) UpdateByID(id int32, loc model.Location) (bool, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
