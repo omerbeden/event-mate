@@ -103,4 +103,23 @@ func TestDeleteEventByID(t *testing.T) {
 
 }
 
+func TestUpdateLocation(t *testing.T) {
+	dbConfig := postgres.PostgresConfig{
+		ConnectionString: "postgres://postgres:password@localhost:5432/test",
+		Config:           pgxpool.Config{MinConns: 5, MaxConns: 10},
+	}
+	pool := postgres.NewConn(&dbConfig)
+
+	repository := repo.NewLocationRepo(pool)
+	defer repository.Close()
+
+	locationToBeUpdated := model.Location{
+		EventId: 1,
+		City:    "Istanbul",
+	}
+	res, err := repository.UpdateByID(locationToBeUpdated)
+	assert.NotNil(t, res)
+	assert.NoError(t, err)
+}
+
 //TODO: Migrate datebase and run the test from docker
