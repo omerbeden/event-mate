@@ -130,7 +130,7 @@ func StartGRPCServer(redisOpt *redis.Options) {
 	s := grpc.NewServer()
 	dbPool := postgres.NewConn(&postgres.PostgresConfig{ConnectionString: "", Config: pgxpool.Config{}})
 	pb.RegisterEventServiceServer(s, &server{
-		eventRepo:    adapters.NewEventRepo(dbPool),
+		eventRepo:    adapters.NewEventRepo(dbPool, adapters.NewLocationRepo(dbPool)), // need to be refactored
 		locationRepo: adapters.NewLocationRepo(dbPool),
 		redisOption:  redisOpt,
 	})
