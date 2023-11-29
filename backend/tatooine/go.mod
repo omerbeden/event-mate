@@ -55,7 +55,6 @@ require (
 	firebase.google.com/go v3.13.0+incompatible
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
-	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/jackc/pgx/v4 v4.18.1
 	github.com/jackc/pgx/v5 v5.4.0
 	github.com/stretchr/testify v1.8.4
