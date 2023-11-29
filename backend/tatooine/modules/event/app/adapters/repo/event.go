@@ -42,11 +42,6 @@ func (r *eventRepository) Create(event model.Event) (*model.Event, error) {
 	event.ID = ID
 	event.Location.EventId = ID
 
-	errInsertParticipants := r.AddParticipants(event)
-	if errInsertParticipants != nil {
-		return nil, fmt.Errorf("%s could not  insert paticipants %w", errlogprefix, errInsertParticipants)
-	}
-
 	return &event, nil
 }
 
@@ -75,13 +70,27 @@ func (r *eventRepository) AddParticipants(event model.Event) error {
 	return nil
 }
 
+func (r *eventRepository) AddParticipant(eventId int64, user model.User) error {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+	q := `INSERT INTO participants(event_id,user_id) VALUES($1,$2)`
+
+	_, err := r.pool.Exec(ctx, q, eventId, user.ID)
+	if err != nil {
+		return fmt.Errorf("%s could not insert participant for event %d , %w", errlogprefix, eventId, err)
+	}
+
+	return nil
+
+}
+
 func (r *eventRepository) GetByID(id int32) (*model.Event, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
 	q := `SELECT e.id, title, category, e.created_user_id, l.city
 	FROM events e
-	LEFT JOIN user_profile u ON e.created_user_id = u.id
+	LEFT JOIN user_profiles u ON e.created_user_id = u.id
 	LEFT JOIN event_locations l ON e.id = l.event_id
 	Where e.id = $1	
 	`
@@ -99,7 +108,7 @@ func (r *eventRepository) GetByLocation(loc *model.Location) ([]model.Event, err
 
 	q := `SELECT e.id, title, category, e.created_user_id, l.city
 	FROM events e
-	LEFT JOIN user_profile u ON e.created_user_id = u.id
+	LEFT JOIN user_profiles u ON e.created_user_id = u.id
 	LEFT JOIN event_locations l ON e.id = l.event_id
 	Where l.city= $1`
 

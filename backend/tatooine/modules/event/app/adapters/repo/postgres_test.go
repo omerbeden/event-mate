@@ -39,6 +39,48 @@ func TestCreateEvent(t *testing.T) {
 
 }
 
+func TestAddParticipants(t *testing.T) {
+	dbConfig := postgres.PostgresConfig{
+		ConnectionString: "postgres://postgres:password@localhost:5432/test",
+		Config:           pgxpool.Config{MinConns: 5, MaxConns: 10},
+	}
+	pool := postgres.NewConn(&dbConfig)
+	eventRepository := repo.NewEventRepo(pool)
+	event := model.Event{
+		ID:           1,
+		Title:        "test title",
+		Category:     "test category",
+		CreatedBy:    model.User{ID: 1},
+		Location:     model.Location{City: "Sakarya"},
+		Participants: []model.User{{ID: 1}, {ID: 2}, {ID: 3}}}
+
+	err := eventRepository.AddParticipants(event)
+	assert.NoError(t, err)
+
+}
+
+func TestAddParticipant(t *testing.T) {
+	dbConfig := postgres.PostgresConfig{
+		ConnectionString: "postgres://postgres:password@localhost:5432/test",
+		Config:           pgxpool.Config{MinConns: 5, MaxConns: 10},
+	}
+	pool := postgres.NewConn(&dbConfig)
+	eventRepository := repo.NewEventRepo(pool)
+	event := model.Event{
+		ID:           1,
+		Title:        "test title",
+		Category:     "test category",
+		CreatedBy:    model.User{ID: 1},
+		Location:     model.Location{City: "Sakarya"},
+		Participants: []model.User{{ID: 1}, {ID: 2}, {ID: 3}}}
+
+	user := model.User{ID: 4}
+
+	err := eventRepository.AddParticipant(event.ID, user)
+	assert.NoError(t, err)
+
+}
+
 func TestGetEventByID(t *testing.T) {
 	dbConfig := postgres.PostgresConfig{
 		ConnectionString: "postgres://postgres:password@localhost:5432/test",
@@ -107,6 +149,22 @@ func TestDeleteEventByID(t *testing.T) {
 
 }
 
+func TestCreateLocation(t *testing.T) {
+	dbConfig := postgres.PostgresConfig{
+		ConnectionString: "postgres://postgres:password@localhost:5432/test",
+		Config:           pgxpool.Config{MinConns: 5, MaxConns: 10},
+	}
+	pool := postgres.NewConn(&dbConfig)
+	repository := repo.NewLocationRepo(pool)
+	defer repository.Close()
+
+	loc := model.Location{
+		EventId: 1,
+		City:    "Sakarya",
+	}
+
+	repository.Create(&loc)
+}
 func TestUpdateLocation(t *testing.T) {
 	dbConfig := postgres.PostgresConfig{
 		ConnectionString: "postgres://postgres:password@localhost:5432/test",
@@ -125,5 +183,3 @@ func TestUpdateLocation(t *testing.T) {
 	assert.NotNil(t, res)
 	assert.NoError(t, err)
 }
-
-//TODO: Migrate datebase and run the test from docker
