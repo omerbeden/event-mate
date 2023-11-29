@@ -8,6 +8,8 @@ type EventRepository interface {
 	GetByLocation(loc *model.Location) ([]model.Event, error)
 	UpdateByID(id int32, event model.Event) (bool, error)
 	DeleteByID(id int32) (bool, error)
+	AddParticipants(event model.Event) error
+	AddParticipant(eventId int64, user model.User) error
 }
 
 type LocationRepository interface {
