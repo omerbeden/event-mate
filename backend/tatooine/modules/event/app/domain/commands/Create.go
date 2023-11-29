@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"encoding/json"
 	"strconv"
 
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/domain/model"
@@ -28,7 +29,11 @@ func (ccmd *CreateCommand) Handle() (bool, error) {
 	}
 
 	eventId := strconv.FormatInt(event.ID, 10)
-	err := ccmd.Redis.Set(eventId, ccmd.Event)
+	jsonEvent, errMarshall := json.Marshal(ccmd.Event)
+	if errMarshall != nil {
+		return false, errMarshall
+	}
+	err := ccmd.Redis.Set(eventId, jsonEvent)
 	if err != nil {
 		return false, err
 	}

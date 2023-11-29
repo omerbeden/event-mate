@@ -39,7 +39,7 @@ func (adapter *RedisAdapter) Get(key string) (any, error) {
 
 	result, err := adapter.client.Get(ctx, key).Result()
 	if err != nil {
-		return nil, fmt.Errorf("%s could not set redis key-value", err_prefix)
+		return nil, fmt.Errorf("%s could not set redis key-value %w", err_prefix, err)
 	}
 	return result, nil
 }

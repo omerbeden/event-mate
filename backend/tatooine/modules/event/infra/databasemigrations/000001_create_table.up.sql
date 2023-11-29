@@ -2,7 +2,7 @@ CREATE TABLE IF NOT EXISTS events(
     id serial primary key ,
     title varchar(20),
 	category varchar(20),
-	created_user_id int
+	created_user_id int 
 );
 
 CREATE TABLE IF NOT EXISTS event_locations(

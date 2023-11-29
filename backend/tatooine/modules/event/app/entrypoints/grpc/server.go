@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"net"
+	"strconv"
 
 	"github.com/go-redis/redis/v8"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -31,11 +32,22 @@ type server struct {
 var redisOption = redisadapter.RedisOption()
 
 func (s *server) CreateEvent(ctx context.Context, req *pb.CreateEventRequest) (*pb.CreateEventResponse, error) {
+	eventId, err := strconv.Atoi(req.Event.Id)
+	if err != nil {
+		return nil, status.Error(codes.Internal, "error parsing event id")
+	}
+
+	userId, err := strconv.Atoi(req.UserId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, "error parsing user id")
+	}
+
 	event := model.Event{
+		ID:        int64(eventId),
 		Title:     req.GetEvent().GetTitle(),
 		Category:  req.GetEvent().GetCategory(),
-		CreatedBy: model.User{},
-		Location:  model.Location{City: req.GetEvent().GetLocation().City},
+		CreatedBy: model.User{ID: int64(userId)},
+		Location:  model.Location{EventId: int64(eventId), City: req.GetEvent().GetLocation().City},
 	}
 
 	client := redis.NewClient(redisOption)
@@ -91,7 +103,9 @@ func StartGRPCServer(redisOpt *redis.Options) {
 	}
 
 	s := grpc.NewServer()
-	dbPool := postgres.NewConn(&postgres.PostgresConfig{ConnectionString: "", Config: pgxpool.Config{}})
+	dbPool := postgres.NewConn(&postgres.PostgresConfig{
+		ConnectionString: "postgres://postgres:password@localhost:5432/test",
+		Config:           pgxpool.Config{MinConns: 5, MaxConns: 10}})
 	pb.RegisterEventServiceServer(s, &server{
 		eventRepo:    adapters.NewEventRepo(dbPool),
 		locationRepo: adapters.NewLocationRepo(dbPool),
