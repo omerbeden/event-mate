@@ -4,11 +4,10 @@ import (
 	"context"
 	"log"
 	"net"
-	"strconv"
 
 	"github.com/go-redis/redis/v8"
 	"github.com/jackc/pgx/v5/pgxpool"
-	cacheadapter "github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/adapters/cacheAdapter"
+	"github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/adapters/redisadapter"
 	adapters "github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/adapters/repo"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/domain/commands"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/domain/model"
@@ -29,7 +28,7 @@ type server struct {
 	pb.UnimplementedEventServiceServer
 }
 
-var redisOption = cacheadapter.RedisOption()
+var redisOption = redisadapter.RedisOption()
 
 func (s *server) CreateEvent(ctx context.Context, req *pb.CreateEventRequest) (*pb.CreateEventResponse, error) {
 	event := model.Event{
@@ -41,10 +40,10 @@ func (s *server) CreateEvent(ctx context.Context, req *pb.CreateEventRequest) (*
 
 	client := redis.NewClient(redisOption)
 	createCmd := &commands.CreateCommand{
-		Repo:    s.eventRepo,
-		LocRepo: s.locationRepo,
-		Event:   event,
-		Redis:   cacheadapter.NewRedisAdapter(client),
+		EventRepo: s.eventRepo,
+		LocRepo:   s.locationRepo,
+		Event:     event,
+		Redis:     redisadapter.NewRedisAdapter(client),
 	}
 	defer client.Close()
 
@@ -81,44 +80,7 @@ func (s *server) GetEvent(ctx context.Context, req *pb.GetEventRequest) (*pb.Get
 }
 
 func (s *server) GetFeed(ctx context.Context, req *pb.GetFeedByLocationRequest) (*pb.GetFeedByLocationResponse, error) {
-	location := &model.Location{
-		City: req.GetLocation().GetCity(),
-	}
-
-	getFeedCommand := &commands.GetFeedCommand{
-		Repo:     s.eventRepo,
-		Location: location,
-	}
-
-	cmdResult, err := command.HandleCommand[*model.GetFeedCommandResult](getFeedCommand)
-	client := redis.NewClient(redisOption)
-	defer client.Close()
-	if !cmdResult.CacheHit {
-		createCacheCommand := &commands.CreateCacheCommand{
-			Redis: cacheadapter.NewRedisAdapter(client),
-			Key:   location.City,
-			Posts: cmdResult.Events,
-		}
-		_, createErr := command.HandleCommand[bool](createCacheCommand)
-		if createErr != nil {
-			return nil, err
-		}
-	}
-
-	var events []*pb.Event
-	for i := range cmdResult.Events {
-		events[i] = &pb.Event{
-			Id:       strconv.FormatUint(uint64(cmdResult.Events[i].ID), 10),
-			Title:    cmdResult.Events[i].Title,
-			Category: cmdResult.Events[i].Category,
-			Location: &pb.Location{City: cmdResult.Events[i].Location.City},
-		}
-	}
-
-	return &pb.GetFeedByLocationResponse{
-		Event: events,
-	}, err
-
+	return nil, nil
 }
 
 func StartGRPCServer(redisOpt *redis.Options) {
@@ -131,7 +93,7 @@ func StartGRPCServer(redisOpt *redis.Options) {
 	s := grpc.NewServer()
 	dbPool := postgres.NewConn(&postgres.PostgresConfig{ConnectionString: "", Config: pgxpool.Config{}})
 	pb.RegisterEventServiceServer(s, &server{
-		eventRepo:    adapters.NewEventRepo(dbPool), // need to be refactored
+		eventRepo:    adapters.NewEventRepo(dbPool),
 		locationRepo: adapters.NewLocationRepo(dbPool),
 		redisOption:  redisOpt,
 	})

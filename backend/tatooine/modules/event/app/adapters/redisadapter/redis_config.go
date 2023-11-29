@@ -1,4 +1,4 @@
-package cacheadapter
+package redisadapter
 
 import "github.com/go-redis/redis/v8"
 

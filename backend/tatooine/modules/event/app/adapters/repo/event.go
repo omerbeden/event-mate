@@ -84,7 +84,7 @@ func (r *eventRepository) AddParticipant(eventId int64, user model.User) error {
 
 }
 
-func (r *eventRepository) GetByID(id int32) (*model.Event, error) {
+func (r *eventRepository) GetByID(id int64) (*model.Event, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
