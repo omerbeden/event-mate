@@ -32,22 +32,16 @@ type server struct {
 var redisOption = redisadapter.RedisOption()
 
 func (s *server) CreateEvent(ctx context.Context, req *pb.CreateEventRequest) (*pb.CreateEventResponse, error) {
-	eventId, err := strconv.Atoi(req.Event.Id)
-	if err != nil {
-		return nil, status.Error(codes.Internal, "error parsing event id")
-	}
-
 	userId, err := strconv.Atoi(req.UserId)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "error parsing user id")
 	}
 
 	event := model.Event{
-		ID:        int64(eventId),
 		Title:     req.GetEvent().GetTitle(),
 		Category:  req.GetEvent().GetCategory(),
 		CreatedBy: model.User{ID: int64(userId)},
-		Location:  model.Location{EventId: int64(eventId), City: req.GetEvent().GetLocation().City},
+		Location:  model.Location{City: req.GetEvent().GetLocation().City},
 	}
 
 	client := redis.NewClient(redisOption)
@@ -64,7 +58,7 @@ func (s *server) CreateEvent(ctx context.Context, req *pb.CreateEventRequest) (*
 		return &pb.CreateEventResponse{
 			Status:  createCmdResult,
 			Message: "event could not created",
-		}, status.Error(codes.Unknown, "event could not created")
+		}, status.Errorf(codes.Unknown, "event could not created %s", err.Error())
 	}
 
 	return &pb.CreateEventResponse{
@@ -75,18 +69,28 @@ func (s *server) CreateEvent(ctx context.Context, req *pb.CreateEventRequest) (*
 }
 
 func (s *server) GetEvent(ctx context.Context, req *pb.GetEventRequest) (*pb.GetEventResponse, error) {
+	client := redis.NewClient(redisOption)
+
 	getCommand := &commands.GetCommand{
 		Repo:      s.eventRepo,
 		EventID:   req.GetEventId(),
 		EventCity: req.GetEventCity(),
+		Redis:     *redisadapter.NewRedisAdapter(client),
 	}
+
+	defer client.Close()
 
 	commandResult, err := command.HandleCommand[*model.Event](getCommand)
 	if err != nil {
-		return nil, status.Error(codes.NotFound, "not found") //TODO refactor error matching
+		return nil, status.Error(codes.NotFound, "not found %s") //TODO refactor error matching
 	}
+
+	toId := strconv.Itoa(int(commandResult.ID))
 	return &pb.GetEventResponse{
-		Event: &pb.Event{Title: commandResult.Title, Category: commandResult.Category},
+		Event: &pb.Event{Id: toId,
+			Title:    commandResult.Title,
+			Category: commandResult.Category,
+			Location: &pb.Location{City: commandResult.Location.City}},
 	}, err
 
 }

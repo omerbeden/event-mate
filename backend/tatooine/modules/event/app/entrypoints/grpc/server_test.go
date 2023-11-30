@@ -6,14 +6,10 @@ import (
 
 	"github.com/go-redis/redis/v8"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/event/infra/grpc/pb"
+	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
-
-type ExceptedResponse struct {
-	message string
-	status  bool
-}
 
 func TestCreateEvent(t *testing.T) {
 	go func() {
@@ -37,7 +33,6 @@ func TestCreateEvent(t *testing.T) {
 	response, err := client.CreateEvent(context.Background(), &pb.CreateEventRequest{
 		UserId: "1",
 		Event: &pb.Event{
-			Id:       "1",
 			Title:    "End2End Test",
 			Category: "Rock",
 			Location: &pb.Location{
@@ -47,21 +42,65 @@ func TestCreateEvent(t *testing.T) {
 	})
 
 	t.Log("endpoint called")
+	expected := &pb.CreateEventResponse{
+		Message: "created",
+		Status:  true,
+	}
 
+	assert.NoError(t, err)
+	assert.NotNil(t, response)
+	assert.EqualValues(t, expected.Message, response.Message)
+	assert.EqualValues(t, expected.Status, response.Status)
+
+}
+
+func TestGetEvent(t *testing.T) {
+	go func() {
+		redisOpt := &redis.Options{
+			Addr:     "Localhost:6379",
+			Password: "",
+			DB:       0,
+		}
+		StartGRPCServer(redisOpt)
+	}()
+
+	t.Log("server created\n")
+
+	conn, err := grpc.Dial("0.0.0.0:50051", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		panic(err)
+	}
+	defer conn.Close()
+
+	client := pb.NewEventServiceClient(conn)
+
+	getRequest := pb.GetEventRequest{
+		EventId:   "1",
+		EventCity: "Sakarya",
+	}
+
+	t.Log("endpoint calling")
+	response, err := client.GetEvent(context.Background(), &getRequest)
 	if err != nil {
 		panic(err)
 	}
 
-	expected := &ExceptedResponse{
-		message: "created",
-		status:  true,
+	t.Log("endpoint called")
+
+	expected := &pb.GetEventResponse{
+		Event: &pb.Event{
+			Id:       "1",
+			Title:    "End2End Test",
+			Category: "Rock",
+			Location: &pb.Location{
+				City: "Sakarya",
+			},
+		},
 	}
 
-	if expected.message != response.GetMessage() && expected.status != response.GetStatus() {
-		t.Errorf("got %q want %q", expected.message, response.Message)
-		t.Errorf("got %t want %t", expected.status, response.Status)
-
-	}
-
-	t.Log(response)
+	assert.NoError(t, err)
+	assert.NotNil(t, response)
+	assert.Equal(t, expected.GetEvent().Category, response.GetEvent().Category)
+	assert.Equal(t, expected.GetEvent().GetLocation().City, response.GetEvent().GetLocation().City)
+	assert.Equal(t, expected.GetEvent().Title, response.GetEvent().Title)
 }

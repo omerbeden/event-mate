@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"encoding/json"
 	"fmt"
 	"strconv"
 
@@ -13,7 +14,7 @@ type GetCommand struct {
 	EventID   string
 	EventCity string
 	Repo      repo.EventRepository
-	Redis     *redisadapter.RedisAdapter
+	Redis     redisadapter.RedisAdapter
 }
 
 func (gc *GetCommand) Handle() (*model.Event, error) {
@@ -25,13 +26,21 @@ func (gc *GetCommand) Handle() (*model.Event, error) {
 
 	result, redisErr := gc.Redis.Get(gc.EventID)
 	if redisErr != nil {
-		return nil, redisErr
+		fmt.Printf("redis error %s \n returning from db", redisErr.Error()) // log error
+		return gc.Repo.GetByID(int64(intID))
 	}
 
-	if result != nil {
-		return result.(*model.Event), err
+	event := model.Event{}
+	err = json.Unmarshal([]byte(result.(string)), &event)
+	if err != nil {
+		fmt.Printf("parsing erorr returning from db %s", err.Error())
+		return gc.Repo.GetByID(int64(intID))
+	}
+
+	if result != nil && err == nil {
+		fmt.Printf("returning from redis %+v\n", event)
+		return &event, err
 	}
 
 	return gc.Repo.GetByID(int64(intID))
-
 }

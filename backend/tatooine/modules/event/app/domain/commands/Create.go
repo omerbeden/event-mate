@@ -23,7 +23,7 @@ func (ccmd *CreateCommand) Handle() (bool, error) {
 		return false, errCreate
 	}
 
-	_, errLoc := ccmd.LocRepo.Create(&ccmd.Event.Location)
+	_, errLoc := ccmd.LocRepo.Create(&event.Location)
 	if errLoc != nil {
 		return false, errLoc
 	}
