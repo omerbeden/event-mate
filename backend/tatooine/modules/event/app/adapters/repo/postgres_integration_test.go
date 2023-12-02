@@ -163,7 +163,9 @@ func TestCreateLocation(t *testing.T) {
 		City:    "Sakarya",
 	}
 
-	repository.Create(&loc)
+	res, err := repository.Create(&loc)
+	assert.NotNil(t, res)
+	assert.NoError(t, err)
 }
 func TestUpdateLocation(t *testing.T) {
 	dbConfig := postgres.PostgresConfig{
