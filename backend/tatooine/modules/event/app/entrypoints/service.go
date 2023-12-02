@@ -8,7 +8,6 @@ import (
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/domain/commands"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/domain/model"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/domain/ports/repositories"
-	"github.com/omerbeden/event-mate/backend/tatooine/pkg/command"
 )
 
 type EventService struct {
@@ -39,7 +38,7 @@ func (service EventService) CreateEvent(ctx context.Context, req CreateEventRequ
 		Redis:     redisadapter.NewRedisAdapter(&service.redisClient),
 	}
 
-	createCmdResult, err := command.HandleCommand[bool](createCmd)
+	createCmdResult, err := createCmd.Handle()
 	if err != nil {
 		return nil, err
 	}
@@ -49,18 +48,31 @@ func (service EventService) CreateEvent(ctx context.Context, req CreateEventRequ
 }
 
 func (service EventService) GetEventById(ctx context.Context, eventId int64) (*GetEventResponse, error) {
-	//TODO: refactor here ,split get command by getbyid and getbylocation
-	getCommand := &commands.GetCommand{
-		Repo:      service.eventRepository,
-		EventID:   "eventId",
-		EventCity: "refactor",
-		Redis:     *redisadapter.NewRedisAdapter(&service.redisClient),
+	getCommand := &commands.GetByIDCommand{
+		Repo:    service.eventRepository,
+		EventID: "eventId",
+		Redis:   *redisadapter.NewRedisAdapter(&service.redisClient),
 	}
 
-	commandResult, err := command.HandleCommand[*model.Event](getCommand)
+	commandResult, err := getCommand.Handle()
 	if err != nil {
 		return nil, err
 	}
 
 	return &GetEventResponse{*commandResult}, nil
+}
+
+func (service EventService) GetEventsByLocation(ctx context.Context, loc model.Location) ([]model.Event, error) {
+	getCommand := &commands.GetByLocationCommand{
+		Location: loc,
+		Repo:     service.eventRepository,
+		Redis:    *redisadapter.NewRedisAdapter(&service.redisClient),
+	}
+
+	commandResult, err := getCommand.Handle()
+	if err != nil {
+		return nil, err
+	}
+
+	return commandResult, nil
 }

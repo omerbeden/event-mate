@@ -1,4 +1,4 @@
-package grpc
+package main
 
 import (
 	"context"
@@ -8,13 +8,12 @@ import (
 
 	"github.com/go-redis/redis/v8"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/omerbeden/event-mate/backend/tatooine/grpc/pb"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/adapters/redisadapter"
 	adapters "github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/adapters/repo"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/domain/commands"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/domain/model"
 	repo "github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/domain/ports/repositories"
-	"github.com/omerbeden/event-mate/backend/tatooine/modules/event/infra/grpc/pb"
-	"github.com/omerbeden/event-mate/backend/tatooine/pkg/command"
 	postgres "github.com/omerbeden/event-mate/backend/tatooine/pkg/database"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -53,7 +52,7 @@ func (s *server) CreateEvent(ctx context.Context, req *pb.CreateEventRequest) (*
 	}
 	defer client.Close()
 
-	createCmdResult, err := command.HandleCommand[bool](createCmd)
+	createCmdResult, err := createCmd.Handle()
 	if err != nil {
 		return &pb.CreateEventResponse{
 			Status:  createCmdResult,
@@ -71,16 +70,15 @@ func (s *server) CreateEvent(ctx context.Context, req *pb.CreateEventRequest) (*
 func (s *server) GetEvent(ctx context.Context, req *pb.GetEventRequest) (*pb.GetEventResponse, error) {
 	client := redis.NewClient(redisOption)
 
-	getCommand := &commands.GetCommand{
-		Repo:      s.eventRepo,
-		EventID:   req.GetEventId(),
-		EventCity: req.GetEventCity(),
-		Redis:     *redisadapter.NewRedisAdapter(client),
+	getCommand := &commands.GetByIDCommand{
+		Repo:    s.eventRepo,
+		EventID: req.GetEventId(),
+		Redis:   *redisadapter.NewRedisAdapter(client),
 	}
 
 	defer client.Close()
 
-	commandResult, err := command.HandleCommand[*model.Event](getCommand)
+	commandResult, err := getCommand.Handle()
 	if err != nil {
 		return nil, status.Error(codes.NotFound, "not found %s") //TODO refactor error matching
 	}

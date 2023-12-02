@@ -1,15 +1,12 @@
 package commands
 
 import (
-	"strconv"
-
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/domain/model"
 	repo "github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/domain/ports/repositories"
-	"github.com/omerbeden/event-mate/backend/tatooine/modules/event/infra/grpc/pb"
 )
 
 type UpdateCommand struct {
-	Event *pb.Event
+	Event *model.Event
 	Repo  repo.EventRepository
 }
 
@@ -19,6 +16,5 @@ func (uc *UpdateCommand) Handle() (bool, error) {
 		Category: uc.Event.Category,
 	}
 
-	intID, _ := strconv.Atoi(uc.Event.GetId())
-	return uc.Repo.UpdateByID(int32(intID), *model)
+	return uc.Repo.UpdateByID(int32(uc.Event.ID), *model)
 }

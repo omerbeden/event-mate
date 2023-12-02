@@ -10,14 +10,13 @@ import (
 	repo "github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/domain/ports/repositories"
 )
 
-type GetCommand struct {
-	EventID   string
-	EventCity string
-	Repo      repo.EventRepository
-	Redis     redisadapter.RedisAdapter
+type GetByIDCommand struct {
+	EventID string
+	Repo    repo.EventRepository
+	Redis   redisadapter.RedisAdapter
 }
 
-func (gc *GetCommand) Handle() (*model.Event, error) {
+func (gc *GetByIDCommand) Handle() (*model.Event, error) {
 
 	intID, err := strconv.Atoi(gc.EventID)
 	if err != nil {
@@ -43,4 +42,33 @@ func (gc *GetCommand) Handle() (*model.Event, error) {
 	}
 
 	return gc.Repo.GetByID(int64(intID))
+}
+
+type GetByLocationCommand struct {
+	Location model.Location
+	Repo     repo.EventRepository
+	Redis    redisadapter.RedisAdapter
+}
+
+func (gc *GetByLocationCommand) Handle() ([]model.Event, error) {
+
+	result, redisErr := gc.Redis.Get(gc.Location.City)
+	if redisErr != nil {
+		fmt.Printf("redis error %s \n returning from db", redisErr.Error()) // log error
+		return gc.Repo.GetByLocation(&gc.Location)
+	}
+
+	events := []model.Event{}
+	err := json.Unmarshal([]byte(result.(string)), &events)
+	if err != nil {
+		fmt.Printf("parsing erorr returning from db %s", err.Error())
+		return gc.Repo.GetByLocation(&gc.Location)
+	}
+
+	if result != nil && err == nil {
+		fmt.Printf("returning events from redis, l: %d\n", len(events))
+		return events, err
+	}
+
+	return gc.Repo.GetByLocation(&gc.Location)
 }
