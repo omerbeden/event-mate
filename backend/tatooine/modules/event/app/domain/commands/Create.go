@@ -2,6 +2,7 @@ package commands
 
 import (
 	"encoding/json"
+	"fmt"
 	"strconv"
 
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/domain/model"
@@ -33,9 +34,10 @@ func (ccmd *CreateCommand) Handle() (bool, error) {
 	if errMarshall != nil {
 		return false, errMarshall
 	}
+
 	err := ccmd.Redis.Set(eventId, jsonEvent)
 	if err != nil {
-		return false, err
+		fmt.Printf("event could not inserted to Redis %s\n", eventId)
 	}
 
 	return true, nil

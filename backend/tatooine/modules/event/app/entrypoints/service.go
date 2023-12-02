@@ -2,6 +2,7 @@ package entrypoints
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/go-redis/redis/v8"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/adapters/redisadapter"
@@ -57,7 +58,12 @@ func (service EventService) GetEventsByLocation(ctx context.Context, loc model.L
 	}
 
 	commandResult, err := getCommand.Handle()
+
+	fmt.Printf("%+v , %+v", commandResult, nil)
 	if err != nil {
+		return nil, err
+	}
+	if commandResult == nil {
 		return nil, err
 	}
 
