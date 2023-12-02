@@ -37,7 +37,7 @@ func (service EventService) CreateEvent(ctx context.Context, event model.Event) 
 func (service EventService) GetEventById(ctx context.Context, eventId int64) (*model.Event, error) {
 	getCommand := &commands.GetByIDCommand{
 		Repo:    service.EventRepository,
-		EventID: "eventId",
+		EventID: eventId,
 		Redis:   *redisadapter.NewRedisAdapter(&service.RedisClient),
 	}
 

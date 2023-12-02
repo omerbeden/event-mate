@@ -4,11 +4,10 @@ import (
 	"context"
 	"log"
 	"net"
-	"strconv"
 
 	"github.com/go-redis/redis/v8"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/omerbeden/event-mate/backend/tatooine/grpc/pb"
+	"github.com/omerbeden/event-mate/backend/tatooine/infra/grpc/pb"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/adapters/redisadapter"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/adapters/repo"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/domain/model"
@@ -29,15 +28,10 @@ var redisOption = redisadapter.RedisOption()
 
 func (s *server) CreateEvent(ctx context.Context, req *pb.CreateEventRequest) (*pb.CreateEventResponse, error) {
 
-	userId, err := strconv.Atoi(req.UserId)
-	if err != nil {
-		return nil, status.Error(codes.Internal, "error parsing user id")
-	}
-
 	event := model.Event{
 		Title:     req.GetEvent().GetTitle(),
 		Category:  req.GetEvent().GetCategory(),
-		CreatedBy: model.User{ID: int64(userId)},
+		CreatedBy: model.User{ID: int64(req.GetUserId())},
 		Location:  model.Location{City: req.GetEvent().GetLocation().City},
 	}
 
@@ -58,10 +52,10 @@ func (s *server) CreateEvent(ctx context.Context, req *pb.CreateEventRequest) (*
 
 func (s *server) GetEvent(ctx context.Context, req *pb.GetEventRequest) (*pb.GetEventResponse, error) {
 
-	result, err := s.EventService.GetEventById(ctx, 1)
+	result, err := s.EventService.GetEventById(ctx, req.GetEventId())
 
 	return &pb.GetEventResponse{
-		Event: &pb.Event{Id: "1",
+		Event: &pb.Event{Id: result.ID,
 			Title:    result.Title,
 			Category: result.Category,
 			Location: &pb.Location{City: result.Location.City}},

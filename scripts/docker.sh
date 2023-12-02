@@ -8,7 +8,7 @@ $docker run --rm -it --name dev-pgadmin  -p 80:80 --network event-mate-network -
 docker run --rm -it --name redis 
 
 ##protoc  go sample
-protoc --go_out=.  --go-grpc_out=.  ./proto/grpc/...
+protoc --go_out=.  --go-grpc_out=.  ./proto/grpc/event/v1
 
 ##dart sample
 protoc -I ./proto/grpc/profile/v1 --dart_out=grpc:./frontend/event_mate_ui/pb ./proto/grpc/profile/v1/profile-service.proto

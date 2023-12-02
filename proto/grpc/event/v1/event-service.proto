@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package event.v1;
 
-option go_package="./backend/eventservice/internal/infra/grpc/pb";
+option go_package="./backend/tatooine/infra/grpc/pb";
 
 service EventService{
     rpc CreateEvent(CreateEventRequest) returns (CreateEventResponse){}
@@ -13,7 +13,7 @@ service EventService{
 message Empty {}
 
 message Event{
-    string id=1;
+    int64 id=1;
     string title=2;
     string category =3;
     Location Location=4;
@@ -24,7 +24,7 @@ message Location{
 }
 
 message CreateEventRequest{
-    string user_id=1;
+    int64 user_id=1;
     Event event = 2;
 
 }
@@ -34,7 +34,7 @@ message CreateEventResponse{
 }
 
 message GetEventRequest{
-    string event_id=1; 
+    int64 event_id=1; 
     string event_city=2;  
 }
 

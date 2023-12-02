@@ -11,29 +11,25 @@ import (
 )
 
 type GetByIDCommand struct {
-	EventID string
+	EventID int64
 	Repo    repo.EventRepository
 	Redis   redisadapter.RedisAdapter
 }
 
 func (gc *GetByIDCommand) Handle() (*model.Event, error) {
 
-	intID, err := strconv.Atoi(gc.EventID)
-	if err != nil {
-		return nil, fmt.Errorf("get command: %w", err)
-	}
-
-	result, redisErr := gc.Redis.Get(gc.EventID)
+	eventId := strconv.FormatInt(gc.EventID, 10)
+	result, redisErr := gc.Redis.Get(eventId)
 	if redisErr != nil {
 		fmt.Printf("redis error %s \n returning from db", redisErr.Error()) // log error
-		return gc.Repo.GetByID(int64(intID))
+		return gc.Repo.GetByID(gc.EventID)
 	}
 
 	event := model.Event{}
-	err = json.Unmarshal([]byte(result.(string)), &event)
+	err := json.Unmarshal([]byte(result.(string)), &event)
 	if err != nil {
 		fmt.Printf("parsing erorr returning from db %s", err.Error())
-		return gc.Repo.GetByID(int64(intID))
+		return gc.Repo.GetByID(gc.EventID)
 	}
 
 	if result != nil && err == nil {
@@ -41,7 +37,7 @@ func (gc *GetByIDCommand) Handle() (*model.Event, error) {
 		return &event, err
 	}
 
-	return gc.Repo.GetByID(int64(intID))
+	return gc.Repo.GetByID(gc.EventID)
 }
 
 type GetByLocationCommand struct {
