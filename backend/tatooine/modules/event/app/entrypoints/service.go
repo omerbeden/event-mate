@@ -11,47 +11,34 @@ import (
 )
 
 type EventService struct {
-	eventRepository   repositories.EventRepository
-	locationReposiroy repositories.LocationRepository
-	redisClient       redis.Client
+	EventRepository   repositories.EventRepository
+	LocationReposiroy repositories.LocationRepository
+	RedisClient       redis.Client
 }
 
-type CreateEventRequest struct {
-}
-
-type CreateEventResponse struct {
-	status bool
-}
-
-type GetEventResponse struct {
-	model.Event
-}
-
-func (service EventService) CreateEvent(ctx context.Context, req CreateEventRequest) (*CreateEventResponse, error) {
-
-	event := model.Event{}
+func (service EventService) CreateEvent(ctx context.Context, event model.Event) (bool, error) {
 
 	createCmd := &commands.CreateCommand{
-		EventRepo: service.eventRepository,
-		LocRepo:   service.locationReposiroy,
+		EventRepo: service.EventRepository,
+		LocRepo:   service.LocationReposiroy,
 		Event:     event,
-		Redis:     redisadapter.NewRedisAdapter(&service.redisClient),
+		Redis:     redisadapter.NewRedisAdapter(&service.RedisClient),
 	}
 
 	createCmdResult, err := createCmd.Handle()
 	if err != nil {
-		return nil, err
+		return false, err
 	}
 
-	return &CreateEventResponse{status: createCmdResult}, nil
+	return createCmdResult, nil
 
 }
 
-func (service EventService) GetEventById(ctx context.Context, eventId int64) (*GetEventResponse, error) {
+func (service EventService) GetEventById(ctx context.Context, eventId int64) (*model.Event, error) {
 	getCommand := &commands.GetByIDCommand{
-		Repo:    service.eventRepository,
+		Repo:    service.EventRepository,
 		EventID: "eventId",
-		Redis:   *redisadapter.NewRedisAdapter(&service.redisClient),
+		Redis:   *redisadapter.NewRedisAdapter(&service.RedisClient),
 	}
 
 	commandResult, err := getCommand.Handle()
@@ -59,14 +46,14 @@ func (service EventService) GetEventById(ctx context.Context, eventId int64) (*G
 		return nil, err
 	}
 
-	return &GetEventResponse{*commandResult}, nil
+	return commandResult, nil
 }
 
 func (service EventService) GetEventsByLocation(ctx context.Context, loc model.Location) ([]model.Event, error) {
 	getCommand := &commands.GetByLocationCommand{
 		Location: loc,
-		Repo:     service.eventRepository,
-		Redis:    *redisadapter.NewRedisAdapter(&service.redisClient),
+		Repo:     service.EventRepository,
+		Redis:    *redisadapter.NewRedisAdapter(&service.RedisClient),
 	}
 
 	commandResult, err := getCommand.Handle()

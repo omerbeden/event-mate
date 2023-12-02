@@ -10,10 +10,9 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/omerbeden/event-mate/backend/tatooine/grpc/pb"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/adapters/redisadapter"
-	adapters "github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/adapters/repo"
-	"github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/domain/commands"
+	"github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/adapters/repo"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/domain/model"
-	repo "github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/domain/ports/repositories"
+	"github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/entrypoints"
 	postgres "github.com/omerbeden/event-mate/backend/tatooine/pkg/database"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -22,15 +21,14 @@ import (
 )
 
 type server struct {
-	eventRepo    repo.EventRepository
-	locationRepo repo.LocationRepository
-	redisOption  *redis.Options
+	EventService entrypoints.EventService
 	pb.UnimplementedEventServiceServer
 }
 
 var redisOption = redisadapter.RedisOption()
 
 func (s *server) CreateEvent(ctx context.Context, req *pb.CreateEventRequest) (*pb.CreateEventResponse, error) {
+
 	userId, err := strconv.Atoi(req.UserId)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "error parsing user id")
@@ -43,52 +41,30 @@ func (s *server) CreateEvent(ctx context.Context, req *pb.CreateEventRequest) (*
 		Location:  model.Location{City: req.GetEvent().GetLocation().City},
 	}
 
-	client := redis.NewClient(redisOption)
-	createCmd := &commands.CreateCommand{
-		EventRepo: s.eventRepo,
-		LocRepo:   s.locationRepo,
-		Event:     event,
-		Redis:     redisadapter.NewRedisAdapter(client),
-	}
-	defer client.Close()
+	result, err := s.EventService.CreateEvent(ctx, event)
 
-	createCmdResult, err := createCmd.Handle()
 	if err != nil {
 		return &pb.CreateEventResponse{
-			Status:  createCmdResult,
+			Status:  result,
 			Message: "event could not created",
 		}, status.Errorf(codes.Unknown, "event could not created %s", err.Error())
 	}
-
 	return &pb.CreateEventResponse{
-		Status:  createCmdResult,
+		Status:  result,
 		Message: "created",
 	}, nil
 
 }
 
 func (s *server) GetEvent(ctx context.Context, req *pb.GetEventRequest) (*pb.GetEventResponse, error) {
-	client := redis.NewClient(redisOption)
 
-	getCommand := &commands.GetByIDCommand{
-		Repo:    s.eventRepo,
-		EventID: req.GetEventId(),
-		Redis:   *redisadapter.NewRedisAdapter(client),
-	}
+	result, err := s.EventService.GetEventById(ctx, 1)
 
-	defer client.Close()
-
-	commandResult, err := getCommand.Handle()
-	if err != nil {
-		return nil, status.Error(codes.NotFound, "not found %s") //TODO refactor error matching
-	}
-
-	toId := strconv.Itoa(int(commandResult.ID))
 	return &pb.GetEventResponse{
-		Event: &pb.Event{Id: toId,
-			Title:    commandResult.Title,
-			Category: commandResult.Category,
-			Location: &pb.Location{City: commandResult.Location.City}},
+		Event: &pb.Event{Id: "1",
+			Title:    result.Title,
+			Category: result.Category,
+			Location: &pb.Location{City: result.Location.City}},
 	}, err
 
 }
@@ -109,9 +85,11 @@ func StartGRPCServer(redisOpt *redis.Options) {
 		ConnectionString: "postgres://postgres:password@localhost:5432/test",
 		Config:           pgxpool.Config{MinConns: 5, MaxConns: 10}})
 	pb.RegisterEventServiceServer(s, &server{
-		eventRepo:    adapters.NewEventRepo(dbPool),
-		locationRepo: adapters.NewLocationRepo(dbPool),
-		redisOption:  redisOpt,
+		EventService: entrypoints.EventService{
+			EventRepository:   repo.NewEventRepo(dbPool),
+			LocationReposiroy: repo.NewLocationRepo(dbPool),
+			RedisClient:       *redis.NewClient(redisOption),
+		},
 	})
 	reflection.Register(s)
 
