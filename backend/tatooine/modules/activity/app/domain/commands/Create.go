@@ -11,33 +11,33 @@ import (
 )
 
 type CreateCommand struct {
-	Event     model.Event
-	EventRepo repo.EventRepository
-	LocRepo   repo.LocationRepository
-	Redis     caching.Cache
+	Activity     model.Activity
+	ActivityRepo repo.ActivityRepository
+	LocRepo      repo.LocationRepository
+	Redis        caching.Cache
 }
 
 func (ccmd *CreateCommand) Handle() (bool, error) {
 
-	event, errCreate := ccmd.EventRepo.Create(ccmd.Event)
+	activity, errCreate := ccmd.ActivityRepo.Create(ccmd.Activity)
 	if errCreate != nil {
 		return false, errCreate
 	}
 
-	_, errLoc := ccmd.LocRepo.Create(&event.Location)
+	_, errLoc := ccmd.LocRepo.Create(&activity.Location)
 	if errLoc != nil {
 		return false, errLoc
 	}
 
-	eventId := strconv.FormatInt(event.ID, 10)
-	jsonEvent, errMarshall := json.Marshal(ccmd.Event)
+	activityId := strconv.FormatInt(activity.ID, 10)
+	jsonActivity, errMarshall := json.Marshal(ccmd.Activity)
 	if errMarshall != nil {
 		return false, errMarshall
 	}
 
-	err := ccmd.Redis.Set(eventId, jsonEvent)
+	err := ccmd.Redis.Set(activityId, jsonActivity)
 	if err != nil {
-		fmt.Printf("event could not inserted to Redis %s\n", eventId)
+		fmt.Printf("activity could not inserted to Redis %s\n", activityId)
 	}
 
 	return true, nil

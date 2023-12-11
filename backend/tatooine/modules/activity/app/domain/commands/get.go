@@ -11,42 +11,42 @@ import (
 )
 
 type GetByIDCommand struct {
-	EventID int64
-	Repo    repo.EventRepository
-	Redis   redisadapter.RedisAdapter
+	ActivityId int64
+	Repo       repo.ActivityRepository
+	Redis      redisadapter.RedisAdapter
 }
 
-func (gc *GetByIDCommand) Handle() (*model.Event, error) {
+func (gc *GetByIDCommand) Handle() (*model.Activity, error) {
 
-	eventId := strconv.FormatInt(gc.EventID, 10)
-	result, redisErr := gc.Redis.Get(eventId)
+	activityId := strconv.FormatInt(gc.ActivityId, 10)
+	result, redisErr := gc.Redis.Get(activityId)
 	if redisErr != nil {
 		fmt.Printf("redis error %s \n returning from db", redisErr.Error()) // log error
-		return gc.Repo.GetByID(gc.EventID)
+		return gc.Repo.GetByID(gc.ActivityId)
 	}
 
-	event := model.Event{}
-	err := json.Unmarshal([]byte(result.(string)), &event)
+	activity := model.Activity{}
+	err := json.Unmarshal([]byte(result.(string)), &activity)
 	if err != nil {
 		fmt.Printf("parsing erorr returning from db %s", err.Error())
-		return gc.Repo.GetByID(gc.EventID)
+		return gc.Repo.GetByID(gc.ActivityId)
 	}
 
 	if result != nil && err == nil {
-		fmt.Printf("returning from redis %+v\n", event)
-		return &event, err
+		fmt.Printf("returning from redis %+v\n", activity)
+		return &activity, err
 	}
 
-	return gc.Repo.GetByID(gc.EventID)
+	return gc.Repo.GetByID(gc.ActivityId)
 }
 
 type GetByLocationCommand struct {
 	Location model.Location
-	Repo     repo.EventRepository
+	Repo     repo.ActivityRepository
 	Redis    redisadapter.RedisAdapter
 }
 
-func (gc *GetByLocationCommand) Handle() ([]model.Event, error) {
+func (gc *GetByLocationCommand) Handle() ([]model.Activity, error) {
 
 	result, redisErr := gc.Redis.Get(gc.Location.City)
 	if redisErr != nil {
@@ -54,16 +54,16 @@ func (gc *GetByLocationCommand) Handle() ([]model.Event, error) {
 		return gc.Repo.GetByLocation(&gc.Location)
 	}
 
-	events := []model.Event{}
-	err := json.Unmarshal([]byte(result.(string)), &events)
+	activities := []model.Activity{}
+	err := json.Unmarshal([]byte(result.(string)), &activities)
 	if err != nil {
 		fmt.Printf("parsing erorr returning from db %s", err.Error())
 		return gc.Repo.GetByLocation(&gc.Location)
 	}
 
 	if result != nil && err == nil {
-		fmt.Printf("returning events from redis, l: %d\n", len(events))
-		return events, err
+		fmt.Printf("returning activities from redis, l: %d\n", len(activities))
+		return activities, err
 	}
 
 	return gc.Repo.GetByLocation(&gc.Location)

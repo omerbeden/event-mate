@@ -1,6 +1,6 @@
 package model
 
-type Event struct {
+type Activity struct {
 	ID           int64
 	Title        string
 	Category     string
@@ -10,6 +10,6 @@ type Event struct {
 }
 
 type Location struct {
-	EventId int64
-	City    string
+	ActivityId int64
+	City       string
 }

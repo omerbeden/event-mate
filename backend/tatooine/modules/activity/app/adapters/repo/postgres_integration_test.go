@@ -10,26 +10,26 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestCreateEvent(t *testing.T) {
+func TestCreateActivity(t *testing.T) {
 	dbConfig := postgres.PostgresConfig{
 		ConnectionString: "postgres://postgres:password@localhost:5432/test",
 		Config:           pgxpool.Config{MinConns: 5, MaxConns: 10},
 	}
 	pool := postgres.NewConn(&dbConfig)
 
-	eventRepository := repo.NewEventRepo(pool)
+	activityRepository := repo.NewActivityRepo(pool)
 	locationRepository := repo.NewLocationRepo(pool)
 
-	defer eventRepository.Close()
+	defer activityRepository.Close()
 
-	event := model.Event{
+	activity := model.Activity{
 		Title:        "test title",
 		Category:     "test category",
 		CreatedBy:    model.User{ID: 1},
 		Location:     model.Location{City: "Sakarya"},
 		Participants: []model.User{{ID: 1}, {ID: 2}, {ID: 3}}}
 
-	res, err := eventRepository.Create(event)
+	res, err := activityRepository.Create(activity)
 	assert.NoError(t, err)
 	assert.NotNil(t, res)
 
@@ -45,8 +45,8 @@ func TestAddParticipants(t *testing.T) {
 		Config:           pgxpool.Config{MinConns: 5, MaxConns: 10},
 	}
 	pool := postgres.NewConn(&dbConfig)
-	eventRepository := repo.NewEventRepo(pool)
-	event := model.Event{
+	activityRepository := repo.NewActivityRepo(pool)
+	activity := model.Activity{
 		ID:           1,
 		Title:        "test title",
 		Category:     "test category",
@@ -54,7 +54,7 @@ func TestAddParticipants(t *testing.T) {
 		Location:     model.Location{City: "Sakarya"},
 		Participants: []model.User{{ID: 1}, {ID: 2}, {ID: 3}}}
 
-	err := eventRepository.AddParticipants(event)
+	err := activityRepository.AddParticipants(activity)
 	assert.NoError(t, err)
 
 }
@@ -65,8 +65,8 @@ func TestAddParticipant(t *testing.T) {
 		Config:           pgxpool.Config{MinConns: 5, MaxConns: 10},
 	}
 	pool := postgres.NewConn(&dbConfig)
-	eventRepository := repo.NewEventRepo(pool)
-	event := model.Event{
+	activityRepository := repo.NewActivityRepo(pool)
+	activity := model.Activity{
 		ID:           1,
 		Title:        "test title",
 		Category:     "test category",
@@ -76,18 +76,18 @@ func TestAddParticipant(t *testing.T) {
 
 	user := model.User{ID: 4}
 
-	err := eventRepository.AddParticipant(event.ID, user)
+	err := activityRepository.AddParticipant(activity.ID, user)
 	assert.NoError(t, err)
 
 }
 
-func TestGetEventByID(t *testing.T) {
+func TestGetActivityByID(t *testing.T) {
 	dbConfig := postgres.PostgresConfig{
 		ConnectionString: "postgres://postgres:password@localhost:5432/test",
 		Config:           pgxpool.Config{MinConns: 5, MaxConns: 10},
 	}
 	pool := postgres.NewConn(&dbConfig)
-	repository := repo.NewEventRepo(pool)
+	repository := repo.NewActivityRepo(pool)
 	defer repository.Close()
 
 	res, err := repository.GetByID(1)
@@ -96,13 +96,13 @@ func TestGetEventByID(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func TestGetEventByLocation(t *testing.T) {
+func TestGetActivitiesByLocation(t *testing.T) {
 	dbConfig := postgres.PostgresConfig{
 		ConnectionString: "postgres://postgres:password@localhost:5432/test",
 		Config:           pgxpool.Config{MinConns: 5, MaxConns: 10},
 	}
 	pool := postgres.NewConn(&dbConfig)
-	repository := repo.NewEventRepo(pool)
+	repository := repo.NewActivityRepo(pool)
 	defer repository.Close()
 
 	res, err := repository.GetByLocation(&model.Location{City: "Sakarya"})
@@ -111,36 +111,36 @@ func TestGetEventByLocation(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func TestUpdateEvent(t *testing.T) {
+func TestUpdateActivity(t *testing.T) {
 
 	dbConfig := postgres.PostgresConfig{
 		ConnectionString: "postgres://postgres:password@localhost:5432/test",
 		Config:           pgxpool.Config{MinConns: 5, MaxConns: 10},
 	}
 	pool := postgres.NewConn(&dbConfig)
-	repository := repo.NewEventRepo(pool)
+	repository := repo.NewActivityRepo(pool)
 	defer repository.Close()
 
-	eventTobeUpdated := model.Event{
+	activityTobeUpdated := model.Activity{
 		Title:     "Updated title",
 		Category:  "Updated Category",
 		CreatedBy: model.User{ID: 2},
 	}
 
-	res, err := repository.UpdateByID(1, eventTobeUpdated)
+	res, err := repository.UpdateByID(1, activityTobeUpdated)
 	assert.NotNil(t, res)
 	assert.NoError(t, err)
 
 }
 
-func TestDeleteEventByID(t *testing.T) {
+func TestDeleteActivityByID(t *testing.T) {
 
 	dbConfig := postgres.PostgresConfig{
 		ConnectionString: "postgres://postgres:password@localhost:5432/test",
 		Config:           pgxpool.Config{MinConns: 5, MaxConns: 10},
 	}
 	pool := postgres.NewConn(&dbConfig)
-	repository := repo.NewEventRepo(pool)
+	repository := repo.NewActivityRepo(pool)
 	defer repository.Close()
 
 	res, err := repository.DeleteByID(1)
@@ -159,8 +159,8 @@ func TestCreateLocation(t *testing.T) {
 	defer repository.Close()
 
 	loc := model.Location{
-		EventId: 1,
-		City:    "Sakarya",
+		ActivityId: 1,
+		City:       "Sakarya",
 	}
 
 	res, err := repository.Create(&loc)
@@ -178,8 +178,8 @@ func TestUpdateLocation(t *testing.T) {
 	defer repository.Close()
 
 	locationToBeUpdated := model.Location{
-		EventId: 1,
-		City:    "Istanbul",
+		ActivityId: 1,
+		City:       "Istanbul",
 	}
 	res, err := repository.UpdateByID(locationToBeUpdated)
 	assert.NotNil(t, res)

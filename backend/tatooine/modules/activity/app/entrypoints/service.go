@@ -12,18 +12,18 @@ import (
 )
 
 type ActivityService struct {
-	EventRepository   repositories.EventRepository
-	LocationReposiroy repositories.LocationRepository
-	RedisClient       redis.Client
+	ActivityRepository repositories.ActivityRepository
+	LocationReposiroy  repositories.LocationRepository
+	RedisClient        redis.Client
 }
 
-func (service ActivityService) CreateActivity(ctx context.Context, event model.Event) (bool, error) {
+func (service ActivityService) CreateActivity(ctx context.Context, activity model.Activity) (bool, error) {
 
 	createCmd := &commands.CreateCommand{
-		EventRepo: service.EventRepository,
-		LocRepo:   service.LocationReposiroy,
-		Event:     event,
-		Redis:     redisadapter.NewRedisAdapter(&service.RedisClient),
+		ActivityRepo: service.ActivityRepository,
+		LocRepo:      service.LocationReposiroy,
+		Activity:     activity,
+		Redis:        redisadapter.NewRedisAdapter(&service.RedisClient),
 	}
 
 	createCmdResult, err := createCmd.Handle()
@@ -35,11 +35,11 @@ func (service ActivityService) CreateActivity(ctx context.Context, event model.E
 
 }
 
-func (service ActivityService) GetActivityById(ctx context.Context, eventId int64) (*model.Event, error) {
+func (service ActivityService) GetActivityById(ctx context.Context, activityId int64) (*model.Activity, error) {
 	getCommand := &commands.GetByIDCommand{
-		Repo:    service.EventRepository,
-		EventID: eventId,
-		Redis:   *redisadapter.NewRedisAdapter(&service.RedisClient),
+		Repo:       service.ActivityRepository,
+		ActivityId: activityId,
+		Redis:      *redisadapter.NewRedisAdapter(&service.RedisClient),
 	}
 
 	commandResult, err := getCommand.Handle()
@@ -50,10 +50,10 @@ func (service ActivityService) GetActivityById(ctx context.Context, eventId int6
 	return commandResult, nil
 }
 
-func (service ActivityService) GetActivitiesByLocation(ctx context.Context, loc model.Location) ([]model.Event, error) {
+func (service ActivityService) GetActivitiesByLocation(ctx context.Context, loc model.Location) ([]model.Activity, error) {
 	getCommand := &commands.GetByLocationCommand{
 		Location: loc,
-		Repo:     service.EventRepository,
+		Repo:     service.ActivityRepository,
 		Redis:    *redisadapter.NewRedisAdapter(&service.RedisClient),
 	}
 

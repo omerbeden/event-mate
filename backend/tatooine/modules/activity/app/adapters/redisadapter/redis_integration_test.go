@@ -14,12 +14,12 @@ const Password = ""
 const DB = 0
 
 var testKey = "1"
-var testValue = model.Event{
+var testValue = model.Activity{
 	ID:           1,
-	Title:        "Integration Test Event",
+	Title:        "Integration Test Activity",
 	Category:     "Test2",
 	CreatedBy:    model.User{ID: 1},
-	Location:     model.Location{EventId: 1, City: "Sakarya"},
+	Location:     model.Location{ActivityId: 1, City: "Sakarya"},
 	Participants: []model.User{{ID: 1}, {ID: 2}, {ID: 3}},
 }
 

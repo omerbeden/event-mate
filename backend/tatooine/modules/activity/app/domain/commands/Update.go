@@ -6,15 +6,15 @@ import (
 )
 
 type UpdateCommand struct {
-	Event *model.Event
-	Repo  repo.EventRepository
+	Activity *model.Activity
+	Repo     repo.ActivityRepository
 }
 
 func (uc *UpdateCommand) Handle() (bool, error) {
-	model := &model.Event{
-		Title:    uc.Event.Title,
-		Category: uc.Event.Category,
+	model := &model.Activity{
+		Title:    uc.Activity.Title,
+		Category: uc.Activity.Category,
 	}
 
-	return uc.Repo.UpdateByID(int32(uc.Event.ID), *model)
+	return uc.Repo.UpdateByID(int32(uc.Activity.ID), *model)
 }

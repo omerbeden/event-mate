@@ -28,7 +28,7 @@ var redisOption = redisadapter.RedisOption()
 
 func (s *server) CreateEvent(ctx context.Context, req *pb.CreateActivityRequest) (*pb.CreateActivityResponse, error) {
 
-	event := model.Event{
+	event := model.Activity{
 		Title:     req.GetActivity().GetTitle(),
 		Category:  req.GetActivity().GetCategory(),
 		CreatedBy: model.User{ID: int64(req.GetUserId())},
@@ -80,9 +80,9 @@ func StartGRPCServer(redisOpt *redis.Options) {
 		Config:           pgxpool.Config{MinConns: 5, MaxConns: 10}})
 	pb.RegisterActivityServiceServer(s, &server{
 		EventService: entrypoints.ActivityService{
-			EventRepository:   repo.NewEventRepo(dbPool),
-			LocationReposiroy: repo.NewLocationRepo(dbPool),
-			RedisClient:       *redis.NewClient(redisOption),
+			ActivityRepository: repo.NewActivityRepo(dbPool),
+			LocationReposiroy:  repo.NewLocationRepo(dbPool),
+			RedisClient:        *redis.NewClient(redisOption),
 		},
 	})
 	reflection.Register(s)
