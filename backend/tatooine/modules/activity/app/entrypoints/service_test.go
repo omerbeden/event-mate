@@ -6,9 +6,9 @@ import (
 
 	"github.com/go-redis/redis/v8"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/adapters/repo"
-	"github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/domain/model"
-	"github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/entrypoints"
+	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/adapters/repo"
+	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/domain/model"
+	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/entrypoints"
 	postgres "github.com/omerbeden/event-mate/backend/tatooine/pkg/database"
 	"github.com/stretchr/testify/assert"
 )
@@ -21,8 +21,8 @@ func TestGetEventFromDBWhenRedisDown(t *testing.T) {
 	pool := postgres.NewConn(&dbConfig)
 	eventService := entrypoints.ActivityService{
 
-		EventRepository:   repo.NewEventRepo(pool),
-		LocationReposiroy: repo.NewLocationRepo(pool),
+		ActivityRepository: repo.NewActivityRepo(pool),
+		LocationReposiroy:  repo.NewLocationRepo(pool),
 		RedisClient: *redis.NewClient(&redis.Options{
 			Addr:     "Localhost:6379",
 			Password: "",
@@ -30,7 +30,7 @@ func TestGetEventFromDBWhenRedisDown(t *testing.T) {
 		}),
 	}
 
-	res, err := eventService.GetEventById(context.Background(), 2)
+	res, err := eventService.GetActivityById(context.Background(), 2)
 
 	assert.NoError(t, err)
 	assert.NotNil(t, res)
@@ -44,8 +44,8 @@ func TestGetEventByIDReturnErrorWhenEventIdNotFound(t *testing.T) {
 	pool := postgres.NewConn(&dbConfig)
 	eventService := entrypoints.ActivityService{
 
-		EventRepository:   repo.NewEventRepo(pool),
-		LocationReposiroy: repo.NewLocationRepo(pool),
+		ActivityRepository: repo.NewActivityRepo(pool),
+		LocationReposiroy:  repo.NewLocationRepo(pool),
 		RedisClient: *redis.NewClient(&redis.Options{
 			Addr:     "Localhost:6379",
 			Password: "",
@@ -53,7 +53,7 @@ func TestGetEventByIDReturnErrorWhenEventIdNotFound(t *testing.T) {
 		}),
 	}
 
-	res, err := eventService.GetEventById(context.Background(), 3)
+	res, err := eventService.GetActivityById(context.Background(), 3)
 
 	assert.Error(t, err)
 	assert.Nil(t, res)
@@ -67,8 +67,8 @@ func TestGetEventByLocationFromDBWhenRedisDown(t *testing.T) {
 	pool := postgres.NewConn(&dbConfig)
 	eventService := entrypoints.ActivityService{
 
-		EventRepository:   repo.NewEventRepo(pool),
-		LocationReposiroy: repo.NewLocationRepo(pool),
+		ActivityRepository: repo.NewActivityRepo(pool),
+		LocationReposiroy:  repo.NewLocationRepo(pool),
 		RedisClient: *redis.NewClient(&redis.Options{
 			Addr:     "Localhost:6379",
 			Password: "",
@@ -77,10 +77,10 @@ func TestGetEventByLocationFromDBWhenRedisDown(t *testing.T) {
 	}
 
 	loc := model.Location{
-		EventId: 2,
-		City:    "Sakarya",
+		ActivityId: 2,
+		City:       "Sakarya",
 	}
-	res, err := eventService.GetEventsByLocation(context.Background(), loc)
+	res, err := eventService.GetActivitiesByLocation(context.Background(), loc)
 
 	assert.NoError(t, err)
 	assert.NotNil(t, res)
@@ -94,8 +94,8 @@ func TestGetEventByLocationReturnErrorWhenEventIdNotFound(t *testing.T) {
 	pool := postgres.NewConn(&dbConfig)
 	eventService := entrypoints.ActivityService{
 
-		EventRepository:   repo.NewEventRepo(pool),
-		LocationReposiroy: repo.NewLocationRepo(pool),
+		ActivityRepository: repo.NewActivityRepo(pool),
+		LocationReposiroy:  repo.NewLocationRepo(pool),
 		RedisClient: *redis.NewClient(&redis.Options{
 			Addr:     "Localhost:6379",
 			Password: "",
@@ -104,11 +104,11 @@ func TestGetEventByLocationReturnErrorWhenEventIdNotFound(t *testing.T) {
 	}
 
 	loc := model.Location{
-		EventId: 2,
-		City:    "Istanbul",
+		ActivityId: 2,
+		City:       "Istanbul",
 	}
 
-	res, _ := eventService.GetEventsByLocation(context.Background(), loc)
+	res, _ := eventService.GetActivitiesByLocation(context.Background(), loc)
 
 	assert.Nil(t, res)
 }
