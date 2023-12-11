@@ -39,7 +39,7 @@ func (service ActivityService) GetActivityById(ctx context.Context, activityId i
 	getCommand := &commands.GetByIDCommand{
 		Repo:       service.ActivityRepository,
 		ActivityId: activityId,
-		Redis:      *redisadapter.NewRedisAdapter(&service.RedisClient),
+		Redis:      redisadapter.NewRedisAdapter(&service.RedisClient),
 	}
 
 	commandResult, err := getCommand.Handle()
@@ -54,7 +54,7 @@ func (service ActivityService) GetActivitiesByLocation(ctx context.Context, loc 
 	getCommand := &commands.GetByLocationCommand{
 		Location: loc,
 		Repo:     service.ActivityRepository,
-		Redis:    *redisadapter.NewRedisAdapter(&service.RedisClient),
+		Redis:    redisadapter.NewRedisAdapter(&service.RedisClient),
 	}
 
 	commandResult, err := getCommand.Handle()

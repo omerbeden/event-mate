@@ -43,7 +43,3 @@ func (adapter *RedisAdapter) Get(key string) (any, error) {
 	}
 	return result, nil
 }
-
-func (adapter *RedisAdapter) Exist(key string) (bool, error) {
-	return true, nil
-}
