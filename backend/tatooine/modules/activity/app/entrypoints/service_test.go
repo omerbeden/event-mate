@@ -19,7 +19,7 @@ func TestGetEventFromDBWhenRedisDown(t *testing.T) {
 		Config:           pgxpool.Config{MinConns: 5, MaxConns: 10},
 	}
 	pool := postgres.NewConn(&dbConfig)
-	eventService := entrypoints.EventService{
+	eventService := entrypoints.ActivityService{
 
 		EventRepository:   repo.NewEventRepo(pool),
 		LocationReposiroy: repo.NewLocationRepo(pool),
@@ -42,7 +42,7 @@ func TestGetEventByIDReturnErrorWhenEventIdNotFound(t *testing.T) {
 		Config:           pgxpool.Config{MinConns: 5, MaxConns: 10},
 	}
 	pool := postgres.NewConn(&dbConfig)
-	eventService := entrypoints.EventService{
+	eventService := entrypoints.ActivityService{
 
 		EventRepository:   repo.NewEventRepo(pool),
 		LocationReposiroy: repo.NewLocationRepo(pool),
@@ -65,7 +65,7 @@ func TestGetEventByLocationFromDBWhenRedisDown(t *testing.T) {
 		Config:           pgxpool.Config{MinConns: 5, MaxConns: 10},
 	}
 	pool := postgres.NewConn(&dbConfig)
-	eventService := entrypoints.EventService{
+	eventService := entrypoints.ActivityService{
 
 		EventRepository:   repo.NewEventRepo(pool),
 		LocationReposiroy: repo.NewLocationRepo(pool),
@@ -92,7 +92,7 @@ func TestGetEventByLocationReturnErrorWhenEventIdNotFound(t *testing.T) {
 		Config:           pgxpool.Config{MinConns: 5, MaxConns: 10},
 	}
 	pool := postgres.NewConn(&dbConfig)
-	eventService := entrypoints.EventService{
+	eventService := entrypoints.ActivityService{
 
 		EventRepository:   repo.NewEventRepo(pool),
 		LocationReposiroy: repo.NewLocationRepo(pool),

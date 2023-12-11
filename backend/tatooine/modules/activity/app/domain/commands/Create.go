@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/domain/model"
-	"github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/domain/ports/caching"
-	repo "github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/domain/ports/repositories"
+	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/domain/model"
+	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/domain/ports/caching"
+	repo "github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/domain/ports/repositories"
 )
 
 type CreateCommand struct {

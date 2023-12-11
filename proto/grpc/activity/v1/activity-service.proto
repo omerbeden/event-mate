@@ -1,0 +1,53 @@
+syntax = "proto3";
+
+package activity.v1;
+
+option go_package="./backend/tatooine/infra/grpc/pb";
+
+service ActivityService{
+    rpc CreateActivity(CreateActivityRequest) returns (CreateActivityResponse){}
+    rpc GetActivityById(GetActivityByIdRequest) returns (GetActivityByIdResponse){}
+    rpc GetActivitiesByLocation(GetActivitiesByLocationRequest) returns(GetActivitiesByLocationResponse){}
+}
+
+message Empty {}
+
+message Activity{
+    int64 id=1;
+    string title=2;
+    string category =3;
+    Location Location=4;
+}
+
+message Location{
+    string city =1;
+}
+
+message CreateActivityRequest{
+    int64 user_id=1;
+    Activity activity = 2;
+
+}
+message CreateActivityResponse{
+    bool status=1;
+    string message=2;
+}
+
+message GetActivityByIdRequest{
+    int64 activityId=1; 
+}
+
+message GetActivityByIdResponse{
+    Activity activity = 1;
+}
+
+message GetActivitiesByLocationRequest{
+     Location location = 1;
+}
+message GetActivitiesByLocationResponse{
+     repeated Activity activity =1;
+}
+
+
+
+

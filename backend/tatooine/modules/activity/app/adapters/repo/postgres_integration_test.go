@@ -4,8 +4,8 @@ import (
 	"testing"
 
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/adapters/repo"
-	"github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/domain/model"
+	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/adapters/repo"
+	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/domain/model"
 	postgres "github.com/omerbeden/event-mate/backend/tatooine/pkg/database"
 	"github.com/stretchr/testify/assert"
 )

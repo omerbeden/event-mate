@@ -1,8 +1,8 @@
 package commands
 
 import (
-	"github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/domain/model"
-	repo "github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/domain/ports/repositories"
+	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/domain/model"
+	repo "github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/domain/ports/repositories"
 )
 
 type UpdateCommand struct {

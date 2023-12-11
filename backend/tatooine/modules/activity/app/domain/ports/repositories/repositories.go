@@ -1,6 +1,6 @@
 package repositories
 
-import "github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/domain/model"
+import "github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/domain/model"
 
 type EventRepository interface {
 	Create(event model.Event) (*model.Event, error)

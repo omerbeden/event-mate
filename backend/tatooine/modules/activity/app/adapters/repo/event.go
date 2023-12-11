@@ -7,7 +7,7 @@ import (
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/domain/model"
+	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/domain/model"
 )
 
 const errlogprefix = "repo:event"

@@ -5,8 +5,8 @@ import (
 	"testing"
 
 	"github.com/go-redis/redis/v8"
-	"github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/adapters/redisadapter"
-	"github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/domain/model"
+	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/adapters/redisadapter"
+	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/domain/model"
 )
 
 const Adress = "Localhost:6379"

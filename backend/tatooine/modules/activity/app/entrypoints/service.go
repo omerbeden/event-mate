@@ -5,19 +5,19 @@ import (
 	"fmt"
 
 	"github.com/go-redis/redis/v8"
-	"github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/adapters/redisadapter"
-	"github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/domain/commands"
-	"github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/domain/model"
-	"github.com/omerbeden/event-mate/backend/tatooine/modules/event/app/domain/ports/repositories"
+	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/adapters/redisadapter"
+	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/domain/commands"
+	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/domain/model"
+	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/domain/ports/repositories"
 )
 
-type EventService struct {
+type ActivityService struct {
 	EventRepository   repositories.EventRepository
 	LocationReposiroy repositories.LocationRepository
 	RedisClient       redis.Client
 }
 
-func (service EventService) CreateEvent(ctx context.Context, event model.Event) (bool, error) {
+func (service ActivityService) CreateActivity(ctx context.Context, event model.Event) (bool, error) {
 
 	createCmd := &commands.CreateCommand{
 		EventRepo: service.EventRepository,
@@ -35,7 +35,7 @@ func (service EventService) CreateEvent(ctx context.Context, event model.Event) 
 
 }
 
-func (service EventService) GetEventById(ctx context.Context, eventId int64) (*model.Event, error) {
+func (service ActivityService) GetActivityById(ctx context.Context, eventId int64) (*model.Event, error) {
 	getCommand := &commands.GetByIDCommand{
 		Repo:    service.EventRepository,
 		EventID: eventId,
@@ -50,7 +50,7 @@ func (service EventService) GetEventById(ctx context.Context, eventId int64) (*m
 	return commandResult, nil
 }
 
-func (service EventService) GetEventsByLocation(ctx context.Context, loc model.Location) ([]model.Event, error) {
+func (service ActivityService) GetActivitiesByLocation(ctx context.Context, loc model.Location) ([]model.Event, error) {
 	getCommand := &commands.GetByLocationCommand{
 		Location: loc,
 		Repo:     service.EventRepository,
