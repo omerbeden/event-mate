@@ -43,3 +43,28 @@ func (adapter *RedisAdapter) Get(key string) (any, error) {
 	}
 	return result, nil
 }
+
+func (adapter *RedisAdapter) AddMember(key string, members ...any) error {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	_, err := adapter.client.SAdd(ctx, key, members).Result()
+	if err != nil {
+		return fmt.Errorf("%s could not set  member  %w", err_prefix, err)
+	}
+
+	return nil
+
+}
+
+func (adapter *RedisAdapter) GetMembers(key string) ([]string, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+	result, err := adapter.client.SMembers(ctx, key).Result()
+	if err != nil {
+		return nil, fmt.Errorf("%s could not get get members %w", err_prefix, err)
+
+	}
+
+	return result, err
+}

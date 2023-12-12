@@ -43,3 +43,12 @@ func (ccmd *CreateCommand) Handle() (bool, error) {
 	return true, nil
 
 }
+
+func (ccmd *CreateCommand) addMember(city string, valueJson []byte) error {
+	cityKey := fmt.Sprintf("City:%s", city)
+
+	return ccmd.Redis.AddMember(cityKey, valueJson)
+}
+
+//TODO: Add addmember function to handle command. it should be done async
+//add Get SMEMBERS method  to get command and add a
