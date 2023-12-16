@@ -35,6 +35,17 @@ func (service ActivityService) CreateActivity(ctx context.Context, activity mode
 
 }
 
+func (service ActivityService) AddParticipant(participant model.User, activityId int64) error {
+	addParticipantCommand := &commands.AddParticipantCommand{
+		ActivityRepository: service.ActivityRepository,
+		Redis:              redisadapter.NewRedisAdapter(&service.RedisClient),
+		Participant:        participant,
+		ActivityId:         activityId,
+	}
+
+	return addParticipantCommand.Handle()
+}
+
 func (service ActivityService) GetActivityById(ctx context.Context, activityId int64) (*model.Activity, error) {
 	getCommand := &commands.GetByIDCommand{
 		Repo:       service.ActivityRepository,

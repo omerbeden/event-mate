@@ -46,6 +46,30 @@ func TestCreateActivity(t *testing.T) {
 	assert.True(t, res)
 }
 
+func TestAddParticipant(t *testing.T) {
+	dbConfig := postgres.PostgresConfig{
+		ConnectionString: "postgres://postgres:password@localhost:5432/test",
+		Config:           pgxpool.Config{MinConns: 5, MaxConns: 10},
+	}
+	pool := postgres.NewConn(&dbConfig)
+	activityService := entrypoints.ActivityService{
+
+		ActivityRepository: repo.NewActivityRepo(pool),
+		LocationReposiroy:  repo.NewLocationRepo(pool),
+		RedisClient: *redis.NewClient(&redis.Options{
+			Addr:     "Localhost:6379",
+			Password: "",
+			DB:       0,
+		}),
+	}
+
+	participant := model.User{
+		ID: 2,
+	}
+	err := activityService.AddParticipant(participant, 1)
+	assert.NoError(t, err)
+}
+
 func TestGetActivityFromDBWhenRedisDown(t *testing.T) {
 	dbConfig := postgres.PostgresConfig{
 		ConnectionString: "postgres://postgres:password@localhost:5432/test",
