@@ -50,7 +50,7 @@ func (s *server) CreateEvent(ctx context.Context, req *pb.CreateActivityRequest)
 
 }
 
-func (s *server) GetEvent(ctx context.Context, req *pb.GetActivityByIdRequest) (*pb.GetActivityByIdResponse, error) {
+func (s *server) GetEventByID(ctx context.Context, req *pb.GetActivityByIdRequest) (*pb.GetActivityByIdResponse, error) {
 
 	result, err := s.EventService.GetActivityById(ctx, req.GetActivityId())
 
@@ -63,8 +63,32 @@ func (s *server) GetEvent(ctx context.Context, req *pb.GetActivityByIdRequest) (
 
 }
 
-func (s *server) GetFeed(ctx context.Context, req *pb.GetActivitiesByLocationRequest) (*pb.GetActivitiesByLocationResponse, error) {
-	return nil, nil
+func (s *server) GetActivitiesByLocation(ctx context.Context, req *pb.GetActivitiesByLocationRequest) (*pb.GetActivitiesByLocationResponse, error) {
+
+	location := model.Location{
+		City: req.GetLocation().GetCity(),
+	}
+	activities, err := s.EventService.GetActivitiesByLocation(ctx, location)
+	if err != nil {
+		var activitiesPB []*pb.Activity
+		for _, activity := range activities {
+			activityPB := pb.Activity{
+				Id:       activity.ID,
+				Title:    activity.Title,
+				Category: activity.Category,
+				Location: &pb.Location{
+					City: activity.Location.City,
+				},
+			}
+			activitiesPB = append(activitiesPB, &activityPB)
+		}
+
+		return &pb.GetActivitiesByLocationResponse{
+			Activity: activitiesPB,
+		}, nil
+	}
+
+	return nil, status.Errorf(codes.Unknown, "could not get activities by city %s", err.Error())
 }
 
 func StartGRPCServer(redisOpt *redis.Options) {
