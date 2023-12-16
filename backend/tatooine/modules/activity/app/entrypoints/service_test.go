@@ -37,13 +37,40 @@ func TestCreateActivity(t *testing.T) {
 			ID: 1,
 		},
 		Location: model.Location{
-			City: "Istanbul",
+			City: "Sakarya",
 		},
 	}
 
 	res, err := activityService.CreateActivity(context.Background(), activity)
 	assert.NoError(t, err)
 	assert.True(t, res)
+}
+
+func TestGetActivitiesByLocation(t *testing.T) {
+	dbConfig := postgres.PostgresConfig{
+		ConnectionString: "postgres://postgres:password@localhost:5432/test",
+		Config:           pgxpool.Config{MinConns: 5, MaxConns: 10},
+	}
+	pool := postgres.NewConn(&dbConfig)
+	activityService := entrypoints.ActivityService{
+
+		ActivityRepository: repo.NewActivityRepo(pool),
+		LocationReposiroy:  repo.NewLocationRepo(pool),
+		RedisClient: *redis.NewClient(&redis.Options{
+			Addr:     "Localhost:6379",
+			Password: "",
+			DB:       0,
+		}),
+	}
+	loc := model.Location{
+		ActivityId: 2,
+		City:       "Sakarya",
+	}
+
+	result, err := activityService.GetActivitiesByLocation(context.Background(), loc)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, result)
+
 }
 
 func TestAddParticipant(t *testing.T) {
@@ -137,6 +164,7 @@ func TestGetActivityByLocationFromDBWhenRedisDown(t *testing.T) {
 		ActivityId: 2,
 		City:       "Sakarya",
 	}
+
 	res, err := activityService.GetActivitiesByLocation(context.Background(), loc)
 
 	assert.NoError(t, err)
