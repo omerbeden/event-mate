@@ -10,6 +10,7 @@ type ActivityRepository interface {
 	DeleteByID(id int32) (bool, error)
 	AddParticipants(activity model.Activity) error
 	AddParticipant(activityId int64, user model.User) error
+	GetParticipants(activityId int64) ([]model.User, error)
 }
 
 type LocationRepository interface {

@@ -84,6 +84,33 @@ func (r *activityRepository) AddParticipant(activityId int64, user model.User) e
 
 }
 
+func (r *activityRepository) GetParticipants(acitivityId int64) ([]model.User, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+	q := `SELECT u.id FROM user_profiles u
+	RIGHT JOIN participants p ON p.user_id = u.id
+	WHERE p.activity_id = $1
+	`
+
+	var participants []model.User
+	rows, err := r.pool.Query(ctx, q, acitivityId)
+	if err != nil {
+		return nil, fmt.Errorf("%s could not get participants , acitivityId: %d  %w", errlogprefix, acitivityId, err)
+	}
+	for rows.Next() {
+		var res model.User
+		err := rows.Scan(&res.ID)
+		if err != nil {
+			return nil, fmt.Errorf("err getting rows %w ", err)
+		}
+		participants = append(participants, res)
+
+	}
+
+	return participants, nil
+
+}
+
 func (r *activityRepository) GetByID(id int64) (*model.Activity, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()

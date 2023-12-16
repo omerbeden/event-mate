@@ -91,12 +91,34 @@ func TestAddParticipant(t *testing.T) {
 	}
 
 	participant := model.User{
-		ID: 2,
+		ID: 3,
 	}
 	err := activityService.AddParticipant(participant, 1)
 	assert.NoError(t, err)
 }
 
+func TestGetParticipants(t *testing.T) {
+	dbConfig := postgres.PostgresConfig{
+		ConnectionString: "postgres://postgres:password@localhost:5432/test",
+		Config:           pgxpool.Config{MinConns: 5, MaxConns: 10},
+	}
+	pool := postgres.NewConn(&dbConfig)
+	activityService := entrypoints.ActivityService{
+
+		ActivityRepository: repo.NewActivityRepo(pool),
+		LocationReposiroy:  repo.NewLocationRepo(pool),
+		RedisClient: *redis.NewClient(&redis.Options{
+			Addr:     "Localhost:6379",
+			Password: "",
+			DB:       0,
+		}),
+	}
+
+	res, err := activityService.GetParticipants(1)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, res)
+
+}
 func TestGetActivityFromDBWhenRedisDown(t *testing.T) {
 	dbConfig := postgres.PostgresConfig{
 		ConnectionString: "postgres://postgres:password@localhost:5432/test",
