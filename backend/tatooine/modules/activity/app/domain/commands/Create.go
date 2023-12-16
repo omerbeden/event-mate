@@ -34,7 +34,8 @@ func (ccmd *CreateCommand) Handle() (bool, error) {
 	}
 
 	activityId := strconv.FormatInt(activity.ID, 10)
-	jsonActivity, errMarshall := json.Marshal(ccmd.Activity)
+
+	jsonActivity, errMarshall := json.Marshal(activity)
 	if errMarshall != nil {
 		return false, errMarshall
 	}
@@ -47,9 +48,12 @@ func (ccmd *CreateCommand) Handle() (bool, error) {
 
 	var wg sync.WaitGroup
 	wg.Add(1)
-	go ccmd.addCityToRedis(activity.Location.City, jsonActivity)
-	wg.Wait()
+	go func() {
+		defer wg.Done()
+		ccmd.addCityToRedis(activity.Location.City, jsonActivity)
+	}()
 
+	wg.Wait()
 	return true, nil
 
 }
