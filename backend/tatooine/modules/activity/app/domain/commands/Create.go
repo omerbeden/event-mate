@@ -4,11 +4,15 @@ import (
 	"encoding/json"
 	"fmt"
 	"strconv"
+	"sync"
 
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/domain/model"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/domain/ports/caching"
 	repo "github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/domain/ports/repositories"
 )
+
+const CITY_KEY = "city"
+const ACTIVITY_KEY = "activity"
 
 type CreateCommand struct {
 	Activity     model.Activity
@@ -35,17 +39,23 @@ func (ccmd *CreateCommand) Handle() (bool, error) {
 		return false, errMarshall
 	}
 
-	err := ccmd.Redis.Set(activityId, jsonActivity)
+	activityKey := fmt.Sprintf("%s:%s", ACTIVITY_KEY, activityId)
+	err := ccmd.Redis.Set(activityKey, jsonActivity)
 	if err != nil {
 		fmt.Printf("activity could not inserted to Redis %s\n", activityId)
 	}
+
+	var wg sync.WaitGroup
+	wg.Add(1)
+	go ccmd.addCityToRedis(activity.Location.City, jsonActivity)
+	wg.Wait()
 
 	return true, nil
 
 }
 
-func (ccmd *CreateCommand) addMember(city string, valueJson []byte) error {
-	cityKey := fmt.Sprintf("City:%s", city)
+func (ccmd *CreateCommand) addCityToRedis(city string, valueJson []byte) error {
+	cityKey := fmt.Sprintf("%s:%s", CITY_KEY, city)
 
 	return ccmd.Redis.AddMember(cityKey, valueJson)
 }

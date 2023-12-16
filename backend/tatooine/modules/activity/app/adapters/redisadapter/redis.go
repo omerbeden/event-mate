@@ -63,7 +63,6 @@ func (adapter *RedisAdapter) GetMembers(key string) ([]string, error) {
 	result, err := adapter.client.SMembers(ctx, key).Result()
 	if err != nil {
 		return nil, fmt.Errorf("%s could not get get members %w", err_prefix, err)
-
 	}
 
 	return result, err

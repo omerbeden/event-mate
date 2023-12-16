@@ -19,7 +19,9 @@ type GetByIDCommand struct {
 func (gc *GetByIDCommand) Handle() (*model.Activity, error) {
 
 	activityId := strconv.FormatInt(gc.ActivityId, 10)
-	result, redisErr := gc.Redis.Get(activityId)
+	activityKey := fmt.Sprintf("%s:%s", ACTIVITY_KEY, activityId)
+
+	result, redisErr := gc.Redis.Get(activityKey)
 	if redisErr != nil {
 		fmt.Printf("redis error %s \n returning from db", redisErr.Error()) // log error
 		return gc.Repo.GetByID(gc.ActivityId)
