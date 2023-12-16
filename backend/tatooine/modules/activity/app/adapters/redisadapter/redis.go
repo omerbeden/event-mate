@@ -48,6 +48,9 @@ func (adapter *RedisAdapter) AddMember(key string, members ...any) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
+	if members == nil || len(members) < 1 {
+		return fmt.Errorf("members nil or blank  for %s", key)
+	}
 	_, err := adapter.client.SAdd(ctx, key, members).Result()
 	if err != nil {
 		return fmt.Errorf("%s could not set  member  %w", err_prefix, err)
