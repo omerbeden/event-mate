@@ -12,3 +12,5 @@ protoc --go_out=.  --go-grpc_out=.  ./proto/grpc/event/v1
 
 ##dart sample
 protoc -I ./proto/grpc/profile/v1 --dart_out=grpc:./frontend/event_mate_ui/pb ./proto/grpc/profile/v1/profile-service.proto
+
+protoc --grpc-swift_opt=Client=true,Server=false --grpc-swift_out=. --swift_out=. --swift_opt=Visibility=Public  ./proto/grpc/activity/v1/activity-service.proto
