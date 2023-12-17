@@ -2,10 +2,7 @@ module github.com/omerbeden/event-mate/backend/tatooine
 
 go 1.19
 
-require (
-	github.com/go-redis/redis/v8 v8.11.5
-	google.golang.org/protobuf v1.30.0
-)
+require github.com/go-redis/redis/v8 v8.11.5
 
 require (
 	cloud.google.com/go v0.110.0 // indirect
@@ -48,6 +45,7 @@ require (
 	google.golang.org/genproto v0.0.0-20230530153820-e85fd2cbaebc // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20230530153820-e85fd2cbaebc // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20230530153820-e85fd2cbaebc // indirect
+	google.golang.org/protobuf v1.30.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
@@ -59,5 +57,5 @@ require (
 	github.com/jackc/pgx/v5 v5.4.0
 	github.com/stretchr/testify v1.8.4
 	google.golang.org/api v0.127.0
-	google.golang.org/grpc v1.55.0
+	google.golang.org/grpc v1.55.0 // indirect
 )
