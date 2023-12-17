@@ -25,6 +25,8 @@ type ActivityServiceClient interface {
 	CreateActivity(ctx context.Context, in *CreateActivityRequest, opts ...grpc.CallOption) (*CreateActivityResponse, error)
 	GetActivityById(ctx context.Context, in *GetActivityByIdRequest, opts ...grpc.CallOption) (*GetActivityByIdResponse, error)
 	GetActivitiesByLocation(ctx context.Context, in *GetActivitiesByLocationRequest, opts ...grpc.CallOption) (*GetActivitiesByLocationResponse, error)
+	AddParticipant(ctx context.Context, in *AddParticipantRequest, opts ...grpc.CallOption) (*AddParticipantResponse, error)
+	GetParticipants(ctx context.Context, in *GetParticipantRequest, opts ...grpc.CallOption) (*GetParticipantResponse, error)
 }
 
 type activityServiceClient struct {
@@ -62,6 +64,24 @@ func (c *activityServiceClient) GetActivitiesByLocation(ctx context.Context, in 
 	return out, nil
 }
 
+func (c *activityServiceClient) AddParticipant(ctx context.Context, in *AddParticipantRequest, opts ...grpc.CallOption) (*AddParticipantResponse, error) {
+	out := new(AddParticipantResponse)
+	err := c.cc.Invoke(ctx, "/activity.v1.ActivityService/AddParticipant", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *activityServiceClient) GetParticipants(ctx context.Context, in *GetParticipantRequest, opts ...grpc.CallOption) (*GetParticipantResponse, error) {
+	out := new(GetParticipantResponse)
+	err := c.cc.Invoke(ctx, "/activity.v1.ActivityService/GetParticipants", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ActivityServiceServer is the server API for ActivityService service.
 // All implementations must embed UnimplementedActivityServiceServer
 // for forward compatibility
@@ -69,6 +89,8 @@ type ActivityServiceServer interface {
 	CreateActivity(context.Context, *CreateActivityRequest) (*CreateActivityResponse, error)
 	GetActivityById(context.Context, *GetActivityByIdRequest) (*GetActivityByIdResponse, error)
 	GetActivitiesByLocation(context.Context, *GetActivitiesByLocationRequest) (*GetActivitiesByLocationResponse, error)
+	AddParticipant(context.Context, *AddParticipantRequest) (*AddParticipantResponse, error)
+	GetParticipants(context.Context, *GetParticipantRequest) (*GetParticipantResponse, error)
 	mustEmbedUnimplementedActivityServiceServer()
 }
 
@@ -84,6 +106,12 @@ func (UnimplementedActivityServiceServer) GetActivityById(context.Context, *GetA
 }
 func (UnimplementedActivityServiceServer) GetActivitiesByLocation(context.Context, *GetActivitiesByLocationRequest) (*GetActivitiesByLocationResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetActivitiesByLocation not implemented")
+}
+func (UnimplementedActivityServiceServer) AddParticipant(context.Context, *AddParticipantRequest) (*AddParticipantResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddParticipant not implemented")
+}
+func (UnimplementedActivityServiceServer) GetParticipants(context.Context, *GetParticipantRequest) (*GetParticipantResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetParticipants not implemented")
 }
 func (UnimplementedActivityServiceServer) mustEmbedUnimplementedActivityServiceServer() {}
 
@@ -152,6 +180,42 @@ func _ActivityService_GetActivitiesByLocation_Handler(srv interface{}, ctx conte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ActivityService_AddParticipant_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AddParticipantRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ActivityServiceServer).AddParticipant(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/activity.v1.ActivityService/AddParticipant",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ActivityServiceServer).AddParticipant(ctx, req.(*AddParticipantRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ActivityService_GetParticipants_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetParticipantRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ActivityServiceServer).GetParticipants(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/activity.v1.ActivityService/GetParticipants",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ActivityServiceServer).GetParticipants(ctx, req.(*GetParticipantRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ActivityService_ServiceDesc is the grpc.ServiceDesc for ActivityService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -170,6 +234,14 @@ var ActivityService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetActivitiesByLocation",
 			Handler:    _ActivityService_GetActivitiesByLocation_Handler,
+		},
+		{
+			MethodName: "AddParticipant",
+			Handler:    _ActivityService_AddParticipant_Handler,
+		},
+		{
+			MethodName: "GetParticipants",
+			Handler:    _ActivityService_GetParticipants_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -8,6 +8,8 @@ service ActivityService{
     rpc CreateActivity(CreateActivityRequest) returns (CreateActivityResponse){}
     rpc GetActivityById(GetActivityByIdRequest) returns (GetActivityByIdResponse){}
     rpc GetActivitiesByLocation(GetActivitiesByLocationRequest) returns(GetActivitiesByLocationResponse){}
+    rpc AddParticipant(AddParticipantRequest) returns (AddParticipantResponse){}
+    rpc GetParticipants(GetParticipantRequest) returns (GetParticipantResponse){}
 }
 
 message Empty {}
@@ -21,6 +23,10 @@ message Activity{
 
 message Location{
     string city =1;
+}
+
+message User{
+    int64 id=1;
 }
 
 message CreateActivityRequest{
@@ -46,6 +52,24 @@ message GetActivitiesByLocationRequest{
 }
 message GetActivitiesByLocationResponse{
      repeated Activity activity =1;
+}
+
+message AddParticipantRequest{
+    int64 activityId =1;
+    User participant = 2;
+}
+
+message AddParticipantResponse{
+    bool status=1;
+    string message=2;
+}
+
+message GetParticipantRequest{
+    int64 activityId =1;
+}
+
+message GetParticipantResponse{
+    repeated User users = 1;
 }
 
 

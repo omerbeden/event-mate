@@ -68,27 +68,64 @@ func (s *server) GetActivitiesByLocation(ctx context.Context, req *pb.GetActivit
 	location := model.Location{
 		City: req.GetLocation().GetCity(),
 	}
+
 	activities, err := s.EventService.GetActivitiesByLocation(ctx, location)
 	if err != nil {
-		var activitiesPB []*pb.Activity
-		for _, activity := range activities {
-			activityPB := pb.Activity{
-				Id:       activity.ID,
-				Title:    activity.Title,
-				Category: activity.Category,
-				Location: &pb.Location{
-					City: activity.Location.City,
-				},
-			}
-			activitiesPB = append(activitiesPB, &activityPB)
-		}
-
-		return &pb.GetActivitiesByLocationResponse{
-			Activity: activitiesPB,
-		}, nil
+		return nil, status.Errorf(codes.Unknown, "could not get activities by city %s", err.Error())
 	}
 
-	return nil, status.Errorf(codes.Unknown, "could not get activities by city %s", err.Error())
+	var activitiesPB []*pb.Activity
+	for _, activity := range activities {
+		activityPB := pb.Activity{
+			Id:       activity.ID,
+			Title:    activity.Title,
+			Category: activity.Category,
+			Location: &pb.Location{
+				City: activity.Location.City,
+			},
+		}
+		activitiesPB = append(activitiesPB, &activityPB)
+	}
+
+	return &pb.GetActivitiesByLocationResponse{
+		Activity: activitiesPB,
+	}, nil
+}
+
+func (server *server) AddParticipant(ctx context.Context, req *pb.AddParticipantRequest) (*pb.AddParticipantResponse, error) {
+
+	participant := model.User{
+		ID: req.GetParticipant().GetId(),
+	}
+	err := server.EventService.AddParticipant(participant, req.GetActivityId())
+	if err != nil {
+		return &pb.AddParticipantResponse{
+			Status:  false,
+			Message: "participant could not be added",
+		}, status.Errorf(codes.Internal, "participant could not be added %s", err.Error())
+	}
+
+	return &pb.AddParticipantResponse{
+		Status:  true,
+		Message: "OK",
+	}, nil
+}
+
+func (server *server) GetParticipants(ctx context.Context, req *pb.GetParticipantRequest) (*pb.GetParticipantResponse, error) {
+	result, err := server.EventService.GetParticipants(req.GetActivityId())
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "participant could not be added %s", err.Error())
+	}
+
+	var userList []*pb.User
+	for _, participants := range result {
+		userList = append(userList, &pb.User{
+			Id: participants.ID,
+		})
+	}
+	return &pb.GetParticipantResponse{
+		Users: userList,
+	}, nil
 }
 
 func StartGRPCServer(redisOpt *redis.Options) {
