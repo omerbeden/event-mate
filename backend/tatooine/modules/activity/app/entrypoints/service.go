@@ -17,6 +17,18 @@ type ActivityService struct {
 	RedisClient        redis.Client
 }
 
+func NewService(
+	activityRepository repositories.ActivityRepository,
+	locationRepository repositories.LocationRepository,
+	redisClient redis.Client,
+) *ActivityService {
+	return &ActivityService{
+		ActivityRepository: activityRepository,
+		LocationReposiroy:  locationRepository,
+		RedisClient:        redisClient,
+	}
+}
+
 func (service ActivityService) CreateActivity(ctx context.Context, activity model.Activity) (bool, error) {
 
 	createCmd := &commands.CreateCommand{
