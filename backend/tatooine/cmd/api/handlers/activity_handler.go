@@ -31,7 +31,7 @@ func CreateActivity(service entrypoints.ActivityService) fiber.Handler {
 		return c.Status(fiber.StatusCreated).JSON(presenter.BaseResponse{
 			APIVersion: presenter.APIVersion,
 			Data:       res,
-			Error:      nil,
+			Error:      "",
 		})
 	}
 }
@@ -92,7 +92,7 @@ func GetParticipants(service entrypoints.ActivityService) fiber.Handler {
 		return c.Status(fiber.StatusOK).JSON(presenter.BaseResponse{
 			APIVersion: presenter.APIVersion,
 			Data:       res,
-			Error:      nil,
+			Error:      "",
 		})
 	}
 }
@@ -125,7 +125,7 @@ func GetActivitiesByLocation(service entrypoints.ActivityService) fiber.Handler 
 		return c.Status(fiber.StatusOK).JSON(presenter.BaseResponse{
 			APIVersion: presenter.APIVersion,
 			Data:       res,
-			Error:      nil,
+			Error:      "",
 		})
 	}
 }
