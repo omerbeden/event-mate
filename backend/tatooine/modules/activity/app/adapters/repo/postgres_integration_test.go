@@ -2,6 +2,7 @@ package repo_test
 
 import (
 	"testing"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/adapters/repo"
@@ -23,11 +24,14 @@ func TestCreateActivity(t *testing.T) {
 	defer activityRepository.Close()
 
 	activity := model.Activity{
-		Title:        "test title",
-		Category:     "test category",
-		CreatedBy:    model.User{ID: 1},
-		Location:     model.Location{City: "Sakarya"},
-		Participants: []model.User{{ID: 1}, {ID: 2}, {ID: 3}}}
+		Title:              "test title",
+		Category:           "test category",
+		CreatedBy:          model.User{ID: 1},
+		Location:           model.Location{City: "Sakarya"},
+		BackgroundImageUrl: "image url",
+		StartAt:            time.Now(),
+		Content:            "test activity content",
+	}
 
 	res, err := activityRepository.Create(activity)
 	assert.NoError(t, err)
@@ -133,22 +137,6 @@ func TestUpdateActivity(t *testing.T) {
 
 }
 
-func TestDeleteActivityByID(t *testing.T) {
-
-	dbConfig := postgres.PostgresConfig{
-		ConnectionString: "postgres://postgres:password@localhost:5432/test",
-		Config:           pgxpool.Config{MinConns: 5, MaxConns: 10},
-	}
-	pool := postgres.NewConn(&dbConfig)
-	repository := repo.NewActivityRepo(pool)
-	defer repository.Close()
-
-	res, err := repository.DeleteByID(1)
-	assert.NotNil(t, res)
-	assert.NoError(t, err)
-
-}
-
 func TestCreateLocation(t *testing.T) {
 	dbConfig := postgres.PostgresConfig{
 		ConnectionString: "postgres://postgres:password@localhost:5432/test",
@@ -184,4 +172,20 @@ func TestUpdateLocation(t *testing.T) {
 	res, err := repository.UpdateByID(locationToBeUpdated)
 	assert.NotNil(t, res)
 	assert.NoError(t, err)
+}
+
+func TestDeleteActivityByID(t *testing.T) {
+
+	dbConfig := postgres.PostgresConfig{
+		ConnectionString: "postgres://postgres:password@localhost:5432/test",
+		Config:           pgxpool.Config{MinConns: 5, MaxConns: 10},
+	}
+	pool := postgres.NewConn(&dbConfig)
+	repository := repo.NewActivityRepo(pool)
+	defer repository.Close()
+
+	res, err := repository.DeleteByID(1)
+	assert.NotNil(t, res)
+	assert.NoError(t, err)
+
 }

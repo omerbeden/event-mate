@@ -1,0 +1,8 @@
+ALTER TABLE activities
+DROP COLUMN IF EXISTS bacgroundImageUrl,
+DROP COLUMN IF EXISTS content,
+DROP COLUMN IF EXISTS startAt;
+
+ALTER TABLE user_profiles
+DROP COLUMN IF EXISTS profileImageUrl,
+DROP COLUMN IF EXISTS profilePoint;

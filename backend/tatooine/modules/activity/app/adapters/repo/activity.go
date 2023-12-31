@@ -31,8 +31,17 @@ func (r *activityRepository) Create(activity model.Activity) (*model.Activity, e
 	defer cancel()
 
 	var ID int64
-	q := `INSERT INTO activities (title,category,created_user_id) Values($1,$2,$3) RETURNING ID`
-	err := r.pool.QueryRow(ctx, q, activity.Title, activity.Category, activity.CreatedBy.ID).Scan(&ID)
+	q := `INSERT INTO activities (title,category,created_by,background_image_url,start_at,content) 
+	Values($1,$2,$3,$4,$5,$6) RETURNING ID`
+	err := r.pool.QueryRow(
+		ctx,
+		q,
+		activity.Title,
+		activity.Category,
+		activity.CreatedBy.ID,
+		activity.BackgroundImageUrl,
+		activity.StartAt,
+		activity.Content).Scan(&ID)
 
 	if err != nil {
 
@@ -115,9 +124,9 @@ func (r *activityRepository) GetByID(id int64) (*model.Activity, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	q := `SELECT e.id, title, category, e.created_user_id, l.city
+	q := `SELECT e.id, title, category, e.created_by, l.city
 	FROM activities e
-	LEFT JOIN user_profiles u ON e.created_user_id = u.id
+	LEFT JOIN user_profiles u ON e.created_by = u.id
 	LEFT JOIN activity_locations l ON e.id = l.activity_id
 	Where e.id = $1	
 	`
@@ -133,9 +142,9 @@ func (r *activityRepository) GetByLocation(loc *model.Location) ([]model.Activit
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	q := `SELECT e.id, title, category, e.created_user_id, l.city
+	q := `SELECT e.id, title, category, e.created_by, l.city
 	FROM activities e
-	LEFT JOIN user_profiles u ON e.created_user_id = u.id
+	LEFT JOIN user_profiles u ON e.created_by = u.id
 	LEFT JOIN activity_locations l ON e.id = l.activity_id
 	Where l.city= $1`
 
@@ -165,7 +174,7 @@ func (r *activityRepository) UpdateByID(id int32, activity model.Activity) (bool
 	q := `UPDATE activities
 	 SET title  = $1,
 	  category = $2,
-	  created_user_id = $3
+	  created_by = $3
 	 WHERE id = $4
 	 `
 	_, err := r.pool.Exec(ctx, q, activity.Title, activity.Category, activity.CreatedBy.ID, id)
