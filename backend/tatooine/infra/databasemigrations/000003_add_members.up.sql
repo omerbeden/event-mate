@@ -4,5 +4,4 @@ ALTER TABLE activities
  ADD COLUMN content TEXT;
 
 ALTER TABLE user_profiles
- ADD COLUMN profile_image_url TEXT,
- ADD COLUMN profile_point INTEGER;
+ ADD COLUMN profile_image_url TEXT

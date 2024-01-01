@@ -33,6 +33,8 @@ func (r *activityRepository) Create(activity model.Activity) (*model.Activity, e
 	var ID int64
 	q := `INSERT INTO activities (title,category,created_by,background_image_url,start_at,content) 
 	Values($1,$2,$3,$4,$5,$6) RETURNING ID`
+
+	fmt.Printf("model: %+v \n", activity)
 	err := r.pool.QueryRow(
 		ctx,
 		q,

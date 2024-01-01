@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"fmt"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/omerbeden/event-mate/backend/tatooine/cmd/api/presenter"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/domain/model"
@@ -12,6 +14,7 @@ func CreateActivity(service entrypoints.ActivityService) fiber.Handler {
 		var requestBody model.Activity
 		err := c.BodyParser(&requestBody)
 		if err != nil {
+			fmt.Printf("err: %v\n", err)
 			return c.Status(fiber.StatusBadRequest).JSON(presenter.BaseResponse{
 				APIVersion: presenter.APIVersion,
 				Data:       nil,
@@ -21,6 +24,8 @@ func CreateActivity(service entrypoints.ActivityService) fiber.Handler {
 
 		res, err := service.CreateActivity(c.Context(), requestBody)
 		if err != nil {
+			fmt.Printf("err: %v\n", err)
+
 			return c.Status(fiber.StatusInternalServerError).JSON(presenter.BaseResponse{
 				APIVersion: presenter.APIVersion,
 				Data:       nil,

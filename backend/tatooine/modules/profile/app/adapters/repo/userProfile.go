@@ -5,42 +5,63 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/jackc/pgx/v4"
-	"github.com/jackc/pgx/v4/pgxpool"
-	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/domain/model"
+	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/model"
 )
 
-type UserProfileRepo struct {
+type userProfileRepo struct {
 	pool *pgxpool.Pool
 }
 
-func (r *UserProfileRepo) GetUsers() ([]model.UserProfile, error) {
-	return nil, nil
+func NewUserProfileRepo(pool *pgxpool.Pool) *userProfileRepo {
+	return &userProfileRepo{
+		pool: pool,
+	}
 }
-func (r *UserProfileRepo) GetUserById(id uint) (*model.UserProfile, error) {
-	return nil, nil
+
+func (r *userProfileRepo) GetUsersByAddress(address model.UserProfileAdress) ([]model.UserProfile, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	q := `
+	Select p.id, p.name, p.last_name, p.profile_image_url, 
+	stats.points, stats.followings, stats.followers,
+	a.city
+	FROM user_profile_addresses a
+	JOIN user_profiles p ON p.id = a.profile_id
+	JOIN user_profile_stats stats ON stats.profile_id = p.id
+	WHERE a.city = $1
+	`
+
+	rows, err := r.pool.Query(ctx, q, address.City)
+	if err != nil {
+		return nil, fmt.Errorf("could not get users, %w", err)
+	}
+
+	var users []model.UserProfile
+	for rows.Next() {
+		var res model.UserProfile
+		err := rows.Scan(&res.Id, &res.Name, &res.LastName, &res.ProfileImageUrl,
+			&res.Stat.Points, &res.Stat.Following, &res.Stat.Followers,
+			&res.Adress.City)
+		if err != nil {
+			return nil, fmt.Errorf("err getting rows %w ", err)
+		}
+		users = append(users, res)
+	}
+	return users, nil
 }
-func (r *UserProfileRepo) InsertUser(user *model.UserProfile) (bool, error) {
+func (r *userProfileRepo) InsertUser(user *model.UserProfile) (bool, error) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	q := `INSERT INTO profile (name,lastName,about,photo) Values($1,$2,$3,$4) RETURNING id`
+	q := `INSERT INTO user_profiles
+	 (name,last_name,profile_image_url)
+	 Values($1,$2,$3) RETURNING id`
 	var id int64
-	tx, err := r.pool.BeginTx(ctx, pgx.TxOptions{})
-	if err != nil {
-		return false, err
-	}
 
-	defer func() {
-		if err != nil {
-			tx.Rollback(ctx)
-		} else {
-			tx.Commit(ctx)
-		}
-	}()
-
-	errQR := tx.QueryRow(ctx, q, user.Name, user.LastName, user.About, user.Photo).Scan(&id)
+	errQR := r.pool.QueryRow(ctx, q, user.Name, user.LastName, user.ProfileImageUrl).Scan(&id)
 	if errQR != nil {
 		return false, fmt.Errorf("could not create %w", errQR)
 	}
@@ -57,37 +78,37 @@ func (r *UserProfileRepo) InsertUser(user *model.UserProfile) (bool, error) {
 
 	return true, nil
 }
-func (r *UserProfileRepo) UpdateUser(user *model.UserProfile) error {
+func (r *userProfileRepo) UpdateUser(user *model.UserProfile) error {
 	return nil
 }
-func (r *UserProfileRepo) DeleteUserById(id uint) (bool, error) {
+func (r *userProfileRepo) DeleteUserById(id uint) (bool, error) {
 	return false, nil
 }
 
-func (r *UserProfileRepo) insertProfileAdress(user *model.UserProfile) error {
+func (r *userProfileRepo) insertProfileAdress(user *model.UserProfile) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	q := `INSERT INTO userProfileAdress (city,userProfileId) Values($1,$2)`
-	_, err := r.pool.Exec(ctx, q, user.Adress.City, user.Id)
+	q := `INSERT INTO user_profile_addresses (profile_id,city) Values($1,$2)`
+	_, err := r.pool.Exec(ctx, q, user.Id, user.Adress.City)
 	if err != nil {
-		return fmt.Errorf("could not insert profile adress")
+		return fmt.Errorf("could not insert profile adress %w", err)
 	}
 
 	return nil
 }
 
-func (r *UserProfileRepo) insertProfileStat(user *model.UserProfile) error {
+func (r *userProfileRepo) insertProfileStat(user *model.UserProfile) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
 	q := fmt.Sprintf(
-		`INSERT INTO userProfileStat
-		 (userprofileid,followers,following,points)
+		`INSERT INTO user_profile_stats
+		 (profile_id,followers,followings,points)
 		 Values(%d,%d,%d,%f)`, user.Id, user.Stat.Followers, user.Stat.Following, user.Stat.Points)
 	_, err := r.pool.Exec(ctx, q)
 	if err != nil {
-		return fmt.Errorf("could not insert profile adress")
+		return fmt.Errorf("could not insert profile stats %w", err)
 	}
 
 	return nil

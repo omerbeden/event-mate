@@ -2,7 +2,7 @@ CREATE TABLE IF NOT EXISTS activities(
     id serial primary key ,
     title varchar(20),
 	category varchar(20),
-	created_user_id int 
+	created_by int 
 );
 
 CREATE TABLE IF NOT EXISTS activity_locations(
@@ -24,7 +24,9 @@ CREATE TABLE IF NOT EXISTS user_profile_addresses(
 
 CREATE TABLE IF NOT EXISTS user_profile_stats(
 	profile_id  int primary key references user_profiles(id) ,
-	points varchar(20)
+	point real,
+	followings int,
+	followers int 
 );
 
 

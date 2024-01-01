@@ -1,8 +1,8 @@
 package commands
 
 import (
-	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/domain/model"
-	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/domain/ports"
+	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/model"
+	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/ports"
 )
 
 type CreateProfileCommand struct {
