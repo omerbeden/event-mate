@@ -93,7 +93,7 @@ func (service ActivityService) GetActivitiesByLocation(ctx context.Context, loc 
 
 	commandResult, err := getCommand.Handle()
 
-	fmt.Printf("%+v , %+v", commandResult, nil)
+	fmt.Printf("%+v , %+v", commandResult, err)
 	if err != nil {
 		return nil, err
 	}

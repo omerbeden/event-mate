@@ -25,7 +25,7 @@ func (r *userProfileRepo) GetUsersByAddress(address model.UserProfileAdress) ([]
 
 	q := `
 	Select p.id, p.name, p.last_name, p.profile_image_url, 
-	stats.points, stats.followings, stats.followers,
+	stats.point, stats.followings, stats.followers,
 	a.city
 	FROM user_profile_addresses a
 	JOIN user_profiles p ON p.id = a.profile_id
@@ -42,7 +42,7 @@ func (r *userProfileRepo) GetUsersByAddress(address model.UserProfileAdress) ([]
 	for rows.Next() {
 		var res model.UserProfile
 		err := rows.Scan(&res.Id, &res.Name, &res.LastName, &res.ProfileImageUrl,
-			&res.Stat.Points, &res.Stat.Following, &res.Stat.Followers,
+			&res.Stat.Point, &res.Stat.Followings, &res.Stat.Followers,
 			&res.Adress.City)
 		if err != nil {
 			return nil, fmt.Errorf("err getting rows %w ", err)
@@ -104,8 +104,8 @@ func (r *userProfileRepo) insertProfileStat(user *model.UserProfile) error {
 
 	q := fmt.Sprintf(
 		`INSERT INTO user_profile_stats
-		 (profile_id,followers,followings,points)
-		 Values(%d,%d,%d,%f)`, user.Id, user.Stat.Followers, user.Stat.Following, user.Stat.Points)
+		 (profile_id,followers,followings,point)
+		 Values(%d,%d,%d,%f)`, user.Id, user.Stat.Followers, user.Stat.Followings, user.Stat.Point)
 	_, err := r.pool.Exec(ctx, q)
 	if err != nil {
 		return fmt.Errorf("could not insert profile stats %w", err)

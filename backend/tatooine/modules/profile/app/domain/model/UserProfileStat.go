@@ -3,7 +3,7 @@ package model
 type UserProfileStat struct {
 	ProfileId      int64
 	Followers      int
-	Following      int
+	Followings     int
 	AttandedEvents int
-	Points         float32
+	Point          float32
 }

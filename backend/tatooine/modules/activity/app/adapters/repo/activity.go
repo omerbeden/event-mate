@@ -98,8 +98,11 @@ func (r *activityRepository) AddParticipant(activityId int64, user model.User) e
 func (r *activityRepository) GetParticipants(acitivityId int64) ([]model.User, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
-	q := `SELECT u.id FROM user_profiles u
+	q := `SELECT u.id, u.name, u.last_name, 
+	stats.point
+	FROM user_profiles u
 	RIGHT JOIN participants p ON p.user_id = u.id
+	RIGHT JOIN user_profile_stats stats ON stats.profile_id = u.id
 	WHERE p.activity_id = $1
 	`
 
@@ -110,7 +113,7 @@ func (r *activityRepository) GetParticipants(acitivityId int64) ([]model.User, e
 	}
 	for rows.Next() {
 		var res model.User
-		err := rows.Scan(&res.ID)
+		err := rows.Scan(&res.ID, &res.Name, &res.LastName, &res.ProfilePoint)
 		if err != nil {
 			return nil, fmt.Errorf("err getting rows %w ", err)
 		}
@@ -144,9 +147,13 @@ func (r *activityRepository) GetByLocation(loc *model.Location) ([]model.Activit
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	q := `SELECT e.id, title, category, e.created_by, l.city
+	q := `SELECT e.id, title, category, 
+	u.id, u.name, u.last_name, u.profile_image_url, 
+	stats.point
+	, l.city
 	FROM activities e
 	LEFT JOIN user_profiles u ON e.created_by = u.id
+	LEFT JOIN user_profile_stats stats ON stats.profile_id = u.id
 	LEFT JOIN activity_locations l ON e.id = l.activity_id
 	Where l.city= $1`
 
@@ -158,7 +165,9 @@ func (r *activityRepository) GetByLocation(loc *model.Location) ([]model.Activit
 
 	for rows.Next() {
 		var res model.Activity
-		err := rows.Scan(&res.ID, &res.Title, &res.Category, &res.CreatedBy.ID, &res.Location.City)
+		err := rows.Scan(&res.ID, &res.Title, &res.Category,
+			&res.CreatedBy.ID, &res.CreatedBy.Name, &res.CreatedBy.LastName, &res.CreatedBy.ProfileImageUrl, &res.CreatedBy.ProfilePoint,
+			&res.Location.City)
 		if err != nil {
 			return nil, fmt.Errorf("err getting rows %w ", err)
 		}

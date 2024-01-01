@@ -35,6 +35,8 @@ func (ccmd *CreateCommand) Handle() (bool, error) {
 
 	activityId := strconv.FormatInt(activity.ID, 10)
 
+	//fill activity createdBy
+
 	jsonActivity, errMarshall := json.Marshal(activity)
 	if errMarshall != nil {
 		return false, errMarshall

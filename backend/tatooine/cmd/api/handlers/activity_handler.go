@@ -61,8 +61,9 @@ func AddParticipant(service entrypoints.ActivityService) fiber.Handler {
 				Error:      presenter.BODY_PARSER_ERR,
 			})
 		}
-
+		fmt.Printf("body: %+v", requestBody)
 		if err := service.AddParticipant(requestBody, int64(activityId)); err != nil { // unnecessary int64 id , can be use int instead
+			fmt.Printf("err: %v\n", err)
 			return c.Status(fiber.StatusInternalServerError).JSON(presenter.BaseResponse{
 				APIVersion: presenter.APIVersion,
 				Data:       nil,

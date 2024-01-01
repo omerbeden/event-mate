@@ -3,7 +3,7 @@ package model
 import "time"
 
 type Activity struct {
-	ID                 int64     `json:"-"`
+	ID                 int64     `json:"id"`
 	Title              string    `json:"title"`
 	Category           string    `json:"category"`
 	CreatedBy          User      `json:"createdBy"`

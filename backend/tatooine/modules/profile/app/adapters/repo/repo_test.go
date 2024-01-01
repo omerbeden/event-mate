@@ -20,19 +20,19 @@ func TestInsertUser(t *testing.T) {
 	repository := repo.NewUserProfileRepo(pool)
 
 	user := model.UserProfile{
-		Name:               "omer2",
+		Name:               "oner1",
 		LastName:           "beden",
 		About:              "about",
 		AttandedActivities: []model.Activity{},
 		Adress: model.UserProfileAdress{
-			ProfileId: 1,
+			ProfileId: 2,
 			City:      "Sakarya",
 		},
 		Stat: model.UserProfileStat{
-			ProfileId: 1,
-			Followers: 1,
-			Following: 10,
-			Points:    3.5,
+			ProfileId:  2,
+			Followers:  1,
+			Followings: 10,
+			Point:      3.5,
 		},
 		ProfileImageUrl: "image url",
 	}
