@@ -71,6 +71,7 @@ func TestGetActivitiesByLocation(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.NotEmpty(t, result)
+	assert.NotEmpty(t, result[0].Participants)
 
 }
 
