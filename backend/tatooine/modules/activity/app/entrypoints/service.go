@@ -2,7 +2,6 @@ package entrypoints
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/go-redis/redis/v8"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/adapters/redisadapter"
@@ -91,15 +90,21 @@ func (service ActivityService) GetActivitiesByLocation(ctx context.Context, loc 
 		Redis:    redisadapter.NewRedisAdapter(&service.RedisClient),
 	}
 
-	commandResult, err := getCommand.Handle()
+	activities, err := getCommand.Handle()
 
-	fmt.Printf("%+v , %+v", commandResult, err)
+	for _, activity := range activities {
+		activity.Participants, err = service.GetParticipants(activity.ID)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	if err != nil {
 		return nil, err
 	}
-	if commandResult == nil {
+	if activities == nil {
 		return nil, err
 	}
 
-	return commandResult, nil
+	return activities, nil
 }

@@ -68,6 +68,7 @@ func TestGetActivitiesByLocation(t *testing.T) {
 	}
 
 	result, err := activityService.GetActivitiesByLocation(context.Background(), loc)
+
 	assert.NoError(t, err)
 	assert.NotEmpty(t, result)
 

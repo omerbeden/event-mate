@@ -99,10 +99,10 @@ func (r *activityRepository) GetParticipants(acitivityId int64) ([]model.User, e
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 	q := `SELECT u.id, u.name, u.last_name, 
-	stats.point
+	COALESCE(stats.point, 0.0) AS point
 	FROM user_profiles u
 	RIGHT JOIN participants p ON p.user_id = u.id
-	RIGHT JOIN user_profile_stats stats ON stats.profile_id = u.id
+	LEFT JOIN user_profile_stats stats ON stats.profile_id = u.id
 	WHERE p.activity_id = $1
 	`
 
@@ -149,7 +149,7 @@ func (r *activityRepository) GetByLocation(loc *model.Location) ([]model.Activit
 
 	q := `SELECT e.id, title, category, 
 	u.id, u.name, u.last_name, u.profile_image_url, 
-	stats.point
+	COALESCE(stats.point, 0.0)  as point
 	, l.city
 	FROM activities e
 	LEFT JOIN user_profiles u ON e.created_by = u.id

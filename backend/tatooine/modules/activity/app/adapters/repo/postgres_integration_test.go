@@ -71,14 +71,14 @@ func TestAddParticipant(t *testing.T) {
 	pool := postgres.NewConn(&dbConfig)
 	activityRepository := repo.NewActivityRepo(pool)
 	activity := model.Activity{
-		ID:           1,
-		Title:        "test title",
-		Category:     "test category",
-		CreatedBy:    model.User{ID: 1},
-		Location:     model.Location{City: "Sakarya"},
-		Participants: []model.User{{ID: 1}, {ID: 2}, {ID: 3}}}
+		ID:        1,
+		Title:     "test title",
+		Category:  "test category",
+		CreatedBy: model.User{ID: 1},
+		Location:  model.Location{City: "Sakarya"},
+	}
 
-	user := model.User{ID: 4}
+	user := model.User{ID: 3}
 
 	err := activityRepository.AddParticipant(activity.ID, user)
 	assert.NoError(t, err)
