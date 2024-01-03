@@ -5,11 +5,12 @@ import (
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/ports"
 )
 
-type CreateProfileCommand struct {
+type DeleteProfileCommand struct {
 	Profile model.UserProfile
 	Repo    ports.UserProfileRepository
+	userId  int64
 }
 
-func (ccmd *CreateProfileCommand) Handle() (bool, error) {
-	return ccmd.Repo.InsertUser(&ccmd.Profile)
+func (c *DeleteProfileCommand) Handle() error {
+	return c.Repo.DeleteUserById(c.userId)
 }
