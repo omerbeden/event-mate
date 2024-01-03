@@ -7,6 +7,7 @@ type UserProfileRepository interface {
 	InsertUser(user *model.UserProfile) (bool, error)
 	UpdateProfileImage(imageUrl string) error
 	DeleteUserById(id uint) error
+	GetAttandedActivities(userId int64) ([]model.Activity, error)
 }
 
 type EventRepository interface {

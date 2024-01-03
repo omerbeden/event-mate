@@ -59,11 +59,11 @@ func (r *userProfileRepo) InsertUser(user *model.UserProfile) (bool, error) {
 	defer cancel()
 
 	q := `INSERT INTO user_profiles
-	 (name,last_name,profile_image_url,about,)
-	 Values($1,$2,$3) RETURNING id`
+	 (name,last_name,profile_image_url,about)
+	 Values($1,$2,$3,$4) RETURNING id`
 	var id int64
 
-	errQR := r.pool.QueryRow(ctx, q, user.Name, user.LastName, user.ProfileImageUrl).Scan(&id)
+	errQR := r.pool.QueryRow(ctx, q, user.Name, user.LastName, user.ProfileImageUrl, user.About).Scan(&id)
 	if errQR != nil {
 		return false, fmt.Errorf("%s could not create %w", errlogprefix, errQR)
 	}
@@ -106,6 +106,38 @@ func (r *userProfileRepo) DeleteUserById(id int64) error {
 	}
 
 	return nil
+}
+
+func (r *userProfileRepo) GetAttandedActivities(userId int64) ([]model.Activity, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	q := `SELECT a.id , a.title, a.category, a.background_image_url, a.content , a.start_at,
+	loc.city
+	FROM participants attended
+	JOIN user_profiles p ON p.id = attended.user_id
+	JOIN activities a ON a.id = attended.activity_id
+	JOIN activity_locations loc ON loc.activity_id = a.id
+	JOIN user_profiles created ON created.id = a.created_by
+	WHERE attended.user_id = $1
+	`
+
+	rows, err := r.pool.Query(ctx, q, userId)
+	if err != nil {
+		return nil, fmt.Errorf("%s could not get activities for user: %d", errlogprefix, userId)
+	}
+
+	var activities []model.Activity
+	for rows.Next() {
+		var activity model.Activity
+		err := rows.Scan(&activity.ID, &activity.Title, &activity.Category, &activity.BackgroundImageUrl, &activity.Content, &activity.StartAt,
+			&activity.Location.City)
+		if err != nil {
+			return nil, fmt.Errorf("%s error getting rows for user : %d", errlogprefix, userId)
+		}
+	}
+
+	return activities, nil
 }
 
 func (r *userProfileRepo) insertProfileAdress(user *model.UserProfile) error {
