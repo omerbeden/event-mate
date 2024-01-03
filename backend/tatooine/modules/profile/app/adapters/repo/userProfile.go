@@ -13,6 +13,8 @@ type userProfileRepo struct {
 	pool *pgxpool.Pool
 }
 
+const errlogprefix = "repo:userProfile"
+
 func NewUserProfileRepo(pool *pgxpool.Pool) *userProfileRepo {
 	return &userProfileRepo{
 		pool: pool,
@@ -35,7 +37,7 @@ func (r *userProfileRepo) GetUsersByAddress(address model.UserProfileAdress) ([]
 
 	rows, err := r.pool.Query(ctx, q, address.City)
 	if err != nil {
-		return nil, fmt.Errorf("could not get users, %w", err)
+		return nil, fmt.Errorf("%s could not get users, %w", errlogprefix, err)
 	}
 
 	var users []model.UserProfile
@@ -45,7 +47,7 @@ func (r *userProfileRepo) GetUsersByAddress(address model.UserProfileAdress) ([]
 			&res.Stat.Point, &res.Stat.Followings, &res.Stat.Followers,
 			&res.Adress.City)
 		if err != nil {
-			return nil, fmt.Errorf("err getting rows %w ", err)
+			return nil, fmt.Errorf("%s err getting rows %w ", errlogprefix, err)
 		}
 		users = append(users, res)
 	}
@@ -57,13 +59,13 @@ func (r *userProfileRepo) InsertUser(user *model.UserProfile) (bool, error) {
 	defer cancel()
 
 	q := `INSERT INTO user_profiles
-	 (name,last_name,profile_image_url)
+	 (name,last_name,profile_image_url,about,)
 	 Values($1,$2,$3) RETURNING id`
 	var id int64
 
 	errQR := r.pool.QueryRow(ctx, q, user.Name, user.LastName, user.ProfileImageUrl).Scan(&id)
 	if errQR != nil {
-		return false, fmt.Errorf("could not create %w", errQR)
+		return false, fmt.Errorf("%s could not create %w", errlogprefix, errQR)
 	}
 
 	user.Id = id
@@ -78,11 +80,32 @@ func (r *userProfileRepo) InsertUser(user *model.UserProfile) (bool, error) {
 
 	return true, nil
 }
-func (r *userProfileRepo) UpdateUser(user *model.UserProfile) error {
+func (r *userProfileRepo) UpdateProfileImage(userId int64, imageUrl string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	q := `UPDATE user_profiles 
+		SET profile_image_url = $1
+		WHERE id = $2`
+
+	_, err := r.pool.Exec(ctx, q, imageUrl, userId)
+	if err != nil {
+		return fmt.Errorf("%s could not update user %d , %w", errlogprefix, userId, err)
+	}
+
 	return nil
 }
-func (r *userProfileRepo) DeleteUserById(id uint) (bool, error) {
-	return false, nil
+func (r *userProfileRepo) DeleteUserById(id int64) error {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	q := `DELETE FROM user_profiles  WHERE id = $1`
+	_, err := r.pool.Exec(ctx, q, id)
+	if err != nil {
+		return fmt.Errorf("%s could not delete activity id: %d %w", errlogprefix, id, err)
+	}
+
+	return nil
 }
 
 func (r *userProfileRepo) insertProfileAdress(user *model.UserProfile) error {
@@ -92,7 +115,7 @@ func (r *userProfileRepo) insertProfileAdress(user *model.UserProfile) error {
 	q := `INSERT INTO user_profile_addresses (profile_id,city) Values($1,$2)`
 	_, err := r.pool.Exec(ctx, q, user.Id, user.Adress.City)
 	if err != nil {
-		return fmt.Errorf("could not insert profile adress %w", err)
+		return fmt.Errorf("%s could not insert profile adress %w", errlogprefix, err)
 	}
 
 	return nil
@@ -108,7 +131,7 @@ func (r *userProfileRepo) insertProfileStat(user *model.UserProfile) error {
 		 Values(%d,%d,%d,%f)`, user.Id, user.Stat.Followers, user.Stat.Followings, user.Stat.Point)
 	_, err := r.pool.Exec(ctx, q)
 	if err != nil {
-		return fmt.Errorf("could not insert profile stats %w", err)
+		return fmt.Errorf("%s could not insert profile stats %w", errlogprefix, err)
 	}
 
 	return nil

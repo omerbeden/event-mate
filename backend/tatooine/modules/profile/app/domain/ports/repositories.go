@@ -5,8 +5,8 @@ import "github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/dom
 type UserProfileRepository interface {
 	GetUsersByAddress(address model.UserProfileAdress) ([]model.UserProfile, error)
 	InsertUser(user *model.UserProfile) (bool, error)
-	UpdateUser(user *model.UserProfile) error
-	DeleteUserById(id uint) (bool, error)
+	UpdateProfileImage(imageUrl string) error
+	DeleteUserById(id uint) error
 }
 
 type EventRepository interface {

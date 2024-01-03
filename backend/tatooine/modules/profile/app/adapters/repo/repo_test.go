@@ -25,11 +25,9 @@ func TestInsertUser(t *testing.T) {
 		About:              "about",
 		AttandedActivities: []model.Activity{},
 		Adress: model.UserProfileAdress{
-			ProfileId: 2,
-			City:      "Sakarya",
+			City: "Sakarya",
 		},
 		Stat: model.UserProfileStat{
-			ProfileId:  2,
 			Followers:  1,
 			Followings: 10,
 			Point:      3.5,
@@ -63,4 +61,30 @@ func TestGetUsersByAddress(t *testing.T) {
 	assert.NotNil(t, result)
 	assert.NotEmpty(t, result)
 	assert.Equal(t, result[0].Adress.City, address.City)
+}
+
+func TestUpdateProfileImage(t *testing.T) {
+	dbConfig := postgres.PostgresConfig{
+		ConnectionString: "postgres://postgres:password@localhost:5432/test",
+		Config:           pgxpool.Config{MinConns: 5, MaxConns: 10},
+	}
+	pool := postgres.NewConn(&dbConfig)
+
+	repository := repo.NewUserProfileRepo(pool)
+
+	err := repository.UpdateProfileImage(1, "new image.png")
+	assert.NoError(t, err)
+}
+
+func TestDeleteUserById(t *testing.T) {
+	dbConfig := postgres.PostgresConfig{
+		ConnectionString: "postgres://postgres:password@localhost:5432/test",
+		Config:           pgxpool.Config{MinConns: 5, MaxConns: 10},
+	}
+	pool := postgres.NewConn(&dbConfig)
+
+	repository := repo.NewUserProfileRepo(pool)
+
+	err := repository.DeleteUserById(1)
+	assert.NoError(t, err)
 }
