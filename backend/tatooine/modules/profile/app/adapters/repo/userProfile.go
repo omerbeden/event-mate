@@ -53,7 +53,7 @@ func (r *userProfileRepo) GetUsersByAddress(address model.UserProfileAdress) ([]
 	}
 	return users, nil
 }
-func (r *userProfileRepo) InsertUser(user *model.UserProfile) (bool, error) {
+func (r *userProfileRepo) InsertUser(user *model.UserProfile) (*model.UserProfile, error) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
@@ -65,20 +65,20 @@ func (r *userProfileRepo) InsertUser(user *model.UserProfile) (bool, error) {
 
 	errQR := r.pool.QueryRow(ctx, q, user.Name, user.LastName, user.ProfileImageUrl, user.About).Scan(&id)
 	if errQR != nil {
-		return false, fmt.Errorf("%s could not create %w", errlogprefix, errQR)
+		return nil, fmt.Errorf("%s could not create %w", errlogprefix, errQR)
 	}
 
 	user.Id = id
 	errAdress := r.insertProfileAdress(user)
 	if errAdress != nil {
-		return false, errAdress
+		return nil, errAdress
 	}
 	errStat := r.insertProfileStat(user)
 	if errStat != nil {
-		return false, errStat
+		return nil, errStat
 	}
 
-	return true, nil
+	return user, nil
 }
 func (r *userProfileRepo) UpdateProfileImage(userId int64, imageUrl string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
@@ -102,7 +102,7 @@ func (r *userProfileRepo) DeleteUserById(id int64) error {
 	q := `DELETE FROM user_profiles  WHERE id = $1`
 	_, err := r.pool.Exec(ctx, q, id)
 	if err != nil {
-		return fmt.Errorf("%s could not delete activity id: %d %w", errlogprefix, id, err)
+		return fmt.Errorf("%s could not delete user, id: %d %w", errlogprefix, id, err)
 	}
 
 	return nil

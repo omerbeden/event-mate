@@ -38,7 +38,7 @@ func TestInsertUser(t *testing.T) {
 	result, err := repository.InsertUser(&user)
 
 	assert.NoError(t, err)
-	assert.True(t, result)
+	assert.NotNil(t, result)
 
 }
 
