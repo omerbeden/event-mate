@@ -7,6 +7,7 @@ import (
 )
 
 var ErrLogPrefix = "profile:cacheAdapter"
+var attandedActivitiesRedisKey = "attandedActivities"
 
 type Cache struct {
 	client cache.Cache
@@ -30,4 +31,14 @@ func (adapter *Cache) Set(key string, jsonValue []byte) error {
 
 func (adapter *Cache) Delete(key string) error {
 	return adapter.client.Delete(key)
+}
+
+func (adapter *Cache) GetAttandedActivities(userId int64) ([]string, error) {
+	key := fmt.Sprintf("%s:%d", attandedActivitiesRedisKey, userId)
+	attandedActivities, err := adapter.client.GetMembers(key)
+	if err != nil {
+		return nil, fmt.Errorf("%s could not get attanded activities for key: %s ", ErrLogPrefix, key)
+	}
+
+	return attandedActivities, nil
 }
