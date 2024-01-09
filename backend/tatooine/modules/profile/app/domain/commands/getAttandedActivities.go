@@ -6,11 +6,11 @@ import (
 
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/adapters/cachedapter"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/model"
-	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/ports"
+	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/ports/repositories"
 )
 
 type GetAttandedActivitiesCommand struct {
-	Repo   ports.UserProfileRepository
+	Repo   repositories.UserProfileRepository
 	Cache  cachedapter.Cache
 	UserId int64
 }

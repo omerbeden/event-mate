@@ -19,7 +19,13 @@ type RedisClient struct {
 	options RedisOption
 }
 
-func NewRedisClient(redis *redis.Client, option RedisOption) *RedisClient {
+func NewRedisClient(option RedisOption) *RedisClient {
+
+	redis := redis.NewClient(&redis.Options{
+		Addr:     option.Addr,
+		Password: option.Password,
+		DB:       option.DB,
+	})
 	return &RedisClient{
 		redis:   redis,
 		options: option,
@@ -29,6 +35,7 @@ func NewRedisClient(redis *redis.Client, option RedisOption) *RedisClient {
 func (client *RedisClient) Set(key string, value any) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
+
 	_, err := client.redis.Set(ctx, key, value, client.options.ExpirationTime).Result()
 
 	if err != nil {

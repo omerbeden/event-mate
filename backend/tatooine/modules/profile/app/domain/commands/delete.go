@@ -5,22 +5,20 @@ import (
 	"strconv"
 
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/adapters/cachedapter"
-	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/model"
-	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/ports"
+	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/ports/repositories"
 )
 
 var errLogPrefixDeleteCommand = "profile:createCommand"
 
 type DeleteProfileCommand struct {
-	Profile model.UserProfile
-	Repo    ports.UserProfileRepository
-	Cache   cachedapter.Cache
-	userId  int64
+	Repo   repositories.UserProfileRepository
+	Cache  cachedapter.Cache
+	UserId int64
 }
 
 func (c *DeleteProfileCommand) Handle() error {
-	err := c.Repo.DeleteUserById(c.userId)
-	userId := strconv.FormatInt(c.userId, 10)
+	err := c.Repo.DeleteUserById(c.UserId)
+	userId := strconv.FormatInt(c.UserId, 10)
 	if err != nil {
 		return err
 	}
@@ -34,5 +32,6 @@ func (c *DeleteProfileCommand) Handle() error {
 }
 
 func (c *DeleteProfileCommand) deleteFromCache(key string) error {
-	return c.Cache.Delete(key)
+	cacheKey := fmt.Sprintf("%s:%s", userProfileCacheKey, key)
+	return c.Cache.Delete(cacheKey)
 }

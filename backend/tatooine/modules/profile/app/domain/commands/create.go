@@ -7,7 +7,7 @@ import (
 
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/adapters/cachedapter"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/model"
-	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/ports"
+	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/ports/repositories"
 )
 
 var userProfileCacheKey = "userProfile"
@@ -15,7 +15,7 @@ var errLogPrefixCreateCommand = "profile:createCommand"
 
 type CreateProfileCommand struct {
 	Profile model.UserProfile
-	Repo    ports.UserProfileRepository
+	Repo    repositories.UserProfileRepository
 	Cache   cachedapter.Cache
 }
 

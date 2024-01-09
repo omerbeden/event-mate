@@ -1,14 +1,17 @@
 package commands
 
 import (
+	"encoding/json"
+	"fmt"
 	"strconv"
 
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/adapters/cachedapter"
-	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/ports"
+	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/model"
+	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/ports/repositories"
 )
 
 type UpdateProfileImageCommand struct {
-	Repo  ports.UserProfileRepository
+	Repo  repositories.UserProfileRepository
 	Cache cachedapter.Cache
 
 	ImageUrl string
@@ -16,15 +19,24 @@ type UpdateProfileImageCommand struct {
 }
 
 func (c *UpdateProfileImageCommand) Handle() error {
-	err := c.Repo.UpdateProfileImage(c.UserId, c.ImageUrl)
+	updatedUser, err := c.Repo.UpdateProfileImage(c.UserId, c.ImageUrl)
 	if err != nil {
 		return err
 	}
 
-	return c.updateCache(c.UserId, c.ImageUrl)
+	fmt.Printf(" updated : %+v\n", updatedUser)
+
+	return c.updateCache(c.UserId, updatedUser)
 }
 
-func (c *UpdateProfileImageCommand) updateCache(userId int64, imageURl string) error {
+func (c *UpdateProfileImageCommand) updateCache(userId int64, updatedUser *model.UserProfile) error {
 	userIdStr := strconv.FormatInt(userId, 10)
-	return c.Cache.Set(userIdStr, []byte(imageURl))
+	cacheKey := fmt.Sprintf("%s:%s", userProfileCacheKey, userIdStr)
+
+	jsonValue, err := json.Marshal(updatedUser)
+	if err != nil {
+		return fmt.Errorf("parsing error while updating user profile on cache")
+	}
+
+	return c.Cache.Set(cacheKey, jsonValue)
 }

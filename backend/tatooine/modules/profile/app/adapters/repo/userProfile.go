@@ -80,7 +80,7 @@ func (r *userProfileRepo) InsertUser(user *model.UserProfile) (*model.UserProfil
 
 	return user, nil
 }
-func (r *userProfileRepo) UpdateProfileImage(userId int64, imageUrl string) error {
+func (r *userProfileRepo) UpdateProfileImage(userId int64, imageUrl string) (*model.UserProfile, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
@@ -90,10 +90,15 @@ func (r *userProfileRepo) UpdateProfileImage(userId int64, imageUrl string) erro
 
 	_, err := r.pool.Exec(ctx, q, imageUrl, userId)
 	if err != nil {
-		return fmt.Errorf("%s could not update user %d , %w", errlogprefix, userId, err)
+		return nil, fmt.Errorf("%s could not update user %d , %w", errlogprefix, userId, err)
 	}
 
-	return nil
+	updatedUser, err := r.getUserById(userId)
+	if err != nil {
+		return nil, fmt.Errorf("%s could not get updated user %d , %w", errlogprefix, userId, err)
+	}
+
+	return updatedUser, nil
 }
 func (r *userProfileRepo) DeleteUserById(id int64) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
@@ -167,5 +172,30 @@ func (r *userProfileRepo) insertProfileStat(user *model.UserProfile) error {
 	}
 
 	return nil
+
+}
+
+func (r *userProfileRepo) getUserById(userId int64) (*model.UserProfile, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+	q := `
+	Select p.id, p.name, p.last_name, p.profile_image_url, 
+	stats.point, stats.followings, stats.followers,
+	a.city
+	FROM user_profile_addresses a
+	JOIN user_profiles p ON p.id = a.profile_id
+	JOIN user_profile_stats stats ON stats.profile_id = p.id
+	WHERE p.id = $1
+	`
+
+	var user model.UserProfile
+	err := r.pool.QueryRow(ctx, q, userId).Scan(&user.Id, &user.Name, &user.LastName, &user.ProfileImageUrl,
+		&user.Stat.Point, &user.Stat.Followings, &user.Stat.Followers,
+		&user.Adress.City)
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
 
 }
