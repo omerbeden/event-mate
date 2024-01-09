@@ -11,6 +11,7 @@ import (
 
 const PARTICIPANT_REDIS_KEY = "participant"
 const ERR_PREFIX_ADD_PARTICIPANT = "commands:addParticipant"
+const ATTANDED_ACTIVITIES_REDIS_KEY = "attandedActivities"
 
 type AddParticipantCommand struct {
 	ActivityRepository repositories.ActivityRepository
@@ -30,6 +31,11 @@ func (command *AddParticipantCommand) Handle() error {
 		return fmt.Errorf("%s could not add participant member to redis for activity id %d", ERR_PREFIX_ADD_PARTICIPANT, command.ActivityId)
 	}
 
+	err = command.addAttandedActivitiesForUser(command.Participant.ID, valueJSON)
+	if err != nil {
+		fmt.Printf("%s could not add atttanded activities to redis ", ERR_PREFIX_ADD_PARTICIPANT)
+	}
+
 	return command.ActivityRepository.AddParticipant(command.ActivityId, command.Participant)
 }
 
@@ -38,4 +44,9 @@ func (command *AddParticipantCommand) addParticipantToRedis(activityID int64, va
 
 	return command.Redis.AddMember(redisKey, valueJSON)
 
+}
+
+func (command *AddParticipantCommand) addAttandedActivitiesForUser(userId int64, valueJSON []byte) error {
+	redisKey := fmt.Sprintf("%s:%d", ATTANDED_ACTIVITIES_REDIS_KEY, userId)
+	return command.Redis.AddMember(redisKey, valueJSON)
 }
