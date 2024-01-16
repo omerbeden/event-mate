@@ -175,8 +175,8 @@ func (r *userProfileRepo) insertProfileStat(user *model.UserProfile) error {
 
 	q := fmt.Sprintf(
 		`INSERT INTO user_profile_stats
-		 (profile_id,followers,followings,point)
-		 Values(%d,%d,%d,%f)`, user.Id, user.Stat.Followers, user.Stat.Followings, user.Stat.Point)
+		 (profile_id,followers,followings,point,attanded_activities)
+		 Values(%d,%d,%d,%f,%d)`, user.Id, user.Stat.Followers, user.Stat.Followings, user.Stat.Point, len(user.AttandedActivities))
 	_, err := r.pool.Exec(ctx, q)
 	if err != nil {
 		return fmt.Errorf("%s could not insert profile stats %w", errlogprefix, err)
