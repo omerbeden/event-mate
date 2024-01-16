@@ -70,7 +70,7 @@ func TestUpdateUserProfileImage(t *testing.T) {
 
 	service := entrypoints.NewService(repo.NewUserProfileRepo(pool), *redis)
 
-	err := service.UpdateProfileImage(4, "new profile image4.png")
+	err := service.UpdateProfileImage(1, "new profile image9.png")
 
 	assert.NoError(t, err)
 }

@@ -26,7 +26,7 @@ func TestCreateActivity(t *testing.T) {
 	activity := model.Activity{
 		Title:              "test title",
 		Category:           "test category",
-		CreatedBy:          model.User{ID: 1},
+		CreatedBy:          model.User{ID: 2},
 		Location:           model.Location{City: "Sakarya"},
 		BackgroundImageUrl: "image url",
 		StartAt:            time.Now(),
@@ -78,7 +78,7 @@ func TestAddParticipant(t *testing.T) {
 		Location:  model.Location{City: "Sakarya"},
 	}
 
-	user := model.User{ID: 3}
+	user := model.User{ID: 1}
 
 	err := activityRepository.AddParticipant(activity.ID, user)
 	assert.NoError(t, err)

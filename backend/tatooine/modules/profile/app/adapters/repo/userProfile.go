@@ -100,6 +100,12 @@ func (r *userProfileRepo) UpdateProfileImage(userId int64, imageUrl string) (*mo
 		return nil, fmt.Errorf("%s could not get updated user %d , %w", errlogprefix, userId, err)
 	}
 
+	updatedUser.AttandedActivities, err = r.GetAttandedActivities(updatedUser.Id)
+	if err != nil {
+		return nil, fmt.Errorf("%s could not get updated user's attanded activities %d , %w", errlogprefix, userId, err)
+	}
+	fmt.Printf("updated user :%+v\n", updatedUser)
+
 	return updatedUser, nil
 }
 func (r *userProfileRepo) DeleteUserById(id int64) error {
@@ -142,6 +148,7 @@ func (r *userProfileRepo) GetAttandedActivities(userId int64) ([]model.Activity,
 		if err != nil {
 			return nil, fmt.Errorf("%s error getting rows for user : %d", errlogprefix, userId)
 		}
+		activities = append(activities, activity)
 	}
 
 	return activities, nil
@@ -181,7 +188,7 @@ func (r *userProfileRepo) getUserById(userId int64) (*model.UserProfile, error) 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 	q := `
-	Select p.id, p.name, p.last_name, p.profile_image_url, 
+	Select p.id, p.name, p.last_name, p.profile_image_url, p.about,
 	stats.point, stats.followings, stats.followers,
 	a.city
 	FROM user_profile_addresses a
@@ -191,7 +198,7 @@ func (r *userProfileRepo) getUserById(userId int64) (*model.UserProfile, error) 
 	`
 
 	var user model.UserProfile
-	err := r.pool.QueryRow(ctx, q, userId).Scan(&user.Id, &user.Name, &user.LastName, &user.ProfileImageUrl,
+	err := r.pool.QueryRow(ctx, q, userId).Scan(&user.Id, &user.Name, &user.LastName, &user.ProfileImageUrl, &user.About,
 		&user.Stat.Point, &user.Stat.Followings, &user.Stat.Followers,
 		&user.Adress.City)
 	if err != nil {
