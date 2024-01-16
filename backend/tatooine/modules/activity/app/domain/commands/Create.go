@@ -35,8 +35,6 @@ func (ccmd *CreateCommand) Handle() (bool, error) {
 
 	activityId := strconv.FormatInt(activity.ID, 10)
 
-	//fill activity createdBy
-
 	jsonActivity, errMarshall := json.Marshal(activity)
 	if errMarshall != nil {
 		return false, errMarshall
@@ -65,6 +63,3 @@ func (ccmd *CreateCommand) addCityToRedis(city string, valueJson []byte) error {
 
 	return ccmd.Redis.AddMember(cityKey, valueJson)
 }
-
-//TODO: Add addmember function to handle command. it should be done async
-//add Get SMEMBERS method  to get command and add a
