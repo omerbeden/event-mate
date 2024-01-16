@@ -8,12 +8,5 @@ type UserProfileRepository interface {
 	UpdateProfileImage(userId int64, imageUrl string) (*model.UserProfile, error)
 	DeleteUserById(id int64) error
 	GetAttandedActivities(userId int64) ([]model.Activity, error)
-}
-
-type EventRepository interface {
-	GetUserEvent(userId int) ([]model.Activity, error)
-}
-
-type UserStatRepository interface {
-	GetUserStat(userId int) (model.UserProfileStat, error)
+	GetUserProfileStats(userId int64) (*model.UserProfileStat, error)
 }

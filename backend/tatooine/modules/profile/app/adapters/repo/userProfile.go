@@ -210,3 +210,20 @@ func (r *userProfileRepo) getUserById(userId int64) (*model.UserProfile, error) 
 	return &user, nil
 
 }
+
+func (r *userProfileRepo) GetUserProfileStats(userId int64) (*model.UserProfileStat, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	q := `SELECT * FROM user_profile_stats
+	WHERE profile_id = $1`
+
+	var stat model.UserProfileStat
+	err := r.pool.QueryRow(ctx, q, userId).Scan(&stat.ProfileId, &stat.Point, &stat.Followings, &stat.Followers, &stat.AttandedEvents)
+	if err != nil {
+		return nil, fmt.Errorf("%s could not get user profile stats for : %d %w", errlogprefix, userId, err)
+
+	}
+
+	return &stat, nil
+}

@@ -63,3 +63,13 @@ func (service *UserService) UpdateProfileImage(userId int64, imageUrl string) er
 
 	return cmd.Handle()
 }
+
+func (service *UserService) GetUserProfileStats(userId int64) (*model.UserProfileStat, error) {
+	cmd := &commands.GetUserProfileStatsCommand{
+		Repo:   service.userRepository,
+		Cache:  *cachedapter.NewCache(&service.redisClient),
+		UserId: userId,
+	}
+
+	return cmd.Handle()
+}
