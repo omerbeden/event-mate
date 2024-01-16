@@ -19,8 +19,8 @@ func (c *GetAttandedActivitiesCommand) Handle() ([]model.Activity, error) {
 
 	attandedActivitiesFromCache, err := c.getFromCache(c.UserId)
 	if err != nil || len(attandedActivitiesFromCache) < 1 || attandedActivitiesFromCache == nil {
-		fmt.Printf("returning attended activities from db")
-		c.Repo.GetAttandedActivities(c.UserId)
+		fmt.Printf("returning attended activities from db userid : %d\n", c.UserId)
+		return c.Repo.GetAttandedActivities(c.UserId)
 	}
 
 	return attandedActivitiesFromCache, nil

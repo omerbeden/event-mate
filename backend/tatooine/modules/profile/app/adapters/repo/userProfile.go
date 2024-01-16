@@ -106,6 +106,8 @@ func (r *userProfileRepo) UpdateProfileImage(userId int64, imageUrl string) (*mo
 	}
 	fmt.Printf("updated user :%+v\n", updatedUser)
 
+	updatedUser.Stat.ProfileId = updatedUser.Id
+	updatedUser.Adress.ProfileId = updatedUser.Id
 	return updatedUser, nil
 }
 func (r *userProfileRepo) DeleteUserById(id int64) error {
