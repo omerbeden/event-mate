@@ -78,6 +78,8 @@ func (r *userProfileRepo) InsertUser(user *model.UserProfile) (*model.UserProfil
 		return nil, errStat
 	}
 
+	user.Stat.ProfileId = user.Id
+	user.Adress.ProfileId = user.Id
 	return user, nil
 }
 func (r *userProfileRepo) UpdateProfileImage(userId int64, imageUrl string) (*model.UserProfile, error) {
