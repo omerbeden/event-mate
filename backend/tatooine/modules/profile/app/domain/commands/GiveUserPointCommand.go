@@ -31,8 +31,7 @@ func (cmd *GiveUserPointCommand) Handle() error {
 		return fmt.Errorf("parsing json error %w", err)
 	}
 
-	cmd.updateCache(cmd.ReceiverId, jsonValue)
-	return nil
+	return cmd.updateCache(cmd.ReceiverId, jsonValue)
 }
 
 func (cmd *GiveUserPointCommand) updateCache(userId int64, value []byte) error {
