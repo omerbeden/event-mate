@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS user_profile_stats(
 	point real,
 	followings int,
 	followers int ,
-	attanded_activities
+	attanded_activities int
 );
 
 
