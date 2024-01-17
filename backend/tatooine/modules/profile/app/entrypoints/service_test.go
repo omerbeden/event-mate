@@ -39,8 +39,6 @@ func TestCreateUserProfile(t *testing.T) {
 		AttandedActivities: []model.Activity{},
 		Adress:             model.UserProfileAdress{City: "Sakarya"},
 		Stat: model.UserProfileStat{
-			Followers:          1,
-			Followings:         2,
 			AttandedActivities: 3,
 			Point:              5,
 		},

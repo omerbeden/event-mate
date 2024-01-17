@@ -28,9 +28,7 @@ func TestInsertUser(t *testing.T) {
 			City: "Sakarya",
 		},
 		Stat: model.UserProfileStat{
-			Followers:  1,
-			Followings: 10,
-			Point:      3.5,
+			Point: 3.5,
 		},
 		ProfileImageUrl: "image url",
 	}

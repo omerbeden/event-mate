@@ -27,7 +27,7 @@ func (r *userProfileRepo) GetUsersByAddress(address model.UserProfileAdress) ([]
 
 	q := `
 	Select p.id, p.name, p.last_name, p.profile_image_url, 
-	stats.point, stats.followings, stats.followers,
+	stats.point,
 	a.city
 	FROM user_profile_addresses a
 	JOIN user_profiles p ON p.id = a.profile_id
@@ -44,7 +44,7 @@ func (r *userProfileRepo) GetUsersByAddress(address model.UserProfileAdress) ([]
 	for rows.Next() {
 		var res model.UserProfile
 		err := rows.Scan(&res.Id, &res.Name, &res.LastName, &res.ProfileImageUrl,
-			&res.Stat.Point, &res.Stat.Followings, &res.Stat.Followers,
+			&res.Stat.Point,
 			&res.Adress.City)
 		if err != nil {
 			return nil, fmt.Errorf("%s err getting rows %w ", errlogprefix, err)
@@ -175,8 +175,8 @@ func (r *userProfileRepo) insertProfileStat(user *model.UserProfile) error {
 
 	q := fmt.Sprintf(
 		`INSERT INTO user_profile_stats
-		 (profile_id,followers,followings,point,attanded_activities)
-		 Values(%d,%d,%d,%f,%d)`, user.Id, user.Stat.Followers, user.Stat.Followings, user.Stat.Point, user.Stat.AttandedActivities)
+		 (profile_id, point, attanded_activities)
+		 Values(%d,%f,%d)`, user.Id, user.Stat.Point, user.Stat.AttandedActivities)
 	_, err := r.pool.Exec(ctx, q)
 	if err != nil {
 		return fmt.Errorf("%s could not insert profile stats %w", errlogprefix, err)
@@ -195,7 +195,7 @@ func (r *userProfileRepo) GetUserProfileStats(userId int64) (*model.UserProfileS
 	WHERE profile_id = $1`
 
 	var stat model.UserProfileStat
-	err := r.pool.QueryRow(ctx, q, userId).Scan(&stat.ProfileId, &stat.Point, &stat.Followings, &stat.Followers, &stat.AttandedActivities)
+	err := r.pool.QueryRow(ctx, q, userId).Scan(&stat.ProfileId, &stat.Point, &stat.AttandedActivities)
 	if err != nil {
 		return nil, fmt.Errorf("%s could not get user profile stats for : %d %w", errlogprefix, userId, err)
 
@@ -210,7 +210,7 @@ func (r *userProfileRepo) GetUserProfile(userId int64) (*model.UserProfile, erro
 
 	q := `SELECT up.id ,up.name, up.last_name, up.about, up.profile_image_url,
 	upa.city,
-	ups.followers, ups.followings, ups.attanded_activities,ups.point	 
+	ups.attanded_activities,ups.point	 
 	FROM user_profiles up
 	JOIN user_profile_stats ups ON ups.profile_id = up.id
 	JOIN user_profile_addresses upa ON upa.profile_id = up.id
@@ -219,7 +219,7 @@ func (r *userProfileRepo) GetUserProfile(userId int64) (*model.UserProfile, erro
 	var user model.UserProfile
 	err := r.pool.QueryRow(ctx, q, userId).Scan(&user.Id, &user.Name, &user.LastName, &user.About, &user.ProfileImageUrl,
 		&user.Adress.City,
-		&user.Stat.Followers, &user.Stat.Followings, &user.Stat.AttandedActivities, &user.Stat.Point)
+		&user.Stat.AttandedActivities, &user.Stat.Point)
 	if err != nil {
 		return nil, fmt.Errorf("%s could not get user profile for : %d %w", errlogprefix, userId, err)
 

@@ -25,8 +25,6 @@ CREATE TABLE IF NOT EXISTS user_profile_addresses(
 CREATE TABLE IF NOT EXISTS user_profile_stats(
 	profile_id  int primary key references user_profiles(id) ON DELETE CASCADE,
 	point real,
-	followings int,
-	followers int ,
 	attanded_activities int
 );
 
