@@ -27,7 +27,7 @@ func (r *userProfileRepo) GetUsersByAddress(address model.UserProfileAdress) ([]
 
 	q := `
 	Select p.id, p.name, p.last_name, p.profile_image_url, 
-	stats.point,
+	(stats.point/stats.point_giving.count) as point,
 	a.city
 	FROM user_profile_addresses a
 	JOIN user_profiles p ON p.id = a.profile_id
@@ -191,7 +191,7 @@ func (r *userProfileRepo) GetUserProfileStats(userId int64) (*model.UserProfileS
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	q := `SELECT * FROM user_profile_stats
+	q := `SELECT profile_id, (point/point_giving_count) as point , attanded_activities FROM user_profile_stats
 	WHERE profile_id = $1`
 
 	var stat model.UserProfileStat
@@ -210,7 +210,7 @@ func (r *userProfileRepo) GetUserProfile(userId int64) (*model.UserProfile, erro
 
 	q := `SELECT up.id ,up.name, up.last_name, up.about, up.profile_image_url,
 	upa.city,
-	ups.attanded_activities,ups.point	 
+	ups.attanded_activities, (ups.point/ups.point_giving_count) point
 	FROM user_profiles up
 	JOIN user_profile_stats ups ON ups.profile_id = up.id
 	JOIN user_profile_addresses upa ON upa.profile_id = up.id
@@ -232,4 +232,21 @@ func (r *userProfileRepo) GetUserProfile(userId int64) (*model.UserProfile, erro
 	}
 
 	return &user, nil
+}
+
+func (r *userProfileRepo) UpdateProfilePoints(userId int64, point float32) error {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	q := `UPDATE user_profile_stats
+		SET point = point + $1,
+		point_giving_count = point_giving_count + 1
+		WHERE profile_id = $2`
+
+	_, err := r.pool.Exec(ctx, q, point, userId)
+	if err != nil {
+		return fmt.Errorf("%s could not update user %d , %w", errlogprefix, userId, err)
+	}
+
+	return nil
 }

@@ -142,10 +142,37 @@ func TestGetUserProfile(t *testing.T) {
 
 	service := entrypoints.NewService(repo.NewUserProfileRepo(pool), *redis)
 
-	user, err := service.GetUserProfile(2)
+	user, err := service.GetUserProfile(1)
 	fmt.Printf("user: %+v", user)
 	assert.NoError(t, err)
 	assert.NotNil(t, user)
+}
+
+func TestAddPointsToUser(t *testing.T) {
+	dbConfig := postgres.PostgresConfig{
+		ConnectionString: "postgres://postgres:password@localhost:5432/test",
+		Config:           pgxpool.Config{MinConns: 5, MaxConns: 10},
+	}
+
+	pool := postgres.NewConn(&dbConfig)
+
+	redis := cache.NewRedisClient(cache.RedisOption{
+		Options: &redis.Options{
+			Addr:     "Localhost:6379",
+			Password: "",
+			DB:       0,
+		},
+		ExpirationTime: 0,
+	})
+
+	receiverId := int64(1)
+	point := float32(3.5)
+
+	service := entrypoints.NewService(repo.NewUserProfileRepo(pool), *redis)
+	err := service.AddPointsToUser(receiverId, point)
+
+	assert.NoError(t, err)
+
 }
 
 func TestDeleteUser(t *testing.T) {
