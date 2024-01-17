@@ -38,10 +38,10 @@ func TestCreateUserProfile(t *testing.T) {
 		AttandedActivities: []model.Activity{},
 		Adress:             model.UserProfileAdress{City: "Sakarya"},
 		Stat: model.UserProfileStat{
-			Followers:      1,
-			Followings:     2,
-			AttandedEvents: 3,
-			Point:          5,
+			Followers:          1,
+			Followings:         2,
+			AttandedActivities: 3,
+			Point:              5,
 		},
 		ProfileImageUrl: "profileImage.png",
 	}
@@ -122,6 +122,31 @@ func TestGetUserProfileStats(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.NotNil(t, attandedActivities)
+}
+
+func TestGetUserProfile(t *testing.T) {
+	dbConfig := postgres.PostgresConfig{
+		ConnectionString: "postgres://postgres:password@localhost:5432/test",
+		Config:           pgxpool.Config{MinConns: 5, MaxConns: 10},
+	}
+
+	pool := postgres.NewConn(&dbConfig)
+
+	redis := cache.NewRedisClient(cache.RedisOption{
+		Options: &redis.Options{
+			Addr:     "Localhost:6379",
+			Password: "",
+			DB:       0,
+		},
+		ExpirationTime: 0,
+	})
+
+	service := entrypoints.NewService(repo.NewUserProfileRepo(pool), *redis)
+
+	user, err := service.GetUserProfile(1)
+
+	assert.NoError(t, err)
+	assert.NotNil(t, user)
 }
 
 func TestDeleteUser(t *testing.T) {

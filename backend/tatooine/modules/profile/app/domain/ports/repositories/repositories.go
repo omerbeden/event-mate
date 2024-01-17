@@ -9,4 +9,5 @@ type UserProfileRepository interface {
 	DeleteUserById(id int64) error
 	GetAttandedActivities(userId int64) ([]model.Activity, error)
 	GetUserProfileStats(userId int64) (*model.UserProfileStat, error)
+	GetUserProfile(userId int64) (*model.UserProfile, error)
 }

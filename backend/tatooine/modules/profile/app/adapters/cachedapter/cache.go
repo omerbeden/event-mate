@@ -1,8 +1,10 @@
 package cachedapter
 
 import (
+	"encoding/json"
 	"fmt"
 
+	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/model"
 	"github.com/omerbeden/event-mate/backend/tatooine/pkg/cache"
 )
 
@@ -42,4 +44,21 @@ func (adapter *Cache) GetAttandedActivities(userId int64) ([]string, error) {
 	}
 
 	return attandedActivities, nil
+}
+
+func (adapter *Cache) GetUserProfile(profileKey string) (*model.UserProfile, error) {
+
+	cacheResult, err := adapter.client.Get(profileKey)
+	if err != nil {
+		return nil, fmt.Errorf("%s could not get user profile for key: %s ", ErrLogPrefix, profileKey)
+	}
+
+	var user model.UserProfile
+	err = json.Unmarshal([]byte(cacheResult.(string)), &user)
+	if err != nil {
+		return nil, fmt.Errorf("%s could not unmarshal result of the cache key: %s ", ErrLogPrefix, profileKey)
+	}
+
+	return &user, nil
+
 }

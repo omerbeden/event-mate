@@ -73,3 +73,12 @@ func (service *UserService) GetUserProfileStats(userId int64) (*model.UserProfil
 
 	return cmd.Handle()
 }
+
+func (service *UserService) GetUserProfile(userId int64) (*model.UserProfile, error) {
+	cmd := &commands.GetUserProfileCommand{
+		Repo:  service.userRepository,
+		Cache: *cachedapter.NewCache(&service.redisClient),
+	}
+
+	return cmd.Handle(userId)
+}

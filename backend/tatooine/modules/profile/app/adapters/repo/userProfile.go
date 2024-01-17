@@ -95,7 +95,7 @@ func (r *userProfileRepo) UpdateProfileImage(userId int64, imageUrl string) (*mo
 		return nil, fmt.Errorf("%s could not update user %d , %w", errlogprefix, userId, err)
 	}
 
-	updatedUser, err := r.getUserById(userId)
+	updatedUser, err := r.GetUserProfile(userId)
 	if err != nil {
 		return nil, fmt.Errorf("%s could not get updated user %d , %w", errlogprefix, userId, err)
 	}
@@ -186,31 +186,7 @@ func (r *userProfileRepo) insertProfileStat(user *model.UserProfile) error {
 
 }
 
-func (r *userProfileRepo) getUserById(userId int64) (*model.UserProfile, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
-	q := `
-	Select p.id, p.name, p.last_name, p.profile_image_url, p.about,
-	stats.point, stats.followings, stats.followers,
-	a.city
-	FROM user_profile_addresses a
-	JOIN user_profiles p ON p.id = a.profile_id
-	JOIN user_profile_stats stats ON stats.profile_id = p.id
-	WHERE p.id = $1
-	`
-
-	var user model.UserProfile
-	err := r.pool.QueryRow(ctx, q, userId).Scan(&user.Id, &user.Name, &user.LastName, &user.ProfileImageUrl, &user.About,
-		&user.Stat.Point, &user.Stat.Followings, &user.Stat.Followers,
-		&user.Adress.City)
-	if err != nil {
-		return nil, err
-	}
-
-	return &user, nil
-
-}
-
+// dont need to anymore
 func (r *userProfileRepo) GetUserProfileStats(userId int64) (*model.UserProfileStat, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
@@ -219,11 +195,39 @@ func (r *userProfileRepo) GetUserProfileStats(userId int64) (*model.UserProfileS
 	WHERE profile_id = $1`
 
 	var stat model.UserProfileStat
-	err := r.pool.QueryRow(ctx, q, userId).Scan(&stat.ProfileId, &stat.Point, &stat.Followings, &stat.Followers, &stat.AttandedEvents)
+	err := r.pool.QueryRow(ctx, q, userId).Scan(&stat.ProfileId, &stat.Point, &stat.Followings, &stat.Followers, &stat.AttandedActivities)
 	if err != nil {
 		return nil, fmt.Errorf("%s could not get user profile stats for : %d %w", errlogprefix, userId, err)
 
 	}
 
 	return &stat, nil
+}
+
+func (r *userProfileRepo) GetUserProfile(userId int64) (*model.UserProfile, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	q := `SELECT up.id ,up.name, up.last_name, up.about, up.profile_image_url,
+	upa.city,
+	ups.followers, ups.followings, ups.attanded_activities,ups.points	 
+	FROM user_profiles up
+	JOIN user_profile_stats ups ON ups.profile_id = up.id
+	JOIN user_profile_address upa ON upa.profile_id = up.id
+	WHERE profile_id = $1`
+
+	var user model.UserProfile
+	err := r.pool.QueryRow(ctx, q, userId).Scan(&user.Stat.ProfileId, &user.Stat.Point, &user.Stat.Followings, &user.Stat.Followers, &user.Stat.AttandedActivities)
+	if err != nil {
+		return nil, fmt.Errorf("%s could not get user profile for : %d %w", errlogprefix, userId, err)
+
+	}
+
+	user.AttandedActivities, err = r.GetAttandedActivities(userId)
+	if err != nil {
+		return nil, fmt.Errorf("%s could not get attanded activities for profile: %d %w", errlogprefix, userId, err)
+
+	}
+
+	return &user, nil
 }
