@@ -1,6 +1,7 @@
 package entrypoints_test
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/go-redis/redis/v8"
@@ -143,8 +144,8 @@ func TestGetUserProfile(t *testing.T) {
 
 	service := entrypoints.NewService(repo.NewUserProfileRepo(pool), *redis)
 
-	user, err := service.GetUserProfile(1)
-
+	user, err := service.GetUserProfile(2)
+	fmt.Printf("user: %+v", user)
 	assert.NoError(t, err)
 	assert.NotNil(t, user)
 }
@@ -167,7 +168,7 @@ func TestDeleteUser(t *testing.T) {
 	})
 
 	service := entrypoints.NewService(repo.NewUserProfileRepo(pool), *redis)
-	err := service.DeleteUser(6)
+	err := service.DeleteUser(1)
 
 	assert.NoError(t, err)
 

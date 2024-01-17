@@ -176,7 +176,7 @@ func (r *userProfileRepo) insertProfileStat(user *model.UserProfile) error {
 	q := fmt.Sprintf(
 		`INSERT INTO user_profile_stats
 		 (profile_id,followers,followings,point,attanded_activities)
-		 Values(%d,%d,%d,%f,%d)`, user.Id, user.Stat.Followers, user.Stat.Followings, user.Stat.Point, len(user.AttandedActivities))
+		 Values(%d,%d,%d,%f,%d)`, user.Id, user.Stat.Followers, user.Stat.Followings, user.Stat.Point, user.Stat.AttandedActivities)
 	_, err := r.pool.Exec(ctx, q)
 	if err != nil {
 		return fmt.Errorf("%s could not insert profile stats %w", errlogprefix, err)
@@ -210,14 +210,16 @@ func (r *userProfileRepo) GetUserProfile(userId int64) (*model.UserProfile, erro
 
 	q := `SELECT up.id ,up.name, up.last_name, up.about, up.profile_image_url,
 	upa.city,
-	ups.followers, ups.followings, ups.attanded_activities,ups.points	 
+	ups.followers, ups.followings, ups.attanded_activities,ups.point	 
 	FROM user_profiles up
 	JOIN user_profile_stats ups ON ups.profile_id = up.id
-	JOIN user_profile_address upa ON upa.profile_id = up.id
-	WHERE profile_id = $1`
+	JOIN user_profile_addresses upa ON upa.profile_id = up.id
+	WHERE up.id = $1`
 
 	var user model.UserProfile
-	err := r.pool.QueryRow(ctx, q, userId).Scan(&user.Stat.ProfileId, &user.Stat.Point, &user.Stat.Followings, &user.Stat.Followers, &user.Stat.AttandedActivities)
+	err := r.pool.QueryRow(ctx, q, userId).Scan(&user.Id, &user.Name, &user.LastName, &user.About, &user.ProfileImageUrl,
+		&user.Adress.City,
+		&user.Stat.Followers, &user.Stat.Followings, &user.Stat.AttandedActivities, &user.Stat.Point)
 	if err != nil {
 		return nil, fmt.Errorf("%s could not get user profile for : %d %w", errlogprefix, userId, err)
 

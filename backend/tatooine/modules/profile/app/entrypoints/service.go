@@ -80,5 +80,15 @@ func (service *UserService) GetUserProfile(userId int64) (*model.UserProfile, er
 		Cache: *cachedapter.NewCache(&service.redisClient),
 	}
 
-	return cmd.Handle(userId)
+	user, err := cmd.Handle(userId)
+	if err != nil {
+		return nil, err
+	}
+
+	user.AttandedActivities, err = service.GetAttandedActivities(userId)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
 }
