@@ -93,7 +93,7 @@ func (service *UserService) GetUserProfile(userId int64) (*model.UserProfile, er
 	return user, nil
 }
 
-func (service *UserService) AddPointsToUser(receiverId int64, point float32) error {
+func (service *UserService) GivePointsToUser(receiverId int64, point float32) error {
 	cmd := &commands.GiveUserPointCommand{
 		Repo:       service.userRepository,
 		Cache:      *cachedapter.NewCache(&service.redisClient),

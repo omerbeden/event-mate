@@ -169,7 +169,7 @@ func TestAddPointsToUser(t *testing.T) {
 	point := float32(3.5)
 
 	service := entrypoints.NewService(repo.NewUserProfileRepo(pool), *redis)
-	err := service.AddPointsToUser(receiverId, point)
+	err := service.GivePointsToUser(receiverId, point)
 
 	assert.NoError(t, err)
 
