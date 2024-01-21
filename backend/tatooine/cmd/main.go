@@ -12,8 +12,11 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/omerbeden/event-mate/backend/tatooine/cmd/api/routes"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/adapters/redisadapter"
-	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/adapters/repo"
-	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/entrypoints"
+	activityRepo "github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/adapters/repo"
+	activityService "github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/entrypoints"
+	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/adapters/repo"
+	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/entrypoints"
+	"github.com/omerbeden/event-mate/backend/tatooine/pkg/cache"
 	postgres "github.com/omerbeden/event-mate/backend/tatooine/pkg/database"
 )
 
@@ -26,13 +29,24 @@ func main() {
 
 	var redisOption = redisadapter.RedisOption()
 	redisClient := redis.NewClient(redisOption)
-	activityRepository := repo.NewActivityRepo(dbPool)
-	locationRepository := repo.NewLocationRepo(dbPool)
-	activityService := entrypoints.NewService(activityRepository, locationRepository, *redisClient)
+	activityRepository := activityRepo.NewActivityRepo(dbPool)
+	locationRepository := activityRepo.NewLocationRepo(dbPool)
+	activityService := activityService.NewService(activityRepository, locationRepository, *redisClient)
+
+	userRepository := repo.NewUserProfileRepo(dbPool)
+	userService := entrypoints.NewService(userRepository, *cache.NewRedisClient(cache.RedisOption{
+		Options: &redis.Options{
+			Addr:     "Localhost:6379",
+			Password: "",
+			DB:       0,
+		},
+		ExpirationTime: 0,
+	}))
 
 	app := fiber.New()
 	api := app.Group("/api")
 	routes.ActivityRouter(api, *activityService)
+	routes.ProfileRouter(api, *userService)
 
 	go func() {
 		if err := app.Listen(applicationPort); err != nil {
