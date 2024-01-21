@@ -69,7 +69,7 @@ func TestUpdateUserProfileImage(t *testing.T) {
 
 	service := entrypoints.NewService(repo.NewUserProfileRepo(pool), *redis)
 
-	err := service.UpdateProfileImage(1, "new profile image9.png")
+	err := service.UpdateProfileImage("", "new profile image9.png")
 
 	assert.NoError(t, err)
 }
@@ -142,7 +142,7 @@ func TestGetUserProfile(t *testing.T) {
 
 	service := entrypoints.NewService(repo.NewUserProfileRepo(pool), *redis)
 
-	user, err := service.GetUserProfile(1)
+	user, err := service.GetUserProfile("")
 	fmt.Printf("user: %+v", user)
 	assert.NoError(t, err)
 	assert.NotNil(t, user)

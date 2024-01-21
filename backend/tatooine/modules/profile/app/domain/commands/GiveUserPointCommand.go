@@ -21,7 +21,7 @@ func (cmd *GiveUserPointCommand) Handle() error {
 		return err
 	}
 
-	updatedUser, err := cmd.Repo.GetUserProfile(cmd.ReceiverId)
+	updatedUser, err := cmd.Repo.GetUserProfile("")
 	if err != nil {
 		return err
 	}

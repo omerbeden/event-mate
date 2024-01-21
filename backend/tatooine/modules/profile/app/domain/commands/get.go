@@ -11,21 +11,22 @@ import (
 var errLogPrefixGetUSerProfileCommand = "GetUserProfile"
 
 type GetUserProfileCommand struct {
-	Repo  repositories.UserProfileRepository
-	Cache cachedapter.Cache
+	Repo       repositories.UserProfileRepository
+	Cache      cachedapter.Cache
+	ExternalId string
 }
 
-func (cmd *GetUserProfileCommand) Handle(userId int64) (*model.UserProfile, error) {
-	user, err := cmd.getFromCache(userId)
+func (cmd *GetUserProfileCommand) Handle() (*model.UserProfile, error) {
+	user, err := cmd.getFromCache(cmd.ExternalId)
 	if err != nil {
-		fmt.Printf("%s: error while getting user profile %d from cache, returning from db", errLogPrefixGetUSerProfileCommand, userId)
-		return cmd.Repo.GetUserProfile(userId)
+		fmt.Printf("%s: error while getting user profile %s from cache, returning from db", errLogPrefixGetUSerProfileCommand, cmd.ExternalId)
+		return cmd.Repo.GetUserProfile(cmd.ExternalId)
 	}
 
 	return user, nil
 }
 
-func (cmd *GetUserProfileCommand) getFromCache(userId int64) (*model.UserProfile, error) {
-	cacheKey := fmt.Sprintf("%s:%d", userProfileCacheKey, userId)
+func (cmd *GetUserProfileCommand) getFromCache(externalId string) (*model.UserProfile, error) {
+	cacheKey := fmt.Sprintf("%s:%s", userProfileCacheKey, externalId)
 	return cmd.Cache.GetUserProfile(cacheKey)
 }

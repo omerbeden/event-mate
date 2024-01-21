@@ -59,11 +59,11 @@ func (r *userProfileRepo) InsertUser(user *model.UserProfile) (*model.UserProfil
 	defer cancel()
 
 	q := `INSERT INTO user_profiles
-	 (name,last_name,profile_image_url,about)
-	 Values($1,$2,$3,$4) RETURNING id`
+	 (name,last_name,profile_image_url,about,external_id)
+	 Values($1,$2,$3,$4,$5) RETURNING id`
 	var id int64
 
-	errQR := r.pool.QueryRow(ctx, q, user.Name, user.LastName, user.ProfileImageUrl, user.About).Scan(&id)
+	errQR := r.pool.QueryRow(ctx, q, user.Name, user.LastName, user.ProfileImageUrl, user.About, user.ExternalId).Scan(&id)
 	if errQR != nil {
 		return nil, fmt.Errorf("%s could not create %w", errlogprefix, errQR)
 	}
@@ -82,27 +82,27 @@ func (r *userProfileRepo) InsertUser(user *model.UserProfile) (*model.UserProfil
 	user.Adress.ProfileId = user.Id
 	return user, nil
 }
-func (r *userProfileRepo) UpdateProfileImage(userId int64, imageUrl string) (*model.UserProfile, error) {
+func (r *userProfileRepo) UpdateProfileImage(externalId string, imageUrl string) (*model.UserProfile, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
 	q := `UPDATE user_profiles 
 		SET profile_image_url = $1
-		WHERE id = $2`
+		WHERE external_id = $2`
 
-	_, err := r.pool.Exec(ctx, q, imageUrl, userId)
+	_, err := r.pool.Exec(ctx, q, imageUrl, externalId)
 	if err != nil {
-		return nil, fmt.Errorf("%s could not update user %d , %w", errlogprefix, userId, err)
+		return nil, fmt.Errorf("%s could not update user %s , %w", errlogprefix, externalId, err)
 	}
 
-	updatedUser, err := r.GetUserProfile(userId)
+	updatedUser, err := r.GetUserProfile(externalId)
 	if err != nil {
-		return nil, fmt.Errorf("%s could not get updated user %d , %w", errlogprefix, userId, err)
+		return nil, fmt.Errorf("%s could not get updated user %d , %w", errlogprefix, updatedUser.Id, err)
 	}
 
 	updatedUser.AttandedActivities, err = r.GetAttandedActivities(updatedUser.Id)
 	if err != nil {
-		return nil, fmt.Errorf("%s could not get updated user's attanded activities %d , %w", errlogprefix, userId, err)
+		return nil, fmt.Errorf("%s could not get updated user's attanded activities %d , %w", errlogprefix, updatedUser.Id, err)
 	}
 	fmt.Printf("updated user :%+v\n", updatedUser)
 
@@ -204,30 +204,34 @@ func (r *userProfileRepo) GetUserProfileStats(userId int64) (*model.UserProfileS
 	return &stat, nil
 }
 
-func (r *userProfileRepo) GetUserProfile(userId int64) (*model.UserProfile, error) {
+func (r *userProfileRepo) GetUserProfile(externalId string) (*model.UserProfile, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	q := `SELECT up.id ,up.name, up.last_name, up.about, up.profile_image_url,
-	upa.city,
-	ups.attanded_activities, (ups.point/ups.point_giving_count) point
+	q := `SELECT up.id, up.name, up.last_name, up.about, up.profile_image_url,
+    upa.city,
+    ups.attanded_activities, 
+		CASE 
+			WHEN ups.point_giving_count = 0 THEN ups.point
+			ELSE (ups.point / ups.point_giving_count) 
+		END as point
 	FROM user_profiles up
 	JOIN user_profile_stats ups ON ups.profile_id = up.id
 	JOIN user_profile_addresses upa ON upa.profile_id = up.id
-	WHERE up.id = $1`
+	WHERE up.external_id = $1;`
 
 	var user model.UserProfile
-	err := r.pool.QueryRow(ctx, q, userId).Scan(&user.Id, &user.Name, &user.LastName, &user.About, &user.ProfileImageUrl,
+	err := r.pool.QueryRow(ctx, q, externalId).Scan(&user.Id, &user.Name, &user.LastName, &user.About, &user.ProfileImageUrl,
 		&user.Adress.City,
 		&user.Stat.AttandedActivities, &user.Stat.Point)
 	if err != nil {
-		return nil, fmt.Errorf("%s could not get user profile for : %d %w", errlogprefix, userId, err)
+		return nil, fmt.Errorf("%s could not get user profile for : %s %w", errlogprefix, externalId, err)
 
 	}
 
-	user.AttandedActivities, err = r.GetAttandedActivities(userId)
+	user.AttandedActivities, err = r.GetAttandedActivities(user.Id)
 	if err != nil {
-		return nil, fmt.Errorf("%s could not get attanded activities for profile: %d %w", errlogprefix, userId, err)
+		return nil, fmt.Errorf("%s could not get attanded activities for profile: %d %w", errlogprefix, user.Id, err)
 
 	}
 

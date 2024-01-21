@@ -1,6 +1,8 @@
 package entrypoints
 
 import (
+	"fmt"
+
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/adapters/cachedapter"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/commands"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/model"
@@ -53,12 +55,12 @@ func (service *UserService) GetAttandedActivities(userId int64) ([]model.Activit
 	return cmd.Handle()
 }
 
-func (service *UserService) UpdateProfileImage(userId int64, imageUrl string) error {
+func (service *UserService) UpdateProfileImage(externalId string, imageUrl string) error {
 	cmd := &commands.UpdateProfileImageCommand{
-		Repo:     service.userRepository,
-		Cache:    *cachedapter.NewCache(&service.redisClient),
-		ImageUrl: imageUrl,
-		UserId:   userId,
+		Repo:       service.userRepository,
+		Cache:      *cachedapter.NewCache(&service.redisClient),
+		ImageUrl:   imageUrl,
+		ExternalId: externalId,
 	}
 
 	return cmd.Handle()
@@ -74,21 +76,24 @@ func (service *UserService) GetUserProfileStats(userId int64) (*model.UserProfil
 	return cmd.Handle()
 }
 
-func (service *UserService) GetUserProfile(userId int64) (*model.UserProfile, error) {
+func (service *UserService) GetUserProfile(externalId string) (*model.UserProfile, error) {
 	cmd := &commands.GetUserProfileCommand{
-		Repo:  service.userRepository,
-		Cache: *cachedapter.NewCache(&service.redisClient),
+		Repo:       service.userRepository,
+		Cache:      *cachedapter.NewCache(&service.redisClient),
+		ExternalId: externalId,
 	}
 
-	user, err := cmd.Handle(userId)
+	user, err := cmd.Handle()
 	if err != nil {
 		return nil, err
 	}
 
-	user.AttandedActivities, err = service.GetAttandedActivities(userId)
-	if err != nil {
-		return nil, err
-	}
+	fmt.Printf("profile: %+v\n", user)
+
+	// user.AttandedActivities, err = service.GetAttandedActivities(user.Id)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
 	return user, nil
 }

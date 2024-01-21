@@ -70,7 +70,7 @@ func TestUpdateProfileImage(t *testing.T) {
 
 	repository := repo.NewUserProfileRepo(pool)
 
-	updatedUSer, err := repository.UpdateProfileImage(1, "new image.png")
+	updatedUSer, err := repository.UpdateProfileImage("", "new image.png")
 	assert.NoError(t, err)
 	assert.NotNil(t, updatedUSer)
 }
