@@ -3,7 +3,6 @@ package commands
 import (
 	"encoding/json"
 	"fmt"
-	"strconv"
 
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/adapters/cachedapter"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/model"
@@ -35,9 +34,16 @@ func (ccmd *CreateProfileCommand) addUserProfileToCache(userProfile *model.UserP
 		return fmt.Errorf("%s could not marshal , %w ", errLogPrefixCreateCommand, err)
 	}
 
-	userId := strconv.FormatInt(userProfile.Id, 10)
-	cacheKey := fmt.Sprintf("%s:%s", userProfileCacheKey, userId)
+	cacheKeyCurrentUser := fmt.Sprintf("%s:%s", userProfileCacheKey, userProfile.ExternalId)
+	cacheKeyUserName := fmt.Sprintf("%s:%s", userProfileCacheKey, userProfile.UserName)
 
-	return ccmd.Cache.Set(cacheKey, jsonValue)
+	if err := ccmd.Cache.Set(cacheKeyCurrentUser, jsonValue); err != nil {
+		return err
+	}
+	if err := ccmd.Cache.Set(cacheKeyUserName, jsonValue); err != nil {
+		return err
+	}
+
+	return nil
 
 }

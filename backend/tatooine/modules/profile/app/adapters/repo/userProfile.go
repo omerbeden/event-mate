@@ -82,7 +82,7 @@ func (r *userProfileRepo) InsertUser(user *model.UserProfile) (*model.UserProfil
 	user.Adress.ProfileId = user.Id
 	return user, nil
 }
-func (r *userProfileRepo) UpdateProfileImage(externalId string, imageUrl string) (*model.UserProfile, error) {
+func (r *userProfileRepo) UpdateProfileImage(externalId string, imageUrl string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
@@ -92,32 +92,19 @@ func (r *userProfileRepo) UpdateProfileImage(externalId string, imageUrl string)
 
 	_, err := r.pool.Exec(ctx, q, imageUrl, externalId)
 	if err != nil {
-		return nil, fmt.Errorf("%s could not update user %s , %w", errlogprefix, externalId, err)
+		return fmt.Errorf("%s could not update user %s , %w", errlogprefix, externalId, err)
 	}
 
-	updatedUser, err := r.GetUserProfile(externalId)
-	if err != nil {
-		return nil, fmt.Errorf("%s could not get updated user %d , %w", errlogprefix, updatedUser.Id, err)
-	}
-
-	updatedUser.AttandedActivities, err = r.GetAttandedActivities(updatedUser.Id)
-	if err != nil {
-		return nil, fmt.Errorf("%s could not get updated user's attanded activities %d , %w", errlogprefix, updatedUser.Id, err)
-	}
-	fmt.Printf("updated user :%+v\n", updatedUser)
-
-	updatedUser.Stat.ProfileId = updatedUser.Id
-	updatedUser.Adress.ProfileId = updatedUser.Id
-	return updatedUser, nil
+	return err
 }
-func (r *userProfileRepo) DeleteUserById(id int64) error {
+func (r *userProfileRepo) DeleteUser(externalId string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	q := `DELETE FROM user_profiles  WHERE id = $1`
-	_, err := r.pool.Exec(ctx, q, id)
+	q := `DELETE FROM user_profiles  WHERE external_id = $1`
+	_, err := r.pool.Exec(ctx, q, externalId)
 	if err != nil {
-		return fmt.Errorf("%s could not delete user, id: %d %w", errlogprefix, id, err)
+		return fmt.Errorf("%s could not delete user, id: %s %w", errlogprefix, externalId, err)
 	}
 
 	return nil
@@ -271,18 +258,20 @@ func (r *userProfileRepo) GetUserProfile(username string) (*model.UserProfile, e
 	return &user, nil
 }
 
-func (r *userProfileRepo) UpdateProfilePoints(userId int64, point float32) error {
+func (r *userProfileRepo) UpdateProfilePoints(receiverUserName string, point float32) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
 	q := `UPDATE user_profile_stats
 		SET point = point + $1,
 		point_giving_count = point_giving_count + 1
-		WHERE profile_id = $2`
+		FROM user_profiles
+		WHERE user_profile_stas.profile_id = user_profiles.id
+		AND user_profiles.user_name = $2`
 
-	_, err := r.pool.Exec(ctx, q, point, userId)
+	_, err := r.pool.Exec(ctx, q, point, receiverUserName)
 	if err != nil {
-		return fmt.Errorf("%s could not update user %d , %w", errlogprefix, userId, err)
+		return fmt.Errorf("%s could not update user %s , %w", errlogprefix, receiverUserName, err)
 	}
 
 	return nil

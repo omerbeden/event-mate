@@ -165,7 +165,7 @@ func TestAddPointsToUser(t *testing.T) {
 		ExpirationTime: 0,
 	})
 
-	receiverId := int64(1)
+	receiverId := "testUserName"
 	point := float32(3.5)
 
 	service := entrypoints.NewService(repo.NewUserProfileRepo(pool), *redis)
@@ -193,7 +193,7 @@ func TestDeleteUser(t *testing.T) {
 	})
 
 	service := entrypoints.NewService(repo.NewUserProfileRepo(pool), *redis)
-	err := service.DeleteUser(1)
+	err := service.DeleteUser("externalId", "userName")
 
 	assert.NoError(t, err)
 

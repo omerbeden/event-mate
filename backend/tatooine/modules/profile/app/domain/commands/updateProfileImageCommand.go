@@ -14,26 +14,42 @@ type UpdateProfileImageCommand struct {
 	Cache      cachedapter.Cache
 	ImageUrl   string
 	ExternalId string
+	Username   string
 }
 
 func (c *UpdateProfileImageCommand) Handle() error {
-	updatedUser, err := c.Repo.UpdateProfileImage(c.ExternalId, c.ImageUrl)
+	err := c.Repo.UpdateProfileImage(c.ExternalId, c.ImageUrl)
 	if err != nil {
 		return err
 	}
 
-	fmt.Printf(" updated : %+v\n", updatedUser)
+	updatedUser, err := c.Repo.GetCurrentUserProfile(c.ExternalId)
+	if err != nil {
+		return err
+	}
 
-	return c.updateCache(c.ExternalId, updatedUser)
+	return c.updateCache(updatedUser)
 }
 
-func (c *UpdateProfileImageCommand) updateCache(externalId string, updatedUser *model.UserProfile) error {
-	cacheKey := fmt.Sprintf("%s:%s", userProfileCacheKey, externalId)
+func (c *UpdateProfileImageCommand) updateCache(updatedUser *model.UserProfile) error {
+	cacheKeyExternalId := fmt.Sprintf("%s:%s", userProfileCacheKey, updatedUser.ExternalId)
+	cacheKeyUserName := fmt.Sprintf("%s:%s", userProfileCacheKey, updatedUser.UserName)
 
 	jsonValue, err := json.Marshal(updatedUser)
 	if err != nil {
 		return fmt.Errorf("parsing error while updating user profile on cache")
 	}
 
-	return c.Cache.Set(cacheKey, jsonValue)
+	err = c.Cache.Set(cacheKeyExternalId, jsonValue)
+	if err != nil {
+		return err
+	}
+
+	err = c.Cache.Set(cacheKeyUserName, jsonValue)
+	if err != nil {
+		return err
+	}
+
+	return nil
+
 }

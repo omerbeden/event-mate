@@ -35,11 +35,12 @@ func (service *UserService) CreateUser(user *model.UserProfile) error {
 	return createCmd.Handle()
 }
 
-func (service *UserService) DeleteUser(userId int64) error {
+func (service *UserService) DeleteUser(externalId, userName string) error {
 	deleteCmd := &commands.DeleteProfileCommand{
-		Repo:   service.userRepository,
-		Cache:  *cachedapter.NewCache(&service.redisClient),
-		UserId: userId,
+		Repo:       service.userRepository,
+		Cache:      *cachedapter.NewCache(&service.redisClient),
+		ExternalId: externalId,
+		UserName:   userName,
 	}
 
 	return deleteCmd.Handle()
@@ -120,12 +121,12 @@ func (service *UserService) GetUserProfile(userName string) (*model.UserProfile,
 	return user, nil
 }
 
-func (service *UserService) GivePointsToUser(receiverId int64, point float32) error {
+func (service *UserService) GivePointsToUser(receiverUserName string, point float32) error {
 	cmd := &commands.GiveUserPointCommand{
-		Repo:       service.userRepository,
-		Cache:      *cachedapter.NewCache(&service.redisClient),
-		ReceiverId: receiverId,
-		Point:      point,
+		Repo:             service.userRepository,
+		Cache:            *cachedapter.NewCache(&service.redisClient),
+		ReceiverUserName: receiverUserName,
+		Point:            point,
 	}
 
 	return cmd.Handle()

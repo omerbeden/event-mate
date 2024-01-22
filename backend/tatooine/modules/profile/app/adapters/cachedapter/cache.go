@@ -33,7 +33,12 @@ func (adapter *Cache) Set(key string, jsonValue []byte) error {
 }
 
 func (adapter *Cache) Delete(key string) error {
-	return adapter.client.Delete(key)
+	err := adapter.client.Delete(key)
+	if err != nil {
+		return fmt.Errorf("%s could not delete key: %s ", ErrLogPrefix, key)
+	}
+
+	return nil
 }
 
 func (adapter *Cache) GetAttandedActivities(userId int64) ([]string, error) {

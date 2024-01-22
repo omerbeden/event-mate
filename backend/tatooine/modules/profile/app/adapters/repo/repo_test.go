@@ -70,9 +70,9 @@ func TestUpdateProfileImage(t *testing.T) {
 
 	repository := repo.NewUserProfileRepo(pool)
 
-	updatedUSer, err := repository.UpdateProfileImage("", "new image.png")
+	err := repository.UpdateProfileImage("", "new image.png")
 	assert.NoError(t, err)
-	assert.NotNil(t, updatedUSer)
+
 }
 
 func TestDeleteUserById(t *testing.T) {
@@ -84,6 +84,6 @@ func TestDeleteUserById(t *testing.T) {
 
 	repository := repo.NewUserProfileRepo(pool)
 
-	err := repository.DeleteUserById(1)
+	err := repository.DeleteUser("externalId")
 	assert.NoError(t, err)
 }
