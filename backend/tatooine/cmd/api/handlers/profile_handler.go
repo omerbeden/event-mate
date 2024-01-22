@@ -41,11 +41,11 @@ func CreateUserProfile(service entrypoints.UserService) fiber.Handler {
 	}
 }
 
-func GetUserProfile(service entrypoints.UserService) fiber.Handler {
+func GetCurrentUserProfile(service entrypoints.UserService) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		externalId := c.Params("externalId")
 
-		res, err := service.GetUserProfile(externalId)
+		res, err := service.GetCurrentUserProfile(externalId)
 
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(presenter.BaseResponse{
