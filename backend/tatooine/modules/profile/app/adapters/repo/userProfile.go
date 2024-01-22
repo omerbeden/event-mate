@@ -59,11 +59,11 @@ func (r *userProfileRepo) InsertUser(user *model.UserProfile) (*model.UserProfil
 	defer cancel()
 
 	q := `INSERT INTO user_profiles
-	 (name,last_name,profile_image_url,about,external_id)
-	 Values($1,$2,$3,$4,$5) RETURNING id`
+	 (name,last_name,profile_image_url,about,external_id,user_name)
+	 Values($1,$2,$3,$4,$5,$6) RETURNING id`
 	var id int64
 
-	errQR := r.pool.QueryRow(ctx, q, user.Name, user.LastName, user.ProfileImageUrl, user.About, user.ExternalId).Scan(&id)
+	errQR := r.pool.QueryRow(ctx, q, user.Name, user.LastName, user.ProfileImageUrl, user.About, user.ExternalId, user.UserName).Scan(&id)
 	if errQR != nil {
 		return nil, fmt.Errorf("%s could not create %w", errlogprefix, errQR)
 	}
@@ -204,7 +204,7 @@ func (r *userProfileRepo) GetUserProfileStats(userId int64) (*model.UserProfileS
 	return &stat, nil
 }
 
-func (r *userProfileRepo) GetUserProfile(externalId string) (*model.UserProfile, error) {
+func (r *userProfileRepo) GetCurrentUserProfile(externalId string) (*model.UserProfile, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
@@ -226,6 +226,39 @@ func (r *userProfileRepo) GetUserProfile(externalId string) (*model.UserProfile,
 		&user.Stat.AttandedActivities, &user.Stat.Point)
 	if err != nil {
 		return nil, fmt.Errorf("%s could not get user profile for : %s %w", errlogprefix, externalId, err)
+
+	}
+
+	user.AttandedActivities, err = r.GetAttandedActivities(user.Id)
+	if err != nil {
+		return nil, fmt.Errorf("%s could not get attanded activities for profile: %d %w", errlogprefix, user.Id, err)
+
+	}
+
+	return &user, nil
+}
+func (r *userProfileRepo) GetUserProfile(username string) (*model.UserProfile, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	q := `SELECT up.id, up.name, up.last_name, up.about, up.profile_image_url,
+    upa.city,
+    ups.attanded_activities, 
+		CASE 
+			WHEN ups.point_giving_count = 0 THEN ups.point
+			ELSE (ups.point / ups.point_giving_count) 
+		END as point
+	FROM user_profiles up
+	JOIN user_profile_stats ups ON ups.profile_id = up.id
+	JOIN user_profile_addresses upa ON upa.profile_id = up.id
+	WHERE up.user_name = $1;`
+
+	var user model.UserProfile
+	err := r.pool.QueryRow(ctx, q, username).Scan(&user.Id, &user.Name, &user.LastName, &user.About, &user.ProfileImageUrl,
+		&user.Adress.City,
+		&user.Stat.AttandedActivities, &user.Stat.Point)
+	if err != nil {
+		return nil, fmt.Errorf("%s could not get user profile for : %s %w", errlogprefix, username, err)
 
 	}
 

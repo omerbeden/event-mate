@@ -10,4 +10,5 @@ type UserProfile struct {
 	Stat               UserProfileStat   `json:"stats"`
 	ProfileImageUrl    string            `json:"profileImageUrl"`
 	ExternalId         string            `json:"externalId"`
+	UserName           string            `json:"userName"`
 }

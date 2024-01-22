@@ -76,11 +76,33 @@ func (service *UserService) GetUserProfileStats(userId int64) (*model.UserProfil
 	return cmd.Handle()
 }
 
-func (service *UserService) GetUserProfile(externalId string) (*model.UserProfile, error) {
-	cmd := &commands.GetUserProfileCommand{
+func (service *UserService) GetCurrentUserProfile(externalId string) (*model.UserProfile, error) {
+	cmd := &commands.GetCurrentUserProfileCommand{
 		Repo:       service.userRepository,
 		Cache:      *cachedapter.NewCache(&service.redisClient),
 		ExternalId: externalId,
+	}
+
+	user, err := cmd.Handle()
+	if err != nil {
+		return nil, err
+	}
+
+	fmt.Printf("profile: %+v\n", user)
+
+	// user.AttandedActivities, err = service.GetAttandedActivities(user.Id)
+	// if err != nil {
+	// 	return nil, err
+	// }
+
+	return user, nil
+}
+
+func (service *UserService) GetUserProfile(userName string) (*model.UserProfile, error) {
+	cmd := &commands.GetUserProfileCommand{
+		Repo:     service.userRepository,
+		Cache:    *cachedapter.NewCache(&service.redisClient),
+		UserName: userName,
 	}
 
 	user, err := cmd.Handle()
