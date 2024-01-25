@@ -7,6 +7,7 @@ import (
 	"github.com/omerbeden/event-mate/backend/tatooine/cmd/api/presenter"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/model"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/entrypoints"
+	customerrors "github.com/omerbeden/event-mate/backend/tatooine/pkg/customErrors"
 )
 
 func CreateUserProfile(service entrypoints.UserService) fiber.Handler {
@@ -48,6 +49,14 @@ func GetCurrentUserProfile(service entrypoints.UserService) fiber.Handler {
 		res, err := service.GetCurrentUserProfile(externalId)
 
 		if err != nil {
+			if err == customerrors.ERR_NOT_FOUND {
+				return c.Status(fiber.StatusNotFound).JSON(presenter.BaseResponse{
+					APIVersion: presenter.APIVersion,
+					Data:       nil,
+					Error:      customerrors.ERR_NOT_FOUND.Error(),
+				})
+			}
+
 			return c.Status(fiber.StatusInternalServerError).JSON(presenter.BaseResponse{
 				APIVersion: presenter.APIVersion,
 				Data:       nil,

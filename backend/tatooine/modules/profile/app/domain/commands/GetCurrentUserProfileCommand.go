@@ -20,7 +20,7 @@ func (cmd *GetCurrentUserProfileCommand) Handle() (*model.UserProfile, error) {
 	user, err := cmd.getFromCache(cmd.ExternalId)
 	if err != nil {
 		fmt.Printf("%s: error while getting user profile %s from cache, returning from db", errLogPrefixCurrentGetUserProfileCommand, cmd.ExternalId)
-		return cmd.Repo.GetUserProfile(cmd.ExternalId)
+		return cmd.Repo.GetCurrentUserProfile(cmd.ExternalId)
 	}
 
 	return user, nil

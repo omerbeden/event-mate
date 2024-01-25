@@ -5,8 +5,11 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/model"
+	customerrors "github.com/omerbeden/event-mate/backend/tatooine/pkg/customErrors"
 )
 
 type userProfileRepo struct {
@@ -212,6 +215,10 @@ func (r *userProfileRepo) GetCurrentUserProfile(externalId string) (*model.UserP
 		&user.Adress.City,
 		&user.Stat.AttandedActivities, &user.Stat.Point)
 	if err != nil {
+		if err == pgx.ErrNoRows {
+			//fmt.Printf("user not found with externalId: %s", externalId)
+			return nil, customerrors.ERR_NOT_FOUND
+		}
 		return nil, fmt.Errorf("%s could not get user profile for : %s %w", errlogprefix, externalId, err)
 
 	}
