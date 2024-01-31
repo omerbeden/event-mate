@@ -71,3 +71,39 @@ func GetCurrentUserProfile(service entrypoints.UserService) fiber.Handler {
 		})
 	}
 }
+
+func UpdateProfileImageUrl(service entrypoints.UserService) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		request := new(presenter.ProfileImageUpdateRequest)
+
+		if err := c.BodyParser(request); err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Cannot parse JSON"})
+		}
+
+		externalId := c.Params("externalId")
+
+		err := service.UpdateProfileImage(externalId, request.ProfileImageUrl)
+		if err != nil {
+			fmt.Printf(err.Error())
+			if err == customerrors.ERR_NOT_FOUND {
+				return c.Status(fiber.StatusNotFound).JSON(presenter.BaseResponse{
+					APIVersion: presenter.APIVersion,
+					Data:       nil,
+					Error:      customerrors.ERR_NOT_FOUND.Error(),
+				})
+			}
+
+			return c.Status(fiber.StatusInternalServerError).JSON(presenter.BaseResponse{
+				APIVersion: presenter.APIVersion,
+				Data:       nil,
+				Error:      presenter.UNKNOW_ERR,
+			})
+		}
+
+		return c.Status(fiber.StatusOK).JSON(presenter.BaseResponse{
+			APIVersion: presenter.APIVersion,
+			Data:       "OK",
+			Error:      "",
+		})
+	}
+}

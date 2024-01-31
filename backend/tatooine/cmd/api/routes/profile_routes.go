@@ -8,5 +8,6 @@ import (
 
 func ProfileRouter(app fiber.Router, service entrypoints.UserService) {
 	app.Post("/profiles", handlers.CreateUserProfile(service))
-	app.Get("profiles/currentUser/:externalId", handlers.GetCurrentUserProfile(service))
+	app.Get("/profiles/currentUser/:externalId", handlers.GetCurrentUserProfile(service))
+	app.Patch("/profiles/currentUser/:externalId/profile-image", handlers.UpdateProfileImageUrl(service))
 }

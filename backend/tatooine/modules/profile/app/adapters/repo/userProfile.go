@@ -198,7 +198,7 @@ func (r *userProfileRepo) GetCurrentUserProfile(externalId string) (*model.UserP
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	q := `SELECT up.id, up.name, up.last_name, up.about, up.profile_image_url,
+	q := `SELECT up.id, up.name, up.last_name, up.about, up.profile_image_url, up.external_id, up.user_name,
     upa.city,
     ups.attanded_activities, 
 		CASE 
@@ -211,7 +211,7 @@ func (r *userProfileRepo) GetCurrentUserProfile(externalId string) (*model.UserP
 	WHERE up.external_id = $1;`
 
 	var user model.UserProfile
-	err := r.pool.QueryRow(ctx, q, externalId).Scan(&user.Id, &user.Name, &user.LastName, &user.About, &user.ProfileImageUrl,
+	err := r.pool.QueryRow(ctx, q, externalId).Scan(&user.Id, &user.Name, &user.LastName, &user.About, &user.ProfileImageUrl, &user.ExternalId, &user.UserName,
 		&user.Adress.City,
 		&user.Stat.AttandedActivities, &user.Stat.Point)
 	if err != nil {
