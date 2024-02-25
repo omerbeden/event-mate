@@ -15,8 +15,10 @@ type Activity struct {
 }
 
 type Location struct {
-	ActivityId  int64  `json:"-"`
-	City        string `json:"city"`
-	District    string `json:"district"`
-	Description string `json:"description"`
+	ActivityId  int64   `json:"-"`
+	City        string  `json:"city"`
+	District    string  `json:"district"`
+	Description string  `json:"description"`
+	Latitude    float32 `json:"latitude"`
+	Longitude   float32 `json:"longitude"`
 }
