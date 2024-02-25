@@ -8,7 +8,8 @@ CREATE TABLE IF NOT EXISTS activities(
 CREATE TABLE IF NOT EXISTS activity_locations(
 	activity_id  int primary key references activities(id) ON DELETE CASCADE,
 	city varchar(20),
-	district varchar(50)
+	district varchar(50),
+	description text
 );
 
 CREATE TABLE IF NOT EXISTS user_profiles(

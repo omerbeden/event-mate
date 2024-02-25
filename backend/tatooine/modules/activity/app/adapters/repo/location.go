@@ -29,8 +29,8 @@ func (r *LocationRepo) Create(location *model.Location) (bool, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	ql := `INSERT INTO activity_locations(activity_id,city,district) Values($1,$2,$3)`
-	_, err := r.pool.Exec(ctx, ql, location.ActivityId, location.City, location.District)
+	ql := `INSERT INTO activity_locations(activity_id,city,district,description) Values($1,$2,$3,$4)`
+	_, err := r.pool.Exec(ctx, ql, location.ActivityId, location.City, location.District, location.Description)
 	if err != nil {
 		return false, fmt.Errorf("%s could not create location for activity %d  %w", errLogPrefix, location.ActivityId, err)
 	}
