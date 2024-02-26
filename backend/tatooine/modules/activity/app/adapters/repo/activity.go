@@ -3,7 +3,6 @@ package repo
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -21,20 +20,17 @@ func NewActivityRepo(pool *pgxpool.Pool) *activityRepository {
 		pool: pool,
 	}
 }
+
 func (r *activityRepository) Close() {
 	r.pool.Close()
 }
 
-func (r *activityRepository) Create(activity model.Activity) (*model.Activity, error) {
-
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
+func (r *activityRepository) Create(ctx context.Context, activity model.Activity) (*model.Activity, error) {
 
 	var ID int64
 	q := `INSERT INTO activities (title,category,created_by,background_image_url,start_at,end_at,content) 
-	Values($1,$2,$3,$4,$5,$6) RETURNING ID`
+	Values($1,$2,$3,$4,$5,$6) RETURNING id`
 
-	fmt.Printf("model: %+v \n", activity)
 	err := r.pool.QueryRow(
 		ctx,
 		q,
@@ -45,9 +41,7 @@ func (r *activityRepository) Create(activity model.Activity) (*model.Activity, e
 		activity.StartAt,
 		activity.EndAt,
 		activity.Content).Scan(&ID)
-
 	if err != nil {
-
 		return nil, fmt.Errorf("%s could not insert activity %w", errlogprefix, err)
 	}
 
@@ -57,9 +51,7 @@ func (r *activityRepository) Create(activity model.Activity) (*model.Activity, e
 	return &activity, nil
 }
 
-func (r *activityRepository) AddParticipants(activity model.Activity) error {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
+func (r *activityRepository) AddParticipants(ctx context.Context, activity model.Activity) error {
 
 	var linkedParticipants [][]interface{}
 	for _, parparticipants := range activity.Participants {
@@ -82,9 +74,8 @@ func (r *activityRepository) AddParticipants(activity model.Activity) error {
 	return nil
 }
 
-func (r *activityRepository) AddParticipant(activityId int64, user model.User) error {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
+func (r *activityRepository) AddParticipant(ctx context.Context, activityId int64, user model.User) error {
+
 	q := `INSERT INTO participants(activity_id,user_id) VALUES($1,$2)`
 
 	_, err := r.pool.Exec(ctx, q, activityId, user.ID)
@@ -96,9 +87,8 @@ func (r *activityRepository) AddParticipant(activityId int64, user model.User) e
 
 }
 
-func (r *activityRepository) GetParticipants(acitivityId int64) ([]model.User, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
+func (r *activityRepository) GetParticipants(ctx context.Context, acitivityId int64) ([]model.User, error) {
+
 	q := `SELECT u.id, u.name, u.last_name, 
 	COALESCE(stats.point, 0.0) AS point
 	FROM user_profiles u
@@ -126,9 +116,7 @@ func (r *activityRepository) GetParticipants(acitivityId int64) ([]model.User, e
 
 }
 
-func (r *activityRepository) GetByID(id int64) (*model.Activity, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
+func (r *activityRepository) GetByID(ctx context.Context, id int64) (*model.Activity, error) {
 
 	q := `SELECT e.id, title, category, a.created_by,a.start_at,a.end_at
 	 l.city
@@ -146,9 +134,7 @@ func (r *activityRepository) GetByID(id int64) (*model.Activity, error) {
 
 	return &activity, nil
 }
-func (r *activityRepository) GetByLocation(loc *model.Location) ([]model.Activity, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
+func (r *activityRepository) GetByLocation(ctx context.Context, loc *model.Location) ([]model.Activity, error) {
 
 	q := `SELECT a.id, a.title, a.category,a.start_at, a.end_at
 	u.id, u.name, u.last_name, u.profile_image_url, 
@@ -180,9 +166,7 @@ func (r *activityRepository) GetByLocation(loc *model.Location) ([]model.Activit
 	return activities, nil
 }
 
-func (r *activityRepository) UpdateByID(id int32, activity model.Activity) (bool, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
+func (r *activityRepository) UpdateByID(ctx context.Context, id int32, activity model.Activity) (bool, error) {
 
 	q := `UPDATE activities
 	 SET title  = $1,
@@ -198,9 +182,7 @@ func (r *activityRepository) UpdateByID(id int32, activity model.Activity) (bool
 	return true, nil
 }
 
-func (r *activityRepository) DeleteByID(id int32) (bool, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
+func (r *activityRepository) DeleteByID(ctx context.Context, id int32) (bool, error) {
 
 	q := `DELETE FROM activities  WHERE id = $1`
 	_, err := r.pool.Exec(ctx, q, id)

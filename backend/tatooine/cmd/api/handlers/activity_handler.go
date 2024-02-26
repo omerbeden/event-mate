@@ -1,8 +1,10 @@
 package handlers
 
 import (
+	"context"
 	"fmt"
 	"strconv"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/omerbeden/event-mate/backend/tatooine/cmd/api/presenter"
@@ -23,7 +25,10 @@ func CreateActivity(service entrypoints.ActivityService) fiber.Handler {
 			})
 		}
 
-		res, err := service.CreateActivity(c.Context(), requestBody)
+		ctx, cancel := context.WithTimeout(c.Context(), time.Second*5)
+		defer cancel()
+
+		res, err := service.CreateActivity(ctx, requestBody)
 		if err != nil {
 			fmt.Printf("err: %v\n", err)
 
@@ -62,8 +67,11 @@ func AddParticipant(service entrypoints.ActivityService) fiber.Handler {
 				Error:      presenter.BODY_PARSER_ERR,
 			})
 		}
-		fmt.Printf("body: %+v", requestBody)
-		if err := service.AddParticipant(requestBody, int64(activityId)); err != nil { // unnecessary int64 id , can be use int instead
+
+		ctx, cancel := context.WithTimeout(c.Context(), time.Second*5)
+		defer cancel()
+
+		if err := service.AddParticipant(ctx, requestBody, int64(activityId)); err != nil { // unnecessary int64 id , can be use int instead
 			fmt.Printf("err: %v\n", err)
 			return c.Status(fiber.StatusInternalServerError).JSON(presenter.BaseResponse{
 				APIVersion: presenter.APIVersion,
@@ -87,7 +95,10 @@ func GetParticipants(service entrypoints.ActivityService) fiber.Handler {
 			})
 		}
 
-		res, err := service.GetParticipants(int64(activityId))
+		ctx, cancel := context.WithTimeout(c.Context(), time.Second*5)
+		defer cancel()
+
+		res, err := service.GetParticipants(ctx, int64(activityId))
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(presenter.BaseResponse{
 				APIVersion: presenter.APIVersion,
@@ -119,7 +130,10 @@ func GetActivitiesByLocation(service entrypoints.ActivityService) fiber.Handler 
 			City: city,
 		}
 
-		res, err := service.GetActivitiesByLocation(c.Context(), loc)
+		ctx, cancel := context.WithTimeout(c.Context(), time.Second*5)
+		defer cancel()
+
+		res, err := service.GetActivitiesByLocation(ctx, loc)
 
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(presenter.BaseResponse{
@@ -152,7 +166,10 @@ func GetActivityById(service entrypoints.ActivityService) fiber.Handler {
 			})
 		}
 
-		res, err := service.GetActivityById(c.Context(), int64(aI))
+		ctx, cancel := context.WithTimeout(c.Context(), time.Second*5)
+		defer cancel()
+
+		res, err := service.GetActivityById(ctx, int64(aI))
 
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(presenter.BaseResponse{
@@ -169,5 +186,4 @@ func GetActivityById(service entrypoints.ActivityService) fiber.Handler {
 		})
 
 	}
-
 }

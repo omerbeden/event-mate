@@ -45,7 +45,7 @@ func (service ActivityService) CreateActivity(ctx context.Context, activity mode
 		Redis:             redisadapter.NewRedisAdapter(&service.RedisClient),
 	}
 
-	createCmdResult, err := createCmd.Handle()
+	createCmdResult, err := createCmd.Handle(ctx)
 	if err != nil {
 		return false, err
 	}
@@ -54,7 +54,7 @@ func (service ActivityService) CreateActivity(ctx context.Context, activity mode
 
 }
 
-func (service ActivityService) AddParticipant(participant model.User, activityId int64) error {
+func (service ActivityService) AddParticipant(ctx context.Context, participant model.User, activityId int64) error {
 	addParticipantCommand := &commands.AddParticipantCommand{
 		ActivityRepository: service.ActivityRepository,
 		Redis:              redisadapter.NewRedisAdapter(&service.RedisClient),
@@ -62,10 +62,10 @@ func (service ActivityService) AddParticipant(participant model.User, activityId
 		ActivityId:         activityId,
 	}
 
-	return addParticipantCommand.Handle()
+	return addParticipantCommand.Handle(ctx)
 }
 
-func (service ActivityService) GetParticipants(activityId int64) ([]model.User, error) {
+func (service ActivityService) GetParticipants(ctx context.Context, activityId int64) ([]model.User, error) {
 
 	getParticipantsCommand := &commands.GetParticipantsCommand{
 		ActivityRepository: service.ActivityRepository,
@@ -73,7 +73,7 @@ func (service ActivityService) GetParticipants(activityId int64) ([]model.User, 
 		ActivityId:         activityId,
 	}
 
-	return getParticipantsCommand.Handle()
+	return getParticipantsCommand.Handle(ctx)
 
 }
 func (service ActivityService) GetActivityById(ctx context.Context, activityId int64) (*model.Activity, error) {
@@ -85,7 +85,7 @@ func (service ActivityService) GetActivityById(ctx context.Context, activityId i
 		Redis:             redisadapter.NewRedisAdapter(&service.RedisClient),
 	}
 
-	commandResult, err := getCommand.Handle()
+	commandResult, err := getCommand.Handle(ctx)
 
 	if err != nil {
 		return nil, err
@@ -101,10 +101,10 @@ func (service ActivityService) GetActivitiesByLocation(ctx context.Context, loc 
 		Redis:    redisadapter.NewRedisAdapter(&service.RedisClient),
 	}
 
-	activities, err := getCommand.Handle()
+	activities, err := getCommand.Handle(ctx)
 
 	for i := range activities {
-		activities[i].Participants, err = service.GetParticipants(activities[i].ID)
+		activities[i].Participants, err = service.GetParticipants(ctx, activities[i].ID)
 		if err != nil {
 			return nil, err
 		}

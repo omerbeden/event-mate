@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
@@ -20,7 +21,7 @@ type AddParticipantCommand struct {
 	ActivityId         int64
 }
 
-func (command *AddParticipantCommand) Handle() error {
+func (command *AddParticipantCommand) Handle(ctx context.Context) error {
 
 	valueJSON, err := json.Marshal(&command.Participant)
 	if err != nil {
@@ -36,7 +37,7 @@ func (command *AddParticipantCommand) Handle() error {
 		fmt.Printf("%s could not add atttanded activities to redis ", ERR_PREFIX_ADD_PARTICIPANT)
 	}
 
-	return command.ActivityRepository.AddParticipant(command.ActivityId, command.Participant)
+	return command.ActivityRepository.AddParticipant(ctx, command.ActivityId, command.Participant)
 }
 
 func (command *AddParticipantCommand) addParticipantToRedis(activityID int64, valueJSON []byte) error {

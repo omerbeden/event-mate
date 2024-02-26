@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
@@ -17,11 +18,11 @@ type GetParticipantsCommand struct {
 	ActivityId         int64
 }
 
-func (command *GetParticipantsCommand) Handle() ([]model.User, error) {
+func (command *GetParticipantsCommand) Handle(ctx context.Context) ([]model.User, error) {
 	redisResult, err := command.getFromRedis()
 	if err != nil {
 		fmt.Printf("%s redis error returning from db", ERR_PREFIX_GET_PARTICIPANTS)
-		return command.ActivityRepository.GetParticipants(command.ActivityId)
+		return command.ActivityRepository.GetParticipants(ctx, command.ActivityId)
 	}
 
 	return redisResult, nil

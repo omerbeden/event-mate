@@ -3,7 +3,6 @@ package repo
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -22,9 +21,7 @@ func (r *activityRulesRepository) Close() {
 	r.pool.Close()
 }
 
-func (r *activityRulesRepository) CreateActivityRules(acitivtyId int64, rules []string) error {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
+func (r *activityRulesRepository) CreateActivityRules(ctx context.Context, acitivtyId int64, rules []string) error {
 
 	var ruleRows [][]interface{}
 	for _, rule := range rules {
@@ -46,9 +43,7 @@ func (r *activityRulesRepository) CreateActivityRules(acitivtyId int64, rules []
 	return nil
 }
 
-func (r *activityRulesRepository) GetActivityRules(activityId int64) ([]string, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
+func (r *activityRulesRepository) GetActivityRules(ctx context.Context, activityId int64) ([]string, error) {
 
 	q := `SELECT description FROM activity_rules WHERE activity_id = $1`
 	rows, err := r.pool.Query(ctx, q, activityId)

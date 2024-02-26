@@ -3,7 +3,6 @@ package repo
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -22,9 +21,7 @@ func (r *activityFLowRepository) Close() {
 	r.pool.Close()
 }
 
-func (r *activityFLowRepository) CreateActivityFlow(acitivtyId int64, flows []string) error {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
+func (r *activityFLowRepository) CreateActivityFlow(ctx context.Context, acitivtyId int64, flows []string) error {
 
 	var flowRows [][]interface{}
 	for _, flow := range flows {
@@ -46,9 +43,7 @@ func (r *activityFLowRepository) CreateActivityFlow(acitivtyId int64, flows []st
 	return nil
 }
 
-func (r *activityFLowRepository) GetActivityFlow(activityId int64) ([]string, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
+func (r *activityFLowRepository) GetActivityFlow(ctx context.Context, activityId int64) ([]string, error) {
 
 	q := `SELECT description FROM activity_flows WHERE activity_id = $1`
 	rows, err := r.pool.Query(ctx, q, activityId)

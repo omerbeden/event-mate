@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"strconv"
@@ -23,24 +24,24 @@ type CreateCommand struct {
 	Redis             caching.Cache
 }
 
-func (ccmd *CreateCommand) Handle() (bool, error) {
+func (ccmd *CreateCommand) Handle(ctx context.Context) (bool, error) {
 
-	activity, errCreate := ccmd.ActivityRepo.Create(ccmd.Activity)
+	activity, errCreate := ccmd.ActivityRepo.Create(ctx, ccmd.Activity)
 	if errCreate != nil {
 		return false, errCreate
 	}
 
-	err := ccmd.ActivityRulesRepo.CreateActivityRules(activity.ID, ccmd.Activity.Rules)
+	err := ccmd.ActivityRulesRepo.CreateActivityRules(ctx, activity.ID, ccmd.Activity.Rules)
 	if err != nil {
 		return false, err
 	}
 
-	err = ccmd.ActivityFlowRepo.CreateActivityFlow(activity.ID, ccmd.Activity.Flow)
+	err = ccmd.ActivityFlowRepo.CreateActivityFlow(ctx, activity.ID, ccmd.Activity.Flow)
 	if err != nil {
 		return false, err
 	}
 
-	_, errLoc := ccmd.LocRepo.Create(&activity.Location)
+	_, errLoc := ccmd.LocRepo.Create(ctx, &activity.Location)
 	if errLoc != nil {
 		return false, errLoc
 	}

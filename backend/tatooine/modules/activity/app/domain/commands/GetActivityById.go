@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"strconv"
@@ -18,7 +19,7 @@ type GetByIDCommand struct {
 	Redis             caching.Cache
 }
 
-func (gc *GetByIDCommand) Handle() (*model.Activity, error) {
+func (gc *GetByIDCommand) Handle(ctx context.Context) (*model.Activity, error) {
 
 	activityId := strconv.FormatInt(gc.ActivityId, 10)
 	activityKey := fmt.Sprintf("%s:%s", ACTIVITY_KEY, activityId)
@@ -26,14 +27,14 @@ func (gc *GetByIDCommand) Handle() (*model.Activity, error) {
 	result, redisErr := gc.Redis.Get(activityKey)
 	if redisErr != nil {
 		fmt.Printf("redis error %s \n returning from db", redisErr.Error()) // log error
-		return gc.getActivityFromDb()
+		return gc.getActivityFromDb(ctx)
 	}
 
 	activity := model.Activity{}
 	err := json.Unmarshal([]byte(result.(string)), &activity)
 	if err != nil {
 		fmt.Printf("parsing erorr returning from db %s", err.Error())
-		return gc.getActivityFromDb()
+		return gc.getActivityFromDb(ctx)
 	}
 
 	if result != nil && err == nil {
@@ -41,23 +42,23 @@ func (gc *GetByIDCommand) Handle() (*model.Activity, error) {
 		return &activity, err
 	}
 
-	return gc.getActivityFromDb()
+	return gc.getActivityFromDb(ctx)
 }
 
-func (gc *GetByIDCommand) getActivityFromDb() (*model.Activity, error) {
-	activity, err := gc.Repo.GetByID(gc.ActivityId)
+func (gc *GetByIDCommand) getActivityFromDb(ctx context.Context) (*model.Activity, error) {
+	activity, err := gc.Repo.GetByID(ctx, gc.ActivityId)
 	if err != nil {
 		return nil, err
 	}
 
-	rules, err := gc.ActivityRulesRepo.GetActivityRules(gc.ActivityId)
+	rules, err := gc.ActivityRulesRepo.GetActivityRules(ctx, gc.ActivityId)
 	if err != nil {
 		return nil, err
 	}
 
 	activity.Rules = rules
 
-	flow, err := gc.ActivityFlowRepo.GetActivityFlow(gc.ActivityId)
+	flow, err := gc.ActivityFlowRepo.GetActivityFlow(ctx, gc.ActivityId)
 	if err != nil {
 		return nil, err
 	}

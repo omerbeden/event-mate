@@ -3,6 +3,7 @@ package entrypoints_test
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/go-redis/redis/v8"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -19,6 +20,8 @@ func TestCreateActivity(t *testing.T) {
 		Config:           pgxpool.Config{MinConns: 5, MaxConns: 10},
 	}
 	pool := postgres.NewConn(&dbConfig)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
 	activityService := entrypoints.ActivityService{
 
 		ActivityRepository: repo.NewActivityRepo(pool),
@@ -41,7 +44,7 @@ func TestCreateActivity(t *testing.T) {
 		},
 	}
 
-	res, err := activityService.CreateActivity(context.Background(), activity)
+	res, err := activityService.CreateActivity(ctx, activity)
 	assert.NoError(t, err)
 	assert.True(t, res)
 }
@@ -52,6 +55,8 @@ func TestGetActivitiesByLocation(t *testing.T) {
 		Config:           pgxpool.Config{MinConns: 5, MaxConns: 10},
 	}
 	pool := postgres.NewConn(&dbConfig)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
 	activityService := entrypoints.ActivityService{
 
 		ActivityRepository: repo.NewActivityRepo(pool),
@@ -67,7 +72,7 @@ func TestGetActivitiesByLocation(t *testing.T) {
 		City:       "Sakarya",
 	}
 
-	result, err := activityService.GetActivitiesByLocation(context.Background(), loc)
+	result, err := activityService.GetActivitiesByLocation(ctx, loc)
 
 	assert.NoError(t, err)
 	assert.NotEmpty(t, result)
@@ -81,6 +86,8 @@ func TestAddParticipant(t *testing.T) {
 		Config:           pgxpool.Config{MinConns: 5, MaxConns: 10},
 	}
 	pool := postgres.NewConn(&dbConfig)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
 	activityService := entrypoints.ActivityService{
 
 		ActivityRepository: repo.NewActivityRepo(pool),
@@ -95,7 +102,7 @@ func TestAddParticipant(t *testing.T) {
 	participant := model.User{
 		ID: 2,
 	}
-	err := activityService.AddParticipant(participant, 2)
+	err := activityService.AddParticipant(ctx, participant, 2)
 	assert.NoError(t, err)
 }
 
@@ -105,6 +112,8 @@ func TestGetParticipants(t *testing.T) {
 		Config:           pgxpool.Config{MinConns: 5, MaxConns: 10},
 	}
 	pool := postgres.NewConn(&dbConfig)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
 	activityService := entrypoints.ActivityService{
 
 		ActivityRepository: repo.NewActivityRepo(pool),
@@ -116,7 +125,7 @@ func TestGetParticipants(t *testing.T) {
 		}),
 	}
 
-	res, err := activityService.GetParticipants(1)
+	res, err := activityService.GetParticipants(ctx, 1)
 	assert.NoError(t, err)
 	assert.NotEmpty(t, res)
 
@@ -127,6 +136,8 @@ func TestGetActivityFromDBWhenRedisDown(t *testing.T) {
 		Config:           pgxpool.Config{MinConns: 5, MaxConns: 10},
 	}
 	pool := postgres.NewConn(&dbConfig)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
 	activityService := entrypoints.ActivityService{
 
 		ActivityRepository: repo.NewActivityRepo(pool),
@@ -138,7 +149,7 @@ func TestGetActivityFromDBWhenRedisDown(t *testing.T) {
 		}),
 	}
 
-	res, err := activityService.GetActivityById(context.Background(), 1)
+	res, err := activityService.GetActivityById(ctx, 1)
 
 	assert.NoError(t, err)
 	assert.NotNil(t, res)
@@ -150,6 +161,8 @@ func TestGetActivityByIDReturnErrorWhenActivityIdNotFound(t *testing.T) {
 		Config:           pgxpool.Config{MinConns: 5, MaxConns: 10},
 	}
 	pool := postgres.NewConn(&dbConfig)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
 	activityService := entrypoints.ActivityService{
 
 		ActivityRepository: repo.NewActivityRepo(pool),
@@ -161,7 +174,7 @@ func TestGetActivityByIDReturnErrorWhenActivityIdNotFound(t *testing.T) {
 		}),
 	}
 
-	res, err := activityService.GetActivityById(context.Background(), 3)
+	res, err := activityService.GetActivityById(ctx, 3)
 
 	assert.Error(t, err)
 	assert.Nil(t, res)
@@ -173,6 +186,8 @@ func TestGetActivityByLocationFromDBWhenRedisDown(t *testing.T) {
 		Config:           pgxpool.Config{MinConns: 5, MaxConns: 10},
 	}
 	pool := postgres.NewConn(&dbConfig)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
 	activityService := entrypoints.ActivityService{
 
 		ActivityRepository: repo.NewActivityRepo(pool),
@@ -189,7 +204,7 @@ func TestGetActivityByLocationFromDBWhenRedisDown(t *testing.T) {
 		City:       "Sakarya",
 	}
 
-	res, err := activityService.GetActivitiesByLocation(context.Background(), loc)
+	res, err := activityService.GetActivitiesByLocation(ctx, loc)
 
 	assert.NoError(t, err)
 	assert.NotNil(t, res)
@@ -201,6 +216,8 @@ func TestGetActivityByLocationReturnErrorWhenCityNotFound(t *testing.T) {
 		Config:           pgxpool.Config{MinConns: 5, MaxConns: 10},
 	}
 	pool := postgres.NewConn(&dbConfig)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
 	activityService := entrypoints.ActivityService{
 
 		ActivityRepository: repo.NewActivityRepo(pool),
@@ -217,7 +234,7 @@ func TestGetActivityByLocationReturnErrorWhenCityNotFound(t *testing.T) {
 		City:       "Istanbul",
 	}
 
-	res, _ := activityService.GetActivitiesByLocation(context.Background(), loc)
+	res, _ := activityService.GetActivitiesByLocation(ctx, loc)
 
 	assert.Nil(t, res)
 }

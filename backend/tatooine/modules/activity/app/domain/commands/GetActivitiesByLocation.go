@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
@@ -15,13 +16,13 @@ type GetByLocationCommand struct {
 	Redis    caching.Cache
 }
 
-func (gc *GetByLocationCommand) Handle() ([]model.Activity, error) {
+func (gc *GetByLocationCommand) Handle(ctx context.Context) ([]model.Activity, error) {
 	cityKey := fmt.Sprintf("%s:%s", CITY_KEY, gc.Location.City)
 
 	activities, redisErr := gc.Redis.GetMembers(cityKey)
 	if redisErr != nil {
 		fmt.Printf("redis error %s \n returning from db", redisErr.Error()) // log error
-		return gc.Repo.GetByLocation(&gc.Location)
+		return gc.Repo.GetByLocation(ctx, &gc.Location)
 	}
 
 	var activitiesResult []model.Activity
@@ -31,7 +32,7 @@ func (gc *GetByLocationCommand) Handle() ([]model.Activity, error) {
 		err := json.Unmarshal([]byte(activity), &activityObject)
 		if err != nil {
 			fmt.Printf("parsing erorr returning from db %s", err.Error())
-			return gc.Repo.GetByLocation(&gc.Location)
+			return gc.Repo.GetByLocation(ctx, &gc.Location)
 		}
 
 		if activityObject.Location.City == gc.Location.City {
@@ -44,5 +45,5 @@ func (gc *GetByLocationCommand) Handle() ([]model.Activity, error) {
 		return activitiesResult, nil
 	}
 
-	return gc.Repo.GetByLocation(&gc.Location)
+	return gc.Repo.GetByLocation(ctx, &gc.Location)
 }

@@ -3,7 +3,6 @@ package repo
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/domain/model"
@@ -25,9 +24,7 @@ func (r *LocationRepo) Close() {
 	r.pool.Close()
 }
 
-func (r *LocationRepo) Create(location *model.Location) (bool, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
+func (r *LocationRepo) Create(ctx context.Context, location *model.Location) (bool, error) {
 
 	ql := `INSERT INTO activity_locations(activity_id,city,district,description,latitude,longitude) Values($1,$2,$3,$4,$5,$6)`
 	_, err := r.pool.Exec(ctx, ql, location.ActivityId, location.City, location.District, location.Description, location.Latitude, location.Longitude)
@@ -38,9 +35,7 @@ func (r *LocationRepo) Create(location *model.Location) (bool, error) {
 	return true, nil
 }
 
-func (r *LocationRepo) UpdateByID(loc model.Location) (bool, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
+func (r *LocationRepo) UpdateByID(ctx context.Context, loc model.Location) (bool, error) {
 
 	q := `UPDATE activity_locations
 			SET city = $1
