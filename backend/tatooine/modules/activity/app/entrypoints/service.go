@@ -13,6 +13,7 @@ import (
 type ActivityService struct {
 	ActivityRepository      repositories.ActivityRepository
 	ActivityRulesRepository repositories.ActivityRulesRepository
+	ActivityFlowRepository  repositories.ActivityFlowRepository
 	LocationReposiroy       repositories.LocationRepository
 	RedisClient             redis.Client
 }
@@ -20,12 +21,14 @@ type ActivityService struct {
 func NewService(
 	activityRepository repositories.ActivityRepository,
 	activityRulesRepository repositories.ActivityRulesRepository,
+	activityFlowRepository repositories.ActivityFlowRepository,
 	locationRepository repositories.LocationRepository,
 	redisClient redis.Client,
 ) *ActivityService {
 	return &ActivityService{
 		ActivityRepository:      activityRepository,
 		ActivityRulesRepository: activityRulesRepository,
+		ActivityFlowRepository:  activityFlowRepository,
 		LocationReposiroy:       locationRepository,
 		RedisClient:             redisClient,
 	}
@@ -37,6 +40,7 @@ func (service ActivityService) CreateActivity(ctx context.Context, activity mode
 		ActivityRepo:      service.ActivityRepository,
 		LocRepo:           service.LocationReposiroy,
 		ActivityRulesRepo: service.ActivityRulesRepository,
+		ActivityFlowRepo:  service.ActivityFlowRepository,
 		Activity:          activity,
 		Redis:             redisadapter.NewRedisAdapter(&service.RedisClient),
 	}
@@ -76,6 +80,7 @@ func (service ActivityService) GetActivityById(ctx context.Context, activityId i
 	getCommand := &commands.GetByIDCommand{
 		Repo:              service.ActivityRepository,
 		ActivityRulesRepo: service.ActivityRulesRepository,
+		ActivityFlowRepo:  service.ActivityFlowRepository,
 		ActivityId:        activityId,
 		Redis:             redisadapter.NewRedisAdapter(&service.RedisClient),
 	}

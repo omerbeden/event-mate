@@ -40,7 +40,14 @@ CREATE TABLE IF NOT EXISTS participants (
 	CONSTRAINT participants_pk PRIMARY KEY(activity_id,user_id));
 
 
-CREATE TABLE IF NOT EXISTS rules(
+CREATE TABLE IF NOT EXISTS activity_rules(
+	id SERIAL PRIMARY KEY,
+	activity_id int NOT NULL,
+	description TEXT NOT NULL,
+	FOREIGN KEY (activity_id) REFERENCES activities(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS activity_flows(
 	id SERIAL PRIMARY KEY,
 	activity_id int NOT NULL,
 	description TEXT NOT NULL,

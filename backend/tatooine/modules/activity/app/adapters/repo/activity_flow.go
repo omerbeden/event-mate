@@ -9,48 +9,48 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-type activityRulesRepository struct {
+type activityFLowRepository struct {
 	pool *pgxpool.Pool
 }
 
-func NewActivityRulesRepo(pool *pgxpool.Pool) *activityRulesRepository {
-	return &activityRulesRepository{
+func NewActivityFlowRepo(pool *pgxpool.Pool) *activityFLowRepository {
+	return &activityFLowRepository{
 		pool: pool,
 	}
 }
-func (r *activityRulesRepository) Close() {
+func (r *activityFLowRepository) Close() {
 	r.pool.Close()
 }
 
-func (r *activityRulesRepository) CreateActivityRules(acitivtyId int64, rules []string) error {
+func (r *activityFLowRepository) CreateActivityFlow(acitivtyId int64, flows []string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	var ruleRows [][]interface{}
-	for _, rule := range rules {
-		ruleRows = append(ruleRows, []interface{}{acitivtyId, rule})
+	var flowRows [][]interface{}
+	for _, flow := range flows {
+		flowRows = append(flowRows, []interface{}{acitivtyId, flow})
 	}
 
 	copyCount, err := r.pool.CopyFrom(ctx,
-		pgx.Identifier{"activity_rules"},
+		pgx.Identifier{"activity_flows"},
 		[]string{"activity_id", "description"},
-		pgx.CopyFromRows(ruleRows))
+		pgx.CopyFromRows(flowRows))
 
 	if err != nil {
 		return err
 	}
 
-	if int(copyCount) != len(rules) {
+	if int(copyCount) != len(flows) {
 		return err
 	}
 	return nil
 }
 
-func (r *activityRulesRepository) GetActivityRules(activityId int64) ([]string, error) {
+func (r *activityFLowRepository) GetActivityFlow(activityId int64) ([]string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	q := `SELECT description FROM activity_rules WHERE activity_id = $1`
+	q := `SELECT description FROM activity_flows WHERE activity_id = $1`
 	rows, err := r.pool.Query(ctx, q, activityId)
 	if err != nil {
 		return nil, fmt.Errorf("could not get rules for activity: %d %w", activityId, err)

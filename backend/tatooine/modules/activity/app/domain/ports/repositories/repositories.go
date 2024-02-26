@@ -18,6 +18,11 @@ type ActivityRulesRepository interface {
 	GetActivityRules(int64) ([]string, error)
 }
 
+type ActivityFlowRepository interface {
+	CreateActivityFlow(int64, []string) error
+	GetActivityFlow(int64) ([]string, error)
+}
+
 type LocationRepository interface {
 	Create(loc *model.Location) (bool, error)
 	UpdateByID(loc model.Location) (bool, error)

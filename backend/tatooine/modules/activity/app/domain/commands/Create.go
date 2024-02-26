@@ -18,6 +18,7 @@ type CreateCommand struct {
 	Activity          model.Activity
 	ActivityRepo      repo.ActivityRepository
 	ActivityRulesRepo repo.ActivityRulesRepository
+	ActivityFlowRepo  repo.ActivityFlowRepository
 	LocRepo           repo.LocationRepository
 	Redis             caching.Cache
 }
@@ -29,7 +30,12 @@ func (ccmd *CreateCommand) Handle() (bool, error) {
 		return false, errCreate
 	}
 
-	err := ccmd.ActivityRulesRepo.CreateActivityRules(activity.ID, activity.Rules)
+	err := ccmd.ActivityRulesRepo.CreateActivityRules(activity.ID, ccmd.Activity.Rules)
+	if err != nil {
+		return false, err
+	}
+
+	err = ccmd.ActivityFlowRepo.CreateActivityFlow(activity.ID, ccmd.Activity.Flow)
 	if err != nil {
 		return false, err
 	}

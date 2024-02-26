@@ -14,6 +14,7 @@ type GetByIDCommand struct {
 	ActivityId        int64
 	Repo              repo.ActivityRepository
 	ActivityRulesRepo repo.ActivityRulesRepository
+	ActivityFlowRepo  repo.ActivityFlowRepository
 	Redis             caching.Cache
 }
 
@@ -40,7 +41,7 @@ func (gc *GetByIDCommand) Handle() (*model.Activity, error) {
 		return &activity, err
 	}
 
-	return gc.Repo.GetByID(gc.ActivityId)
+	return gc.getActivityFromDb()
 }
 
 func (gc *GetByIDCommand) getActivityFromDb() (*model.Activity, error) {
@@ -55,6 +56,13 @@ func (gc *GetByIDCommand) getActivityFromDb() (*model.Activity, error) {
 	}
 
 	activity.Rules = rules
+
+	flow, err := gc.ActivityFlowRepo.GetActivityFlow(gc.ActivityId)
+	if err != nil {
+		return nil, err
+	}
+
+	activity.Flow = flow
 
 	return activity, nil
 

@@ -13,6 +13,7 @@ type Activity struct {
 	StartAt            time.Time `json:"startAt"`
 	Content            string    `json:"content"`
 	Rules              []string  `json:"rules"`
+	Flow               []string  `json:"flow"`
 }
 
 type Location struct {
