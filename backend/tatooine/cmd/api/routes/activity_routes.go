@@ -10,5 +10,6 @@ func ActivityRouter(app fiber.Router, service entrypoints.ActivityService) {
 	app.Post("/activities", handlers.CreateActivity(service))
 	app.Post("/activities/:activityId/participants", handlers.AddParticipant(service))
 	app.Get("/activities/:activityId/participants", handlers.GetParticipants(service))
-	app.Get("/activities/:city", handlers.GetActivitiesByLocation(service))
+	app.Get("/activities", handlers.GetActivitiesByLocation(service))
+	app.Get("/activities/:activityId", handlers.GetActivityById(service))
 }

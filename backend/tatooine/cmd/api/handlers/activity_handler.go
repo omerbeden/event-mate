@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/omerbeden/event-mate/backend/tatooine/cmd/api/presenter"
@@ -105,7 +106,7 @@ func GetParticipants(service entrypoints.ActivityService) fiber.Handler {
 
 func GetActivitiesByLocation(service entrypoints.ActivityService) fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		city := c.Params("city")
+		city := c.Query("city")
 		if city == "" {
 			return c.Status(fiber.StatusBadRequest).JSON(presenter.BaseResponse{
 				APIVersion: presenter.APIVersion,
@@ -134,4 +135,39 @@ func GetActivitiesByLocation(service entrypoints.ActivityService) fiber.Handler 
 			Error:      "",
 		})
 	}
+}
+
+func GetActivityById(service entrypoints.ActivityService) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+
+		activityId := c.Params("activityId")
+
+		aI, err := strconv.Atoi(activityId)
+
+		if err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(presenter.BaseResponse{
+				APIVersion: presenter.APIVersion,
+				Data:       nil,
+				Error:      presenter.PARAM_PARSER_ERR,
+			})
+		}
+
+		res, err := service.GetActivityById(c.Context(), int64(aI))
+
+		if err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(presenter.BaseResponse{
+				APIVersion: presenter.APIVersion,
+				Data:       nil,
+				Error:      presenter.UNKNOW_ERR,
+			})
+		}
+
+		return c.Status(fiber.StatusOK).JSON(presenter.BaseResponse{
+			APIVersion: presenter.APIVersion,
+			Data:       res,
+			Error:      "",
+		})
+
+	}
+
 }

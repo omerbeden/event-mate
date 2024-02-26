@@ -22,7 +22,7 @@ func (r *activityRulesRepository) Close() {
 	r.pool.Close()
 }
 
-func (r *activityRepository) CreateActivityRules(acitivtyId int64, rules []string) error {
+func (r *activityRulesRepository) CreateActivityRules(acitivtyId int64, rules []string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
@@ -46,7 +46,7 @@ func (r *activityRepository) CreateActivityRules(acitivtyId int64, rules []strin
 	return nil
 }
 
-func (r *activityRepository) GetActivityRules(activityId int64) ([]string, error) {
+func (r *activityRulesRepository) GetActivityRules(activityId int64) ([]string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 

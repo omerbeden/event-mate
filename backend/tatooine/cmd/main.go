@@ -30,8 +30,10 @@ func main() {
 	var redisOption = redisadapter.RedisOption()
 	redisClient := redis.NewClient(redisOption)
 	activityRepository := activityRepo.NewActivityRepo(dbPool)
+	activityRulesRepository := activityRepo.NewActivityRulesRepo(dbPool)
 	locationRepository := activityRepo.NewLocationRepo(dbPool)
-	activityService := activityService.NewService(activityRepository, locationRepository, *redisClient)
+
+	activityService := activityService.NewService(activityRepository, activityRulesRepository, locationRepository, *redisClient)
 
 	userRepository := repo.NewUserProfileRepo(dbPool)
 	userService := entrypoints.NewService(userRepository, *cache.NewRedisClient(cache.RedisOption{

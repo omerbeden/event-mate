@@ -11,30 +11,34 @@ import (
 )
 
 type ActivityService struct {
-	ActivityRepository repositories.ActivityRepository
-	LocationReposiroy  repositories.LocationRepository
-	RedisClient        redis.Client
+	ActivityRepository      repositories.ActivityRepository
+	ActivityRulesRepository repositories.ActivityRulesRepository
+	LocationReposiroy       repositories.LocationRepository
+	RedisClient             redis.Client
 }
 
 func NewService(
 	activityRepository repositories.ActivityRepository,
+	activityRulesRepository repositories.ActivityRulesRepository,
 	locationRepository repositories.LocationRepository,
 	redisClient redis.Client,
 ) *ActivityService {
 	return &ActivityService{
-		ActivityRepository: activityRepository,
-		LocationReposiroy:  locationRepository,
-		RedisClient:        redisClient,
+		ActivityRepository:      activityRepository,
+		ActivityRulesRepository: activityRulesRepository,
+		LocationReposiroy:       locationRepository,
+		RedisClient:             redisClient,
 	}
 }
 
 func (service ActivityService) CreateActivity(ctx context.Context, activity model.Activity) (bool, error) {
 
 	createCmd := &commands.CreateCommand{
-		ActivityRepo: service.ActivityRepository,
-		LocRepo:      service.LocationReposiroy,
-		Activity:     activity,
-		Redis:        redisadapter.NewRedisAdapter(&service.RedisClient),
+		ActivityRepo:      service.ActivityRepository,
+		LocRepo:           service.LocationReposiroy,
+		ActivityRulesRepo: service.ActivityRulesRepository,
+		Activity:          activity,
+		Redis:             redisadapter.NewRedisAdapter(&service.RedisClient),
 	}
 
 	createCmdResult, err := createCmd.Handle()
@@ -70,12 +74,14 @@ func (service ActivityService) GetParticipants(activityId int64) ([]model.User, 
 }
 func (service ActivityService) GetActivityById(ctx context.Context, activityId int64) (*model.Activity, error) {
 	getCommand := &commands.GetByIDCommand{
-		Repo:       service.ActivityRepository,
-		ActivityId: activityId,
-		Redis:      redisadapter.NewRedisAdapter(&service.RedisClient),
+		Repo:              service.ActivityRepository,
+		ActivityRulesRepo: service.ActivityRulesRepository,
+		ActivityId:        activityId,
+		Redis:             redisadapter.NewRedisAdapter(&service.RedisClient),
 	}
 
 	commandResult, err := getCommand.Handle()
+
 	if err != nil {
 		return nil, err
 	}
