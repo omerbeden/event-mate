@@ -11,6 +11,7 @@ type Activity struct {
 	Participants       []User    `json:"participants"`
 	BackgroundImageUrl string    `json:"backgroundImage"`
 	StartAt            time.Time `json:"startAt"`
+	EndAt              time.Time `json:"endAt"`
 	Content            string    `json:"content"`
 	Rules              []string  `json:"rules"`
 	Flow               []string  `json:"flow"`

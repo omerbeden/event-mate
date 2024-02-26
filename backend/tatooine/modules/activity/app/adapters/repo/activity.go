@@ -31,7 +31,7 @@ func (r *activityRepository) Create(activity model.Activity) (*model.Activity, e
 	defer cancel()
 
 	var ID int64
-	q := `INSERT INTO activities (title,category,created_by,background_image_url,start_at,content) 
+	q := `INSERT INTO activities (title,category,created_by,background_image_url,start_at,end_at,content) 
 	Values($1,$2,$3,$4,$5,$6) RETURNING ID`
 
 	fmt.Printf("model: %+v \n", activity)
@@ -43,6 +43,7 @@ func (r *activityRepository) Create(activity model.Activity) (*model.Activity, e
 		activity.CreatedBy.ID,
 		activity.BackgroundImageUrl,
 		activity.StartAt,
+		activity.EndAt,
 		activity.Content).Scan(&ID)
 
 	if err != nil {
@@ -129,14 +130,16 @@ func (r *activityRepository) GetByID(id int64) (*model.Activity, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	q := `SELECT e.id, title, category, e.created_by, l.city
-	FROM activities e
-	LEFT JOIN user_profiles u ON e.created_by = u.id
-	LEFT JOIN activity_locations l ON e.id = l.activity_id
-	Where e.id = $1	
+	q := `SELECT e.id, title, category, a.created_by,a.start_at,a.end_at
+	 l.city
+	FROM activities a
+	LEFT JOIN user_profiles u ON a.created_by = u.id
+	LEFT JOIN activity_locations l ON a.id = l.activity_id
+	Where a.id = $1	
 	`
 	var activity model.Activity
-	err := r.pool.QueryRow(ctx, q, id).Scan(&activity.ID, &activity.Title, &activity.Category, &activity.CreatedBy.ID, &activity.Location.City)
+	err := r.pool.QueryRow(ctx, q, id).Scan(&activity.ID, &activity.Title, &activity.Category, &activity.CreatedBy.ID,
+		&activity.StartAt, &activity.EndAt, &activity.Location.City)
 	if err != nil {
 		return nil, fmt.Errorf("%s could not get activity by id: %d %w", errlogprefix, id, err)
 	}
@@ -147,14 +150,14 @@ func (r *activityRepository) GetByLocation(loc *model.Location) ([]model.Activit
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	q := `SELECT e.id, title, category, 
+	q := `SELECT a.id, a.title, a.category,a.start_at, a.end_at
 	u.id, u.name, u.last_name, u.profile_image_url, 
 	COALESCE(stats.point, 0.0)  as point
 	, l.city
-	FROM activities e
-	LEFT JOIN user_profiles u ON e.created_by = u.id
+	FROM activities a
+	LEFT JOIN user_profiles u ON a.created_by = u.id
 	LEFT JOIN user_profile_stats stats ON stats.profile_id = u.id
-	LEFT JOIN activity_locations l ON e.id = l.activity_id
+	LEFT JOIN activity_locations l ON a.id = l.activity_id
 	Where l.city= $1`
 
 	var activities []model.Activity
@@ -165,7 +168,7 @@ func (r *activityRepository) GetByLocation(loc *model.Location) ([]model.Activit
 
 	for rows.Next() {
 		var res model.Activity
-		err := rows.Scan(&res.ID, &res.Title, &res.Category,
+		err := rows.Scan(&res.ID, &res.Title, &res.Category, &res.StartAt, &res.EndAt,
 			&res.CreatedBy.ID, &res.CreatedBy.Name, &res.CreatedBy.LastName, &res.CreatedBy.ProfileImageUrl, &res.CreatedBy.ProfilePoint,
 			&res.Location.City)
 		if err != nil {
