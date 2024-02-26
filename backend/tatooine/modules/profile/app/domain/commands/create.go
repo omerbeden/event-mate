@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
@@ -18,8 +19,8 @@ type CreateProfileCommand struct {
 	Cache   cachedapter.Cache
 }
 
-func (ccmd *CreateProfileCommand) Handle() error {
-	userProfile, err := ccmd.Repo.InsertUser(&ccmd.Profile)
+func (ccmd *CreateProfileCommand) Handle(ctx context.Context) error {
+	userProfile, err := ccmd.Repo.InsertUser(ctx, &ccmd.Profile)
 	if err != nil {
 		return err
 	}

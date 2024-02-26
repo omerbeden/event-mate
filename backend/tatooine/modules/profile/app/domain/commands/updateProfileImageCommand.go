@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
@@ -17,13 +18,13 @@ type UpdateProfileImageCommand struct {
 	Username   string
 }
 
-func (c *UpdateProfileImageCommand) Handle() error {
-	err := c.Repo.UpdateProfileImage(c.ExternalId, c.ImageUrl)
+func (c *UpdateProfileImageCommand) Handle(ctx context.Context) error {
+	err := c.Repo.UpdateProfileImage(ctx, c.ExternalId, c.ImageUrl)
 	if err != nil {
 		return err
 	}
 
-	updatedUser, err := c.Repo.GetCurrentUserProfile(c.ExternalId)
+	updatedUser, err := c.Repo.GetCurrentUserProfile(ctx, c.ExternalId)
 	if err != nil {
 		return err
 	}

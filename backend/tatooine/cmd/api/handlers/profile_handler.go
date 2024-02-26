@@ -1,7 +1,9 @@
 package handlers
 
 import (
+	"context"
 	"fmt"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/omerbeden/event-mate/backend/tatooine/cmd/api/presenter"
@@ -22,8 +24,10 @@ func CreateUserProfile(service entrypoints.UserService) fiber.Handler {
 				Error:      presenter.BODY_PARSER_ERR,
 			})
 		}
+		ctx, cancel := context.WithTimeout(c.Context(), time.Second*5)
+		defer cancel()
 
-		err = service.CreateUser(&requestBody)
+		err = service.CreateUser(ctx, &requestBody)
 		if err != nil {
 			fmt.Printf("err: %v\n", err)
 
@@ -46,7 +50,9 @@ func GetCurrentUserProfile(service entrypoints.UserService) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		externalId := c.Params("externalId")
 
-		res, err := service.GetCurrentUserProfile(externalId)
+		ctx, cancel := context.WithTimeout(c.Context(), time.Second*5)
+		defer cancel()
+		res, err := service.GetCurrentUserProfile(ctx, externalId)
 
 		if err != nil {
 			if err == customerrors.ERR_NOT_FOUND {
@@ -79,12 +85,12 @@ func UpdateProfileImageUrl(service entrypoints.UserService) fiber.Handler {
 		if err := c.BodyParser(request); err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Cannot parse JSON"})
 		}
-
+		ctx, cancel := context.WithTimeout(c.Context(), time.Second*5)
+		defer cancel()
 		externalId := c.Params("externalId")
 
-		err := service.UpdateProfileImage(externalId, request.ProfileImageUrl)
+		err := service.UpdateProfileImage(ctx, externalId, request.ProfileImageUrl)
 		if err != nil {
-			fmt.Printf(err.Error())
 			if err == customerrors.ERR_NOT_FOUND {
 				return c.Status(fiber.StatusNotFound).JSON(presenter.BaseResponse{
 					APIVersion: presenter.APIVersion,

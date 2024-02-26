@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/adapters/cachedapter"
@@ -14,8 +15,8 @@ type DeleteProfileCommand struct {
 	UserName   string
 }
 
-func (c *DeleteProfileCommand) Handle() error {
-	err := c.Repo.DeleteUser(c.ExternalId)
+func (c *DeleteProfileCommand) Handle(ctx context.Context) error {
+	err := c.Repo.DeleteUser(ctx, c.ExternalId)
 	if err != nil {
 		return err
 	}

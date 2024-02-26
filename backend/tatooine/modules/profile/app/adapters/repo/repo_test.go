@@ -1,7 +1,9 @@
 package repo_test
 
 import (
+	"context"
 	"testing"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/adapters/repo"
@@ -16,7 +18,8 @@ func TestInsertUser(t *testing.T) {
 		Config:           pgxpool.Config{MinConns: 5, MaxConns: 10},
 	}
 	pool := postgres.NewConn(&dbConfig)
-
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
 	repository := repo.NewUserProfileRepo(pool)
 
 	user := model.UserProfile{
@@ -33,7 +36,7 @@ func TestInsertUser(t *testing.T) {
 		ProfileImageUrl: "image url",
 	}
 
-	result, err := repository.InsertUser(&user)
+	result, err := repository.InsertUser(ctx, &user)
 
 	assert.NoError(t, err)
 	assert.NotNil(t, result)
@@ -48,12 +51,14 @@ func TestGetUsersByAddress(t *testing.T) {
 	pool := postgres.NewConn(&dbConfig)
 
 	repository := repo.NewUserProfileRepo(pool)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
 
 	address := model.UserProfileAdress{
 		City: "Sakarya",
 	}
 
-	result, err := repository.GetUsersByAddress(address)
+	result, err := repository.GetUsersByAddress(ctx, address)
 
 	assert.NoError(t, err)
 	assert.NotNil(t, result)
@@ -67,10 +72,12 @@ func TestUpdateProfileImage(t *testing.T) {
 		Config:           pgxpool.Config{MinConns: 5, MaxConns: 10},
 	}
 	pool := postgres.NewConn(&dbConfig)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
 
 	repository := repo.NewUserProfileRepo(pool)
 
-	err := repository.UpdateProfileImage("", "new image.png")
+	err := repository.UpdateProfileImage(ctx, "", "new image.png")
 	assert.NoError(t, err)
 
 }
@@ -81,9 +88,11 @@ func TestDeleteUserById(t *testing.T) {
 		Config:           pgxpool.Config{MinConns: 5, MaxConns: 10},
 	}
 	pool := postgres.NewConn(&dbConfig)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
 
 	repository := repo.NewUserProfileRepo(pool)
 
-	err := repository.DeleteUser("externalId")
+	err := repository.DeleteUser(ctx, "externalId")
 	assert.NoError(t, err)
 }

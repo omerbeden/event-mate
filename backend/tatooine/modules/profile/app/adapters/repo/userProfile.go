@@ -3,7 +3,6 @@ package repo
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -24,9 +23,7 @@ func NewUserProfileRepo(pool *pgxpool.Pool) *userProfileRepo {
 	}
 }
 
-func (r *userProfileRepo) GetUsersByAddress(address model.UserProfileAdress) ([]model.UserProfile, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
+func (r *userProfileRepo) GetUsersByAddress(ctx context.Context, address model.UserProfileAdress) ([]model.UserProfile, error) {
 
 	q := `
 	Select p.id, p.name, p.last_name, p.profile_image_url, 
@@ -56,10 +53,7 @@ func (r *userProfileRepo) GetUsersByAddress(address model.UserProfileAdress) ([]
 	}
 	return users, nil
 }
-func (r *userProfileRepo) InsertUser(user *model.UserProfile) (*model.UserProfile, error) {
-
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
+func (r *userProfileRepo) InsertUser(ctx context.Context, user *model.UserProfile) (*model.UserProfile, error) {
 
 	q := `INSERT INTO user_profiles
 	 (name,last_name,profile_image_url,about,external_id,user_name)
@@ -72,11 +66,11 @@ func (r *userProfileRepo) InsertUser(user *model.UserProfile) (*model.UserProfil
 	}
 
 	user.Id = id
-	errAdress := r.insertProfileAdress(user)
+	errAdress := r.insertProfileAdress(ctx, user)
 	if errAdress != nil {
 		return nil, errAdress
 	}
-	errStat := r.insertProfileStat(user)
+	errStat := r.insertProfileStat(ctx, user)
 	if errStat != nil {
 		return nil, errStat
 	}
@@ -85,9 +79,7 @@ func (r *userProfileRepo) InsertUser(user *model.UserProfile) (*model.UserProfil
 	user.Adress.ProfileId = user.Id
 	return user, nil
 }
-func (r *userProfileRepo) UpdateProfileImage(externalId string, imageUrl string) error {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
+func (r *userProfileRepo) UpdateProfileImage(ctx context.Context, externalId string, imageUrl string) error {
 
 	q := `UPDATE user_profiles 
 		SET profile_image_url = $1
@@ -100,9 +92,7 @@ func (r *userProfileRepo) UpdateProfileImage(externalId string, imageUrl string)
 
 	return err
 }
-func (r *userProfileRepo) DeleteUser(externalId string) error {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
+func (r *userProfileRepo) DeleteUser(ctx context.Context, externalId string) error {
 
 	q := `DELETE FROM user_profiles  WHERE external_id = $1`
 	_, err := r.pool.Exec(ctx, q, externalId)
@@ -113,9 +103,7 @@ func (r *userProfileRepo) DeleteUser(externalId string) error {
 	return nil
 }
 
-func (r *userProfileRepo) GetAttandedActivities(userId int64) ([]model.Activity, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
+func (r *userProfileRepo) GetAttandedActivities(ctx context.Context, userId int64) ([]model.Activity, error) {
 
 	q := `SELECT a.id , a.title, a.category, a.background_image_url, a.content , a.start_at,
 	loc.city
@@ -146,9 +134,7 @@ func (r *userProfileRepo) GetAttandedActivities(userId int64) ([]model.Activity,
 	return activities, nil
 }
 
-func (r *userProfileRepo) insertProfileAdress(user *model.UserProfile) error {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
+func (r *userProfileRepo) insertProfileAdress(ctx context.Context, user *model.UserProfile) error {
 
 	q := `INSERT INTO user_profile_addresses (profile_id,city) Values($1,$2)`
 	_, err := r.pool.Exec(ctx, q, user.Id, user.Adress.City)
@@ -159,9 +145,7 @@ func (r *userProfileRepo) insertProfileAdress(user *model.UserProfile) error {
 	return nil
 }
 
-func (r *userProfileRepo) insertProfileStat(user *model.UserProfile) error {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
+func (r *userProfileRepo) insertProfileStat(ctx context.Context, user *model.UserProfile) error {
 
 	q := fmt.Sprintf(
 		`INSERT INTO user_profile_stats
@@ -177,9 +161,7 @@ func (r *userProfileRepo) insertProfileStat(user *model.UserProfile) error {
 }
 
 // dont need to anymore
-func (r *userProfileRepo) GetUserProfileStats(userId int64) (*model.UserProfileStat, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
+func (r *userProfileRepo) GetUserProfileStats(ctx context.Context, userId int64) (*model.UserProfileStat, error) {
 
 	q := `SELECT profile_id, (point/point_giving_count) as point , attanded_activities FROM user_profile_stats
 	WHERE profile_id = $1`
@@ -194,9 +176,7 @@ func (r *userProfileRepo) GetUserProfileStats(userId int64) (*model.UserProfileS
 	return &stat, nil
 }
 
-func (r *userProfileRepo) GetCurrentUserProfile(externalId string) (*model.UserProfile, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
+func (r *userProfileRepo) GetCurrentUserProfile(ctx context.Context, externalId string) (*model.UserProfile, error) {
 
 	q := `SELECT up.id, up.name, up.last_name, up.about, up.profile_image_url, up.external_id, up.user_name,
     upa.city,
@@ -223,7 +203,7 @@ func (r *userProfileRepo) GetCurrentUserProfile(externalId string) (*model.UserP
 
 	}
 
-	user.AttandedActivities, err = r.GetAttandedActivities(user.Id)
+	user.AttandedActivities, err = r.GetAttandedActivities(ctx, user.Id)
 	if err != nil {
 		return nil, fmt.Errorf("%s could not get attanded activities for profile: %d %w", errlogprefix, user.Id, err)
 
@@ -231,9 +211,7 @@ func (r *userProfileRepo) GetCurrentUserProfile(externalId string) (*model.UserP
 
 	return &user, nil
 }
-func (r *userProfileRepo) GetUserProfile(username string) (*model.UserProfile, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
+func (r *userProfileRepo) GetUserProfile(ctx context.Context, username string) (*model.UserProfile, error) {
 
 	q := `SELECT up.id, up.name, up.last_name, up.about, up.profile_image_url,
     upa.city,
@@ -256,7 +234,7 @@ func (r *userProfileRepo) GetUserProfile(username string) (*model.UserProfile, e
 
 	}
 
-	user.AttandedActivities, err = r.GetAttandedActivities(user.Id)
+	user.AttandedActivities, err = r.GetAttandedActivities(ctx, user.Id)
 	if err != nil {
 		return nil, fmt.Errorf("%s could not get attanded activities for profile: %d %w", errlogprefix, user.Id, err)
 
@@ -265,9 +243,7 @@ func (r *userProfileRepo) GetUserProfile(username string) (*model.UserProfile, e
 	return &user, nil
 }
 
-func (r *userProfileRepo) UpdateProfilePoints(receiverUserName string, point float32) error {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
+func (r *userProfileRepo) UpdateProfilePoints(ctx context.Context, receiverUserName string, point float32) error {
 
 	q := `UPDATE user_profile_stats
 		SET point = point + $1,

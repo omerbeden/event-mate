@@ -1,6 +1,7 @@
 package entrypoints
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/adapters/cachedapter"
@@ -25,17 +26,17 @@ func NewService(
 	}
 }
 
-func (service *UserService) CreateUser(user *model.UserProfile) error {
+func (service *UserService) CreateUser(ctx context.Context, user *model.UserProfile) error {
 	createCmd := &commands.CreateProfileCommand{
 		Profile: *user,
 		Repo:    service.userRepository,
 		Cache:   *cachedapter.NewCache(&service.redisClient),
 	}
 
-	return createCmd.Handle()
+	return createCmd.Handle(ctx)
 }
 
-func (service *UserService) DeleteUser(externalId, userName string) error {
+func (service *UserService) DeleteUser(ctx context.Context, externalId, userName string) error {
 	deleteCmd := &commands.DeleteProfileCommand{
 		Repo:       service.userRepository,
 		Cache:      *cachedapter.NewCache(&service.redisClient),
@@ -43,20 +44,20 @@ func (service *UserService) DeleteUser(externalId, userName string) error {
 		UserName:   userName,
 	}
 
-	return deleteCmd.Handle()
+	return deleteCmd.Handle(ctx)
 }
 
-func (service *UserService) GetAttandedActivities(userId int64) ([]model.Activity, error) {
+func (service *UserService) GetAttandedActivities(ctx context.Context, userId int64) ([]model.Activity, error) {
 	cmd := &commands.GetAttandedActivitiesCommand{
 		Repo:   service.userRepository,
 		Cache:  *cachedapter.NewCache(&service.redisClient),
 		UserId: userId,
 	}
 
-	return cmd.Handle()
+	return cmd.Handle(ctx)
 }
 
-func (service *UserService) UpdateProfileImage(externalId string, imageUrl string) error {
+func (service *UserService) UpdateProfileImage(ctx context.Context, externalId string, imageUrl string) error {
 	cmd := &commands.UpdateProfileImageCommand{
 		Repo:       service.userRepository,
 		Cache:      *cachedapter.NewCache(&service.redisClient),
@@ -64,27 +65,27 @@ func (service *UserService) UpdateProfileImage(externalId string, imageUrl strin
 		ExternalId: externalId,
 	}
 
-	return cmd.Handle()
+	return cmd.Handle(ctx)
 }
 
-func (service *UserService) GetUserProfileStats(userId int64) (*model.UserProfileStat, error) {
+func (service *UserService) GetUserProfileStats(ctx context.Context, userId int64) (*model.UserProfileStat, error) {
 	cmd := &commands.GetUserProfileStatsCommand{
 		Repo:   service.userRepository,
 		Cache:  *cachedapter.NewCache(&service.redisClient),
 		UserId: userId,
 	}
 
-	return cmd.Handle()
+	return cmd.Handle(ctx)
 }
 
-func (service *UserService) GetCurrentUserProfile(externalId string) (*model.UserProfile, error) {
+func (service *UserService) GetCurrentUserProfile(ctx context.Context, externalId string) (*model.UserProfile, error) {
 	cmd := &commands.GetCurrentUserProfileCommand{
 		Repo:       service.userRepository,
 		Cache:      *cachedapter.NewCache(&service.redisClient),
 		ExternalId: externalId,
 	}
 
-	user, err := cmd.Handle()
+	user, err := cmd.Handle(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -99,14 +100,14 @@ func (service *UserService) GetCurrentUserProfile(externalId string) (*model.Use
 	return user, nil
 }
 
-func (service *UserService) GetUserProfile(userName string) (*model.UserProfile, error) {
+func (service *UserService) GetUserProfile(ctx context.Context, userName string) (*model.UserProfile, error) {
 	cmd := &commands.GetUserProfileCommand{
 		Repo:     service.userRepository,
 		Cache:    *cachedapter.NewCache(&service.redisClient),
 		UserName: userName,
 	}
 
-	user, err := cmd.Handle()
+	user, err := cmd.Handle(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -121,7 +122,7 @@ func (service *UserService) GetUserProfile(userName string) (*model.UserProfile,
 	return user, nil
 }
 
-func (service *UserService) GivePointsToUser(receiverUserName string, point float32) error {
+func (service *UserService) GivePointsToUser(ctx context.Context, receiverUserName string, point float32) error {
 	cmd := &commands.GiveUserPointCommand{
 		Repo:             service.userRepository,
 		Cache:            *cachedapter.NewCache(&service.redisClient),
@@ -129,5 +130,5 @@ func (service *UserService) GivePointsToUser(receiverUserName string, point floa
 		Point:            point,
 	}
 
-	return cmd.Handle()
+	return cmd.Handle(ctx)
 }

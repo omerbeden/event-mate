@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/adapters/cachedapter"
@@ -16,11 +17,11 @@ type GetUserProfileCommand struct {
 	UserName string
 }
 
-func (cmd *GetUserProfileCommand) Handle() (*model.UserProfile, error) {
+func (cmd *GetUserProfileCommand) Handle(ctx context.Context) (*model.UserProfile, error) {
 	user, err := cmd.getFromCache(cmd.UserName)
 	if err != nil {
 		fmt.Printf("%s: error while getting user profile %s from cache, returning from db", errLogPrefixGetUserProfileCommand, cmd.UserName)
-		return cmd.Repo.GetUserProfile(cmd.UserName)
+		return cmd.Repo.GetUserProfile(ctx, cmd.UserName)
 	}
 
 	return user, nil

@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
@@ -15,12 +16,12 @@ type GetAttandedActivitiesCommand struct {
 	UserId int64
 }
 
-func (c *GetAttandedActivitiesCommand) Handle() ([]model.Activity, error) {
+func (c *GetAttandedActivitiesCommand) Handle(ctx context.Context) ([]model.Activity, error) {
 
 	attandedActivitiesFromCache, err := c.getFromCache(c.UserId)
 	if err != nil || len(attandedActivitiesFromCache) < 1 || attandedActivitiesFromCache == nil {
 		fmt.Printf("returning attended activities from db userid : %d\n", c.UserId)
-		return c.Repo.GetAttandedActivities(c.UserId)
+		return c.Repo.GetAttandedActivities(ctx, c.UserId)
 	}
 
 	return attandedActivitiesFromCache, nil

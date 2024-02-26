@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
@@ -17,13 +18,13 @@ type GiveUserPointCommand struct {
 	ExternalId       string
 }
 
-func (cmd *GiveUserPointCommand) Handle() error {
-	err := cmd.Repo.UpdateProfilePoints(cmd.ReceiverUserName, cmd.Point)
+func (cmd *GiveUserPointCommand) Handle(ctx context.Context) error {
+	err := cmd.Repo.UpdateProfilePoints(ctx, cmd.ReceiverUserName, cmd.Point)
 	if err != nil {
 		return err
 	}
 
-	updatedUser, err := cmd.Repo.GetUserProfile(cmd.ReceiverUserName)
+	updatedUser, err := cmd.Repo.GetUserProfile(ctx, cmd.ReceiverUserName)
 	if err != nil {
 		return err
 	}
