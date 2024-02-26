@@ -12,6 +12,7 @@ type Activity struct {
 	BackgroundImageUrl string    `json:"backgroundImage"`
 	StartAt            time.Time `json:"startAt"`
 	Content            string    `json:"content"`
+	Rules              []string  `json:"rules"`
 }
 
 type Location struct {

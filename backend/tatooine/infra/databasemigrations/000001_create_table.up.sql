@@ -38,3 +38,11 @@ CREATE TABLE IF NOT EXISTS participants (
 	user_id int references user_profiles(id)ON DELETE CASCADE,
 	
 	CONSTRAINT participants_pk PRIMARY KEY(activity_id,user_id));
+
+
+CREATE TABLE IF NOT EXISTS rules(
+	id SERIAL PRIMARY KEY,
+	activity_id int NOT NULL,
+	description TEXT NOT NULL,
+	FOREIGN KEY (activity_id) REFERENCES activities(id) ON DELETE CASCADE
+);

@@ -13,6 +13,11 @@ type ActivityRepository interface {
 	GetParticipants(activityId int64) ([]model.User, error)
 }
 
+type ActivityRulesRepository interface {
+	CreateActivityRules(int64, []string) error
+	GetActivityRules(int64) ([]string, error)
+}
+
 type LocationRepository interface {
 	Create(loc *model.Location) (bool, error)
 	UpdateByID(loc model.Location) (bool, error)

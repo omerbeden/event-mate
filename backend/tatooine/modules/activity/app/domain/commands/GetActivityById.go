@@ -11,9 +11,10 @@ import (
 )
 
 type GetByIDCommand struct {
-	ActivityId int64
-	Repo       repo.ActivityRepository
-	Redis      caching.Cache
+	ActivityId        int64
+	Repo              repo.ActivityRepository
+	ActivityRulesRepo repo.ActivityRulesRepository
+	Redis             caching.Cache
 }
 
 func (gc *GetByIDCommand) Handle() (*model.Activity, error) {
@@ -24,14 +25,14 @@ func (gc *GetByIDCommand) Handle() (*model.Activity, error) {
 	result, redisErr := gc.Redis.Get(activityKey)
 	if redisErr != nil {
 		fmt.Printf("redis error %s \n returning from db", redisErr.Error()) // log error
-		return gc.Repo.GetByID(gc.ActivityId)
+		return gc.getActivityFromDb()
 	}
 
 	activity := model.Activity{}
 	err := json.Unmarshal([]byte(result.(string)), &activity)
 	if err != nil {
 		fmt.Printf("parsing erorr returning from db %s", err.Error())
-		return gc.Repo.GetByID(gc.ActivityId)
+		return gc.getActivityFromDb()
 	}
 
 	if result != nil && err == nil {
@@ -40,4 +41,21 @@ func (gc *GetByIDCommand) Handle() (*model.Activity, error) {
 	}
 
 	return gc.Repo.GetByID(gc.ActivityId)
+}
+
+func (gc *GetByIDCommand) getActivityFromDb() (*model.Activity, error) {
+	activity, err := gc.Repo.GetByID(gc.ActivityId)
+	if err != nil {
+		return nil, err
+	}
+
+	rules, err := gc.ActivityRulesRepo.GetActivityRules(gc.ActivityId)
+	if err != nil {
+		return nil, err
+	}
+
+	activity.Rules = rules
+
+	return activity, nil
+
 }

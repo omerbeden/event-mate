@@ -15,10 +15,11 @@ const CITY_KEY = "city"
 const ACTIVITY_KEY = "activity"
 
 type CreateCommand struct {
-	Activity     model.Activity
-	ActivityRepo repo.ActivityRepository
-	LocRepo      repo.LocationRepository
-	Redis        caching.Cache
+	Activity          model.Activity
+	ActivityRepo      repo.ActivityRepository
+	ActivityRulesRepo repo.ActivityRulesRepository
+	LocRepo           repo.LocationRepository
+	Redis             caching.Cache
 }
 
 func (ccmd *CreateCommand) Handle() (bool, error) {
@@ -28,20 +29,25 @@ func (ccmd *CreateCommand) Handle() (bool, error) {
 		return false, errCreate
 	}
 
+	err := ccmd.ActivityRulesRepo.CreateActivityRules(activity.ID, activity.Rules)
+	if err != nil {
+		return false, err
+	}
+
 	_, errLoc := ccmd.LocRepo.Create(&activity.Location)
 	if errLoc != nil {
 		return false, errLoc
 	}
-
-	activityId := strconv.FormatInt(activity.ID, 10)
 
 	jsonActivity, errMarshall := json.Marshal(activity)
 	if errMarshall != nil {
 		return false, errMarshall
 	}
 
+	activityId := strconv.FormatInt(activity.ID, 10)
 	activityKey := fmt.Sprintf("%s:%s", ACTIVITY_KEY, activityId)
-	err := ccmd.Redis.Set(activityKey, jsonActivity)
+
+	err = ccmd.Redis.Set(activityKey, jsonActivity)
 	if err != nil {
 		fmt.Printf("activity could not inserted to Redis %s\n", activityId)
 	}

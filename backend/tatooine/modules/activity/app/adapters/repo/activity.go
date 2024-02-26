@@ -157,7 +157,7 @@ func (r *activityRepository) GetByLocation(loc *model.Location) ([]model.Activit
 	LEFT JOIN activity_locations l ON e.id = l.activity_id
 	Where l.city= $1`
 
-	var activity []model.Activity
+	var activities []model.Activity
 	rows, err := r.pool.Query(ctx, q, loc.City)
 	if err != nil {
 		return nil, fmt.Errorf("%s could not get activity by loc: id: %s  %w", errlogprefix, loc.City, err)
@@ -171,11 +171,10 @@ func (r *activityRepository) GetByLocation(loc *model.Location) ([]model.Activit
 		if err != nil {
 			return nil, fmt.Errorf("err getting rows %w ", err)
 		}
-		activity = append(activity, res)
-
+		activities = append(activities, res)
 	}
 
-	return activity, nil
+	return activities, nil
 }
 
 func (r *activityRepository) UpdateByID(id int32, activity model.Activity) (bool, error) {
