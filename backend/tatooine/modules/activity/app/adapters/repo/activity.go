@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/domain/model"
 )
@@ -12,10 +13,24 @@ import (
 const errlogprefix = "repo:activity"
 
 type activityRepository struct {
-	pool *pgxpool.Pool
+	pool DBExecutor
 }
 
-func NewActivityRepo(pool *pgxpool.Pool) *activityRepository {
+type DBExecutor interface {
+	Begin(ctx context.Context) (pgx.Tx, error)
+	BeginTx(ctx context.Context, txOptions pgx.TxOptions) (pgx.Tx, error)
+	Close()
+	Config() *pgxpool.Config
+	CopyFrom(ctx context.Context, tableName pgx.Identifier, columnNames []string, rowSrc pgx.CopyFromSource) (int64, error)
+	Exec(ctx context.Context, sql string, arguments ...any) (pgconn.CommandTag, error)
+	Ping(ctx context.Context) error
+	Query(ctx context.Context, sql string, args ...any) (pgx.Rows, error)
+	QueryRow(ctx context.Context, sql string, args ...any) pgx.Row
+}
+
+var _ DBExecutor = (*pgxpool.Pool)(nil)
+
+func NewActivityRepo(pool DBExecutor) *activityRepository {
 	return &activityRepository{
 		pool: pool,
 	}
@@ -166,7 +181,7 @@ func (r *activityRepository) GetByLocation(ctx context.Context, loc *model.Locat
 	return activities, nil
 }
 
-func (r *activityRepository) UpdateByID(ctx context.Context, id int32, activity model.Activity) (bool, error) {
+func (r *activityRepository) UpdateByID(ctx context.Context, id int64, activity model.Activity) (bool, error) {
 
 	q := `UPDATE activities
 	 SET title  = $1,
@@ -182,7 +197,7 @@ func (r *activityRepository) UpdateByID(ctx context.Context, id int32, activity 
 	return true, nil
 }
 
-func (r *activityRepository) DeleteByID(ctx context.Context, id int32) (bool, error) {
+func (r *activityRepository) DeleteByID(ctx context.Context, id int64) (bool, error) {
 
 	q := `DELETE FROM activities  WHERE id = $1`
 	_, err := r.pool.Exec(ctx, q, id)

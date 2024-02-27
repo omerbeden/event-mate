@@ -18,5 +18,5 @@ func (uc *UpdateCommand) Handle(ctx context.Context) (bool, error) {
 		Category: uc.Activity.Category,
 	}
 
-	return uc.Repo.UpdateByID(ctx, int32(uc.Activity.ID), *model)
+	return uc.Repo.UpdateByID(ctx, uc.Activity.ID, *model)
 }

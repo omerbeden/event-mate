@@ -4,17 +4,16 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/domain/model"
 )
 
 const errLogPrefix = "repo:location"
 
 type LocationRepo struct {
-	pool *pgxpool.Pool
+	pool DBExecutor
 }
 
-func NewLocationRepo(pool *pgxpool.Pool) *LocationRepo {
+func NewLocationRepo(pool DBExecutor) *LocationRepo {
 	return &LocationRepo{
 		pool: pool,
 	}
