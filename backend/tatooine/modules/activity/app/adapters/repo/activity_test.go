@@ -29,6 +29,7 @@ func (m *MockRow) Scan(dest ...any) error {
 type MockRows struct {
 	Activities []model.Activity
 	Rules      []string
+	Flow       []string
 	Current    int
 }
 
@@ -51,6 +52,9 @@ func (m *MockRows) Next() bool {
 	if len(m.Rules) > 0 {
 		return m.Current < len(m.Rules)
 	}
+	if len(m.Flow) > 0 {
+		return m.Current < len(m.Flow)
+	}
 	return false
 }
 func (m *MockRows) Scan(dest ...any) error {
@@ -71,6 +75,10 @@ func (m *MockRows) Scan(dest ...any) error {
 	if len(m.Rules) > 0 {
 		rule := m.Rules[m.Current]
 		*dest[0].(*string) = rule
+	}
+	if len(m.Flow) > 0 {
+		flow := m.Flow[m.Current]
+		*dest[0].(*string) = flow
 	}
 	m.Current++
 	return nil

@@ -13,20 +13,21 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestCreateActivityRules(t *testing.T) {
+func TestCreateActivityFlow(t *testing.T) {
+	flow := []string{"flow1", "flow2"}
 	tests := []struct {
 		name        string
 		id          int
 		activityId  int64
-		rules       []string
+		flow        []string
 		expectError bool
 		setupMock   func(*MockDBExecuter)
 	}{
 		{
-			name:        "should create activity rules",
+			name:        "should create activity flow",
 			id:          1,
 			activityId:  1,
-			rules:       []string{"rule1", "rule2"},
+			flow:        flow,
 			expectError: false,
 			setupMock: func(md *MockDBExecuter) {
 				md.CopyFromFunc = func(ctx context.Context, tableName pgx.Identifier, columnNames []string, rowSrc pgx.CopyFromSource) (int64, error) {
@@ -38,7 +39,7 @@ func TestCreateActivityRules(t *testing.T) {
 			name:        "should return error",
 			id:          2,
 			activityId:  1,
-			rules:       []string{"rule1", "rule2"},
+			flow:        flow,
 			expectError: true,
 			setupMock: func(md *MockDBExecuter) {
 				md.CopyFromFunc = func(ctx context.Context, tableName pgx.Identifier, columnNames []string, rowSrc pgx.CopyFromSource) (int64, error) {
@@ -50,7 +51,7 @@ func TestCreateActivityRules(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(fmt.Sprintf("%s,%d", tc.name, tc.id), func(t *testing.T) {
 			mockDB := new(MockDBExecuter)
-			repo := repo.NewActivityRulesRepo(mockDB)
+			repo := repo.NewActivityFlowRepo(mockDB)
 
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 			defer cancel()
@@ -59,7 +60,7 @@ func TestCreateActivityRules(t *testing.T) {
 				tc.setupMock(mockDB)
 			}
 
-			err := repo.CreateActivityRules(ctx, tc.activityId, tc.rules)
+			err := repo.CreateActivityFlow(ctx, tc.activityId, tc.flow)
 
 			if tc.expectError {
 				assert.Error(t, err)
@@ -70,9 +71,9 @@ func TestCreateActivityRules(t *testing.T) {
 	}
 }
 
-func TestGetActivityRules(t *testing.T) {
+func TestGetActivityFlow(t *testing.T) {
 
-	rules := []string{"rule1", "rule2"}
+	flow := []string{"flow1", "flow2"}
 	tests := []struct {
 		name        string
 		id          int
@@ -82,16 +83,17 @@ func TestGetActivityRules(t *testing.T) {
 		setupMock   func(*MockDBExecuter)
 	}{
 		{
-			name:        "should get activity rules",
+			name:        "should get activity flow",
 			id:          1,
 			activityId:  1,
-			expected:    rules,
+			expected:    flow,
 			expectError: false,
 			setupMock: func(md *MockDBExecuter) {
 				md.QueryFunc = func(ctx context.Context, sql string, args ...any) (pgx.Rows, error) {
 					return &MockRows{
 						Activities: []model.Activity{},
-						Rules:      rules,
+						Rules:      []string{},
+						Flow:       flow,
 						Current:    0,
 					}, nil
 				}
@@ -101,7 +103,7 @@ func TestGetActivityRules(t *testing.T) {
 			name:        "should return error",
 			id:          2,
 			activityId:  1,
-			expected:    rules,
+			expected:    flow,
 			expectError: true,
 			setupMock: func(md *MockDBExecuter) {
 				md.QueryFunc = func(ctx context.Context, sql string, args ...any) (pgx.Rows, error) {
@@ -113,7 +115,7 @@ func TestGetActivityRules(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(fmt.Sprintf("%s,%d", tc.name, tc.id), func(t *testing.T) {
 			mockDB := new(MockDBExecuter)
-			repo := repo.NewActivityRulesRepo(mockDB)
+			repo := repo.NewActivityFlowRepo(mockDB)
 
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 			defer cancel()
@@ -122,7 +124,7 @@ func TestGetActivityRules(t *testing.T) {
 				tc.setupMock(mockDB)
 			}
 
-			res, err := repo.GetActivityRules(ctx, tc.activityId)
+			res, err := repo.GetActivityFlow(ctx, tc.activityId)
 
 			if tc.expectError {
 				assert.Error(t, err)
