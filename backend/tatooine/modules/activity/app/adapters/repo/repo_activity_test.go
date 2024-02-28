@@ -159,7 +159,7 @@ func TestAddParticipants(t *testing.T) {
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 			defer cancel()
 
-			err := activityRepository.AddParticipants(ctx, *tc.activity)
+			err := activityRepository.AddParticipants(ctx, *&tc.activity.ID, tc.activity.Participants)
 
 			if tc.expectError {
 				assert.Error(t, err)

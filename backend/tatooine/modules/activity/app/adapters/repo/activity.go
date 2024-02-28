@@ -67,11 +67,11 @@ func (r *activityRepository) Create(ctx context.Context, activity model.Activity
 	return &activity, nil
 }
 
-func (r *activityRepository) AddParticipants(ctx context.Context, activity model.Activity) error {
+func (r *activityRepository) AddParticipants(ctx context.Context, activityId int64, participants []model.User) error {
 
 	var linkedParticipants [][]interface{}
-	for _, parparticipants := range activity.Participants {
-		linkedParticipants = append(linkedParticipants, []interface{}{activity.ID, parparticipants.ID})
+	for _, parparticipants := range participants {
+		linkedParticipants = append(linkedParticipants, []interface{}{activityId, parparticipants.ID})
 
 	}
 
@@ -84,7 +84,7 @@ func (r *activityRepository) AddParticipants(ctx context.Context, activity model
 	if err != nil {
 		return err
 	}
-	if int(copyCount) != len(activity.Participants) {
+	if int(copyCount) != len(participants) {
 		return err
 	}
 	return nil

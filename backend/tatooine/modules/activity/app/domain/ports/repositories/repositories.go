@@ -12,7 +12,7 @@ type ActivityRepository interface {
 	GetByLocation(context.Context, *model.Location) ([]model.Activity, error)
 	UpdateByID(context.Context, int64, model.Activity) (bool, error)
 	DeleteByID(context.Context, int64) (bool, error)
-	AddParticipants(context.Context, model.Activity) error
+	AddParticipants(context.Context, int64, []model.User) error
 	AddParticipant(context.Context, int64, model.User) error
 	GetParticipants(context.Context, int64) ([]model.User, error)
 }
