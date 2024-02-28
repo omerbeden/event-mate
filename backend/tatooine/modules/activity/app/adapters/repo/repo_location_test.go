@@ -9,6 +9,7 @@ import (
 
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/adapters/repo"
+	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/adapters/repo/testutils"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/domain/model"
 	"github.com/stretchr/testify/assert"
 )
@@ -18,7 +19,7 @@ func TestCreateLocation(t *testing.T) {
 		name        string
 		id          int
 		location    model.Location
-		setupMock   func(*MockDBExecuter)
+		setupMock   func(*testutils.MockDBExecuter)
 		expectError bool
 	}{
 		{
@@ -28,7 +29,7 @@ func TestCreateLocation(t *testing.T) {
 				City: "London",
 			},
 			expectError: false,
-			setupMock: func(md *MockDBExecuter) {
+			setupMock: func(md *testutils.MockDBExecuter) {
 				md.ExecFunc = func(ctx context.Context, sql string, arguments ...any) (pgconn.CommandTag, error) {
 					return pgconn.NewCommandTag(""), nil
 				}
@@ -41,7 +42,7 @@ func TestCreateLocation(t *testing.T) {
 				City: "London",
 			},
 			expectError: true,
-			setupMock: func(md *MockDBExecuter) {
+			setupMock: func(md *testutils.MockDBExecuter) {
 				md.ExecFunc = func(ctx context.Context, sql string, arguments ...any) (pgconn.CommandTag, error) {
 					return pgconn.NewCommandTag(""), errors.New("database error")
 				}
@@ -51,7 +52,7 @@ func TestCreateLocation(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(fmt.Sprintf("%s,%d", tc.name, tc.id), func(t *testing.T) {
-			mockDB := new(MockDBExecuter)
+			mockDB := new(testutils.MockDBExecuter)
 			repo := repo.NewLocationRepo(mockDB)
 
 			if tc.setupMock != nil {
@@ -77,7 +78,7 @@ func TestUpdateLocation(t *testing.T) {
 		name        string
 		id          int
 		location    model.Location
-		setupMock   func(*MockDBExecuter)
+		setupMock   func(*testutils.MockDBExecuter)
 		expectError bool
 	}{
 		{
@@ -87,7 +88,7 @@ func TestUpdateLocation(t *testing.T) {
 				City: "London",
 			},
 			expectError: false,
-			setupMock: func(md *MockDBExecuter) {
+			setupMock: func(md *testutils.MockDBExecuter) {
 				md.ExecFunc = func(ctx context.Context, sql string, arguments ...any) (pgconn.CommandTag, error) {
 					return pgconn.NewCommandTag(""), nil
 				}
@@ -100,7 +101,7 @@ func TestUpdateLocation(t *testing.T) {
 				City: "NEW York",
 			},
 			expectError: true,
-			setupMock: func(md *MockDBExecuter) {
+			setupMock: func(md *testutils.MockDBExecuter) {
 				md.ExecFunc = func(ctx context.Context, sql string, arguments ...any) (pgconn.CommandTag, error) {
 					return pgconn.NewCommandTag(""), errors.New("database error")
 				}
@@ -110,7 +111,7 @@ func TestUpdateLocation(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(fmt.Sprintf("%s,%d", tc.name, tc.id), func(t *testing.T) {
-			mockDB := new(MockDBExecuter)
+			mockDB := new(testutils.MockDBExecuter)
 			repo := repo.NewLocationRepo(mockDB)
 
 			if tc.setupMock != nil {

@@ -9,6 +9,7 @@ import (
 
 	"github.com/jackc/pgx/v5"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/adapters/repo"
+	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/adapters/repo/testutils"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/domain/model"
 	"github.com/stretchr/testify/assert"
 )
@@ -21,7 +22,7 @@ func TestCreateActivityFlow(t *testing.T) {
 		activityId  int64
 		flow        []string
 		expectError bool
-		setupMock   func(*MockDBExecuter)
+		setupMock   func(*testutils.MockDBExecuter)
 	}{
 		{
 			name:        "should create activity flow",
@@ -29,7 +30,7 @@ func TestCreateActivityFlow(t *testing.T) {
 			activityId:  1,
 			flow:        flow,
 			expectError: false,
-			setupMock: func(md *MockDBExecuter) {
+			setupMock: func(md *testutils.MockDBExecuter) {
 				md.CopyFromFunc = func(ctx context.Context, tableName pgx.Identifier, columnNames []string, rowSrc pgx.CopyFromSource) (int64, error) {
 					return 2, nil
 				}
@@ -41,7 +42,7 @@ func TestCreateActivityFlow(t *testing.T) {
 			activityId:  1,
 			flow:        flow,
 			expectError: true,
-			setupMock: func(md *MockDBExecuter) {
+			setupMock: func(md *testutils.MockDBExecuter) {
 				md.CopyFromFunc = func(ctx context.Context, tableName pgx.Identifier, columnNames []string, rowSrc pgx.CopyFromSource) (int64, error) {
 					return 0, errors.New("database error")
 				}
@@ -50,7 +51,7 @@ func TestCreateActivityFlow(t *testing.T) {
 	}
 	for _, tc := range tests {
 		t.Run(fmt.Sprintf("%s,%d", tc.name, tc.id), func(t *testing.T) {
-			mockDB := new(MockDBExecuter)
+			mockDB := new(testutils.MockDBExecuter)
 			repo := repo.NewActivityFlowRepo(mockDB)
 
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
@@ -80,7 +81,7 @@ func TestGetActivityFlow(t *testing.T) {
 		activityId  int64
 		expected    []string
 		expectError bool
-		setupMock   func(*MockDBExecuter)
+		setupMock   func(*testutils.MockDBExecuter)
 	}{
 		{
 			name:        "should get activity flow",
@@ -88,9 +89,9 @@ func TestGetActivityFlow(t *testing.T) {
 			activityId:  1,
 			expected:    flow,
 			expectError: false,
-			setupMock: func(md *MockDBExecuter) {
+			setupMock: func(md *testutils.MockDBExecuter) {
 				md.QueryFunc = func(ctx context.Context, sql string, args ...any) (pgx.Rows, error) {
-					return &MockRows{
+					return &testutils.MockRows{
 						Activities: []model.Activity{},
 						Rules:      []string{},
 						Flow:       flow,
@@ -105,7 +106,7 @@ func TestGetActivityFlow(t *testing.T) {
 			activityId:  1,
 			expected:    flow,
 			expectError: true,
-			setupMock: func(md *MockDBExecuter) {
+			setupMock: func(md *testutils.MockDBExecuter) {
 				md.QueryFunc = func(ctx context.Context, sql string, args ...any) (pgx.Rows, error) {
 					return nil, errors.New("database error")
 				}
@@ -114,7 +115,7 @@ func TestGetActivityFlow(t *testing.T) {
 	}
 	for _, tc := range tests {
 		t.Run(fmt.Sprintf("%s,%d", tc.name, tc.id), func(t *testing.T) {
-			mockDB := new(MockDBExecuter)
+			mockDB := new(testutils.MockDBExecuter)
 			repo := repo.NewActivityFlowRepo(mockDB)
 
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)

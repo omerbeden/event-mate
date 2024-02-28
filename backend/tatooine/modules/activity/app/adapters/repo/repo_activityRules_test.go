@@ -9,6 +9,7 @@ import (
 
 	"github.com/jackc/pgx/v5"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/adapters/repo"
+	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/adapters/repo/testutils"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/domain/model"
 	"github.com/stretchr/testify/assert"
 )
@@ -20,7 +21,7 @@ func TestCreateActivityRules(t *testing.T) {
 		activityId  int64
 		rules       []string
 		expectError bool
-		setupMock   func(*MockDBExecuter)
+		setupMock   func(*testutils.MockDBExecuter)
 	}{
 		{
 			name:        "should create activity rules",
@@ -28,7 +29,7 @@ func TestCreateActivityRules(t *testing.T) {
 			activityId:  1,
 			rules:       []string{"rule1", "rule2"},
 			expectError: false,
-			setupMock: func(md *MockDBExecuter) {
+			setupMock: func(md *testutils.MockDBExecuter) {
 				md.CopyFromFunc = func(ctx context.Context, tableName pgx.Identifier, columnNames []string, rowSrc pgx.CopyFromSource) (int64, error) {
 					return 2, nil
 				}
@@ -40,7 +41,7 @@ func TestCreateActivityRules(t *testing.T) {
 			activityId:  1,
 			rules:       []string{"rule1", "rule2"},
 			expectError: true,
-			setupMock: func(md *MockDBExecuter) {
+			setupMock: func(md *testutils.MockDBExecuter) {
 				md.CopyFromFunc = func(ctx context.Context, tableName pgx.Identifier, columnNames []string, rowSrc pgx.CopyFromSource) (int64, error) {
 					return 0, errors.New("database error")
 				}
@@ -49,7 +50,7 @@ func TestCreateActivityRules(t *testing.T) {
 	}
 	for _, tc := range tests {
 		t.Run(fmt.Sprintf("%s,%d", tc.name, tc.id), func(t *testing.T) {
-			mockDB := new(MockDBExecuter)
+			mockDB := new(testutils.MockDBExecuter)
 			repo := repo.NewActivityRulesRepo(mockDB)
 
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
@@ -79,7 +80,7 @@ func TestGetActivityRules(t *testing.T) {
 		activityId  int64
 		expected    []string
 		expectError bool
-		setupMock   func(*MockDBExecuter)
+		setupMock   func(*testutils.MockDBExecuter)
 	}{
 		{
 			name:        "should get activity rules",
@@ -87,9 +88,9 @@ func TestGetActivityRules(t *testing.T) {
 			activityId:  1,
 			expected:    rules,
 			expectError: false,
-			setupMock: func(md *MockDBExecuter) {
+			setupMock: func(md *testutils.MockDBExecuter) {
 				md.QueryFunc = func(ctx context.Context, sql string, args ...any) (pgx.Rows, error) {
-					return &MockRows{
+					return &testutils.MockRows{
 						Activities: []model.Activity{},
 						Rules:      rules,
 						Current:    0,
@@ -103,7 +104,7 @@ func TestGetActivityRules(t *testing.T) {
 			activityId:  1,
 			expected:    rules,
 			expectError: true,
-			setupMock: func(md *MockDBExecuter) {
+			setupMock: func(md *testutils.MockDBExecuter) {
 				md.QueryFunc = func(ctx context.Context, sql string, args ...any) (pgx.Rows, error) {
 					return nil, errors.New("database error")
 				}
@@ -112,7 +113,7 @@ func TestGetActivityRules(t *testing.T) {
 	}
 	for _, tc := range tests {
 		t.Run(fmt.Sprintf("%s,%d", tc.name, tc.id), func(t *testing.T) {
-			mockDB := new(MockDBExecuter)
+			mockDB := new(testutils.MockDBExecuter)
 			repo := repo.NewActivityRulesRepo(mockDB)
 
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)

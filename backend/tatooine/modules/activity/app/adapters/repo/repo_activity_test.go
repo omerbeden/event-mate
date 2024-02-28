@@ -9,144 +9,11 @@ import (
 
 	pgx "github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/adapters/repo"
+	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/adapters/repo/testutils"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/domain/model"
 	"github.com/stretchr/testify/assert"
 )
-
-type MockRow struct {
-	ScanFunc func(dest ...interface{}) error
-}
-
-func (m *MockRow) Scan(dest ...any) error {
-	if m.ScanFunc != nil {
-		return m.ScanFunc(dest...)
-	}
-	return fmt.Errorf("ScanFunc not set")
-}
-
-type MockRows struct {
-	Activities []model.Activity
-	Rules      []string
-	Flow       []string
-	Current    int
-}
-
-func (m *MockRows) Close() {
-	panic("unimplemented")
-}
-func (m *MockRows) Err() error {
-	panic("unimplemented")
-}
-func (m *MockRows) CommandTag() pgconn.CommandTag {
-	panic("unimplemented")
-}
-func (m *MockRows) FieldDescriptions() []pgconn.FieldDescription {
-	panic("unimplemented")
-}
-func (m *MockRows) Next() bool {
-	if len(m.Activities) > 0 {
-		return m.Current < len(m.Activities)
-	}
-	if len(m.Rules) > 0 {
-		return m.Current < len(m.Rules)
-	}
-	if len(m.Flow) > 0 {
-		return m.Current < len(m.Flow)
-	}
-	return false
-}
-func (m *MockRows) Scan(dest ...any) error {
-	if len(m.Activities) > 0 {
-		activity := m.Activities[m.Current]
-		*dest[0].(*int64) = activity.ID
-		*dest[1].(*string) = activity.Title
-		*dest[2].(*string) = activity.Category
-		*dest[3].(*time.Time) = activity.StartAt
-		*dest[4].(*time.Time) = activity.EndAt
-		*dest[5].(*int64) = activity.CreatedBy.ID
-		*dest[6].(*string) = activity.CreatedBy.Name
-		*dest[7].(*string) = activity.CreatedBy.LastName
-		*dest[8].(*string) = activity.CreatedBy.ProfileImageUrl
-		*dest[9].(*float64) = activity.CreatedBy.ProfilePoint
-		*dest[10].(*string) = activity.Location.City
-	}
-	if len(m.Rules) > 0 {
-		rule := m.Rules[m.Current]
-		*dest[0].(*string) = rule
-	}
-	if len(m.Flow) > 0 {
-		flow := m.Flow[m.Current]
-		*dest[0].(*string) = flow
-	}
-	m.Current++
-	return nil
-}
-func (m *MockRows) Values() ([]any, error) {
-	panic("unimplemented")
-}
-func (m *MockRows) RawValues() [][]byte {
-	panic("unimplemented")
-}
-func (m *MockRows) Conn() *pgx.Conn {
-	panic("unimplemented")
-}
-
-type MockDBExecuter struct {
-	QueryRowFunc func(ctx context.Context, sql string, args ...interface{}) pgx.Row
-	QueryFunc    func(ctx context.Context, sql string, args ...any) (pgx.Rows, error)
-	CopyFromFunc func(ctx context.Context, tableName pgx.Identifier, columnNames []string, rowSrc pgx.CopyFromSource) (int64, error)
-	ExecFunc     func(ctx context.Context, sql string, arguments ...any) (pgconn.CommandTag, error)
-}
-
-func (*MockDBExecuter) Begin(ctx context.Context) (pgx.Tx, error) {
-	panic("unimplemented")
-}
-
-func (*MockDBExecuter) BeginTx(ctx context.Context, txOptions pgx.TxOptions) (pgx.Tx, error) {
-	panic("unimplemented")
-}
-
-func (m *MockDBExecuter) Close() {
-	panic("unimplemented")
-}
-
-func (m *MockDBExecuter) Config() *pgxpool.Config {
-	panic("unimplemented")
-}
-
-func (m *MockDBExecuter) CopyFrom(ctx context.Context, tableName pgx.Identifier, columnNames []string, rowSrc pgx.CopyFromSource) (int64, error) {
-	if m.CopyFromFunc != nil {
-		return m.CopyFromFunc(ctx, tableName, columnNames, rowSrc)
-	}
-	return 0, fmt.Errorf("CopyFrom not set")
-}
-
-func (m *MockDBExecuter) Exec(ctx context.Context, sql string, arguments ...any) (pgconn.CommandTag, error) {
-	if m.ExecFunc != nil {
-		return m.ExecFunc(ctx, sql, arguments)
-	}
-	return pgconn.NewCommandTag(""), fmt.Errorf("CopyFrom not set")
-}
-
-func (*MockDBExecuter) Ping(ctx context.Context) error {
-	panic("unimplemented")
-}
-
-func (m *MockDBExecuter) Query(ctx context.Context, sql string, args ...any) (pgx.Rows, error) {
-	if m.QueryFunc != nil {
-		return m.QueryFunc(ctx, sql, args...)
-	}
-	return nil, fmt.Errorf("QueryFunc not set")
-}
-
-func (m *MockDBExecuter) QueryRow(ctx context.Context, sql string, args ...any) pgx.Row {
-	if m.QueryRowFunc != nil {
-		return m.QueryRowFunc(ctx, sql, args...)
-	}
-	return &MockRow{}
-}
 
 func TestCreateActivity(t *testing.T) {
 	startAt := time.Now()
@@ -154,7 +21,7 @@ func TestCreateActivity(t *testing.T) {
 
 	test := []struct {
 		name        string
-		setupMock   func(*MockDBExecuter)
+		setupMock   func(*testutils.MockDBExecuter)
 		id          int64
 		activity    *model.Activity
 		expectError bool
@@ -171,9 +38,9 @@ func TestCreateActivity(t *testing.T) {
 				Content:   "Sample Content",
 			},
 			expectError: false,
-			setupMock: func(md *MockDBExecuter) {
+			setupMock: func(md *testutils.MockDBExecuter) {
 				md.QueryRowFunc = func(ctx context.Context, sql string, args ...any) pgx.Row {
-					return &MockRow{
+					return &testutils.MockRow{
 						ScanFunc: func(dest ...any) error {
 							*dest[0].(*int64) = int64(1)
 							return nil
@@ -194,9 +61,9 @@ func TestCreateActivity(t *testing.T) {
 				Content:   "Sample Content",
 			},
 			expectError: true,
-			setupMock: func(md *MockDBExecuter) {
+			setupMock: func(md *testutils.MockDBExecuter) {
 				md.QueryRowFunc = func(ctx context.Context, sql string, args ...any) pgx.Row {
-					return &MockRow{
+					return &testutils.MockRow{
 						ScanFunc: func(dest ...any) error {
 							return errors.New("database error")
 						},
@@ -207,7 +74,7 @@ func TestCreateActivity(t *testing.T) {
 	}
 	for _, tc := range test {
 		t.Run(fmt.Sprintf("%s,%d", tc.name, tc.id), func(t *testing.T) {
-			mockDB := new(MockDBExecuter)
+			mockDB := new(testutils.MockDBExecuter)
 			if tc.setupMock != nil {
 				tc.setupMock(mockDB)
 			}
@@ -234,7 +101,7 @@ func TestAddParticipants(t *testing.T) {
 
 	tests := []struct {
 		name        string
-		setupMock   func(*MockDBExecuter)
+		setupMock   func(*testutils.MockDBExecuter)
 		id          int64
 		activity    *model.Activity
 		expectError bool
@@ -252,7 +119,7 @@ func TestAddParticipants(t *testing.T) {
 				Participants: []model.User{{ID: 1}, {ID: 2}, {ID: 3}},
 			},
 			expectError: false,
-			setupMock: func(md *MockDBExecuter) {
+			setupMock: func(md *testutils.MockDBExecuter) {
 				md.CopyFromFunc = func(ctx context.Context, tableName pgx.Identifier, columnNames []string, rowSrc pgx.CopyFromSource) (int64, error) {
 					return 3, nil
 				}
@@ -270,7 +137,7 @@ func TestAddParticipants(t *testing.T) {
 				Content:   "Sample Content",
 			},
 			expectError: true,
-			setupMock: func(md *MockDBExecuter) {
+			setupMock: func(md *testutils.MockDBExecuter) {
 				md.CopyFromFunc = func(ctx context.Context, tableName pgx.Identifier, columnNames []string, rowSrc pgx.CopyFromSource) (int64, error) {
 					return 0, errors.New("database error")
 				}
@@ -279,7 +146,7 @@ func TestAddParticipants(t *testing.T) {
 	}
 	for _, tc := range tests {
 		t.Run(fmt.Sprintf("%s,%d", tc.name, tc.id), func(t *testing.T) {
-			mockDB := new(MockDBExecuter)
+			mockDB := new(testutils.MockDBExecuter)
 			if tc.setupMock != nil {
 				tc.setupMock(mockDB)
 			}
@@ -303,7 +170,7 @@ func TestAddParticipant(t *testing.T) {
 	tests :=
 		[]struct {
 			name        string
-			setupMock   func(*MockDBExecuter)
+			setupMock   func(*testutils.MockDBExecuter)
 			id          int
 			activityId  int64
 			user        model.User
@@ -315,7 +182,7 @@ func TestAddParticipant(t *testing.T) {
 				activityId:  int64(1),
 				user:        model.User{},
 				expectError: false,
-				setupMock: func(md *MockDBExecuter) {
+				setupMock: func(md *testutils.MockDBExecuter) {
 					md.ExecFunc = func(ctx context.Context, sql string, arguments ...any) (pgconn.CommandTag, error) {
 						return pgconn.NewCommandTag("INSERT 0 1"), nil
 					}
@@ -327,7 +194,7 @@ func TestAddParticipant(t *testing.T) {
 				activityId:  int64(1),
 				user:        model.User{},
 				expectError: true,
-				setupMock: func(md *MockDBExecuter) {
+				setupMock: func(md *testutils.MockDBExecuter) {
 					md.ExecFunc = func(ctx context.Context, sql string, arguments ...any) (pgconn.CommandTag, error) {
 						return pgconn.NewCommandTag(""), errors.New("database error")
 					}
@@ -337,7 +204,7 @@ func TestAddParticipant(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(fmt.Sprintf("%s,%d", tc.name, tc.id), func(t *testing.T) {
-			mockDB := new(MockDBExecuter)
+			mockDB := new(testutils.MockDBExecuter)
 			if tc.setupMock != nil {
 				tc.setupMock(mockDB)
 			}
@@ -363,7 +230,7 @@ func TestGetActivityByID(t *testing.T) {
 
 	test := []struct {
 		name        string
-		setupMock   func(*MockDBExecuter)
+		setupMock   func(*testutils.MockDBExecuter)
 		id          int64
 		expected    *model.Activity
 		expectError bool
@@ -381,9 +248,9 @@ func TestGetActivityByID(t *testing.T) {
 				Location:  model.Location{City: "London"},
 			},
 			expectError: false,
-			setupMock: func(md *MockDBExecuter) {
+			setupMock: func(md *testutils.MockDBExecuter) {
 				md.QueryRowFunc = func(ctx context.Context, sql string, args ...any) pgx.Row {
-					return &MockRow{
+					return &testutils.MockRow{
 						ScanFunc: func(dest ...any) error {
 							*dest[0].(*int64) = int64(1)
 							*dest[1].(*string) = "Sample Activity"
@@ -403,9 +270,9 @@ func TestGetActivityByID(t *testing.T) {
 			id:          int64(2),
 			expected:    nil,
 			expectError: true,
-			setupMock: func(md *MockDBExecuter) {
+			setupMock: func(md *testutils.MockDBExecuter) {
 				md.QueryRowFunc = func(ctx context.Context, sql string, args ...any) pgx.Row {
-					return &MockRow{
+					return &testutils.MockRow{
 						ScanFunc: func(dest ...any) error {
 							return errors.New("database error")
 						},
@@ -417,7 +284,7 @@ func TestGetActivityByID(t *testing.T) {
 
 	for _, tc := range test {
 		t.Run(fmt.Sprintf("%s,%d", tc.name, tc.id), func(t *testing.T) {
-			mockDB := new(MockDBExecuter)
+			mockDB := new(testutils.MockDBExecuter)
 			if tc.setupMock != nil {
 				tc.setupMock(mockDB)
 			}
@@ -472,7 +339,7 @@ func TestGetActivitiesByLocation(t *testing.T) {
 
 	test := []struct {
 		name        string
-		setupMock   func(*MockDBExecuter)
+		setupMock   func(*testutils.MockDBExecuter)
 		id          int64
 		expected    []model.Activity
 		location    model.Location
@@ -484,9 +351,9 @@ func TestGetActivitiesByLocation(t *testing.T) {
 			location:    model.Location{City: "London"},
 			expected:    activities,
 			expectError: false,
-			setupMock: func(md *MockDBExecuter) {
+			setupMock: func(md *testutils.MockDBExecuter) {
 				md.QueryFunc = func(ctx context.Context, sql string, args ...any) (pgx.Rows, error) {
-					return &MockRows{
+					return &testutils.MockRows{
 						Activities: activities,
 						Current:    0,
 					}, nil
@@ -500,7 +367,7 @@ func TestGetActivitiesByLocation(t *testing.T) {
 			expected:    activities,
 			location:    model.Location{City: "London"},
 			expectError: true,
-			setupMock: func(md *MockDBExecuter) {
+			setupMock: func(md *testutils.MockDBExecuter) {
 				md.QueryFunc = func(ctx context.Context, sql string, args ...any) (pgx.Rows, error) {
 					return nil, errors.New("database error")
 				}
@@ -510,7 +377,7 @@ func TestGetActivitiesByLocation(t *testing.T) {
 
 	for _, tc := range test {
 		t.Run(fmt.Sprintf("%s,%d", tc.name, tc.id), func(t *testing.T) {
-			mockDB := new(MockDBExecuter)
+			mockDB := new(testutils.MockDBExecuter)
 			if tc.setupMock != nil {
 				tc.setupMock(mockDB)
 			}
@@ -537,7 +404,7 @@ func TestUpdateActivity(t *testing.T) {
 	tests :=
 		[]struct {
 			name        string
-			setupMock   func(*MockDBExecuter)
+			setupMock   func(*testutils.MockDBExecuter)
 			id          int
 			activity    model.Activity
 			activityId  int64
@@ -549,7 +416,7 @@ func TestUpdateActivity(t *testing.T) {
 				activity:    model.Activity{},
 				activityId:  1,
 				expectError: false,
-				setupMock: func(md *MockDBExecuter) {
+				setupMock: func(md *testutils.MockDBExecuter) {
 					md.ExecFunc = func(ctx context.Context, sql string, arguments ...any) (pgconn.CommandTag, error) {
 						return pgconn.NewCommandTag(""), nil
 					}
@@ -561,7 +428,7 @@ func TestUpdateActivity(t *testing.T) {
 				activityId:  2,
 				activity:    model.Activity{},
 				expectError: true,
-				setupMock: func(md *MockDBExecuter) {
+				setupMock: func(md *testutils.MockDBExecuter) {
 					md.ExecFunc = func(ctx context.Context, sql string, arguments ...any) (pgconn.CommandTag, error) {
 						return pgconn.NewCommandTag(""), errors.New("database error")
 					}
@@ -571,7 +438,7 @@ func TestUpdateActivity(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(fmt.Sprintf("%s,%d", tc.name, tc.id), func(t *testing.T) {
-			mockDB := new(MockDBExecuter)
+			mockDB := new(testutils.MockDBExecuter)
 			if tc.setupMock != nil {
 				tc.setupMock(mockDB)
 			}
@@ -598,7 +465,7 @@ func TestDeleteActivityByID(t *testing.T) {
 	tests :=
 		[]struct {
 			name        string
-			setupMock   func(*MockDBExecuter)
+			setupMock   func(*testutils.MockDBExecuter)
 			id          int
 			activityId  int64
 			expectError bool
@@ -608,7 +475,7 @@ func TestDeleteActivityByID(t *testing.T) {
 				id:          1,
 				activityId:  1,
 				expectError: false,
-				setupMock: func(md *MockDBExecuter) {
+				setupMock: func(md *testutils.MockDBExecuter) {
 					md.ExecFunc = func(ctx context.Context, sql string, arguments ...any) (pgconn.CommandTag, error) {
 						return pgconn.NewCommandTag(""), nil
 					}
@@ -619,7 +486,7 @@ func TestDeleteActivityByID(t *testing.T) {
 				id:          2,
 				activityId:  2,
 				expectError: true,
-				setupMock: func(md *MockDBExecuter) {
+				setupMock: func(md *testutils.MockDBExecuter) {
 					md.ExecFunc = func(ctx context.Context, sql string, arguments ...any) (pgconn.CommandTag, error) {
 						return pgconn.NewCommandTag(""), errors.New("database error")
 					}
@@ -629,7 +496,7 @@ func TestDeleteActivityByID(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(fmt.Sprintf("%s,%d", tc.name, tc.id), func(t *testing.T) {
-			mockDB := new(MockDBExecuter)
+			mockDB := new(testutils.MockDBExecuter)
 			if tc.setupMock != nil {
 				tc.setupMock(mockDB)
 			}
