@@ -36,6 +36,7 @@ func TestCreateActivity(t *testing.T) {
 				StartAt:   startAt,
 				EndAt:     endAt,
 				Content:   "Sample Content",
+				Quota:     3,
 			},
 			expectError: false,
 			setupMock: func(md *testutils.MockDBExecuter) {
@@ -59,6 +60,7 @@ func TestCreateActivity(t *testing.T) {
 				StartAt:   startAt,
 				EndAt:     endAt,
 				Content:   "Sample Content",
+				Quota:     3,
 			},
 			expectError: true,
 			setupMock: func(md *testutils.MockDBExecuter) {
@@ -116,6 +118,7 @@ func TestAddParticipants(t *testing.T) {
 				StartAt:      startAt,
 				EndAt:        endAt,
 				Content:      "Sample Content",
+				Quota:        3,
 				Participants: []model.User{{ID: 1}, {ID: 2}, {ID: 3}},
 			},
 			expectError: false,
@@ -134,6 +137,7 @@ func TestAddParticipants(t *testing.T) {
 				CreatedBy: model.User{ID: 1},
 				StartAt:   startAt,
 				EndAt:     endAt,
+				Quota:     3,
 				Content:   "Sample Content",
 			},
 			expectError: true,
@@ -245,6 +249,8 @@ func TestGetActivityByID(t *testing.T) {
 				CreatedBy: model.User{ID: 1},
 				StartAt:   startAt,
 				EndAt:     endAt,
+				Content:   "Sample Content",
+				Quota:     3,
 				Location:  model.Location{City: "London"},
 			},
 			expectError: false,
@@ -258,7 +264,9 @@ func TestGetActivityByID(t *testing.T) {
 							*dest[3].(*int64) = int64(1)
 							*dest[4].(*time.Time) = startAt
 							*dest[5].(*time.Time) = endAt
-							*dest[6].(*string) = "London"
+							*dest[6].(*string) = "Sample Content"
+							*dest[7].(*int) = 3
+							*dest[8].(*string) = "London"
 							return nil
 						},
 					}
@@ -321,6 +329,7 @@ func TestGetActivitiesByLocation(t *testing.T) {
 				ProfileImageUrl: "imageurl.png",
 				ProfilePoint:    3},
 			Location: model.Location{City: "London"},
+			Quota:    3,
 		},
 		{
 			ID:       2,
@@ -334,6 +343,7 @@ func TestGetActivitiesByLocation(t *testing.T) {
 			StartAt:  startAt,
 			EndAt:    endAt,
 			Location: model.Location{City: "London"},
+			Quota:    3,
 		},
 	}
 

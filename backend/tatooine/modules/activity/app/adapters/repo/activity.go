@@ -43,8 +43,8 @@ func (r *activityRepository) Close() {
 func (r *activityRepository) Create(ctx context.Context, activity model.Activity) (*model.Activity, error) {
 
 	var ID int64
-	q := `INSERT INTO activities (title,category,created_by,background_image_url,start_at,end_at,content) 
-	Values($1,$2,$3,$4,$5,$6) RETURNING id`
+	q := `INSERT INTO activities (title,category,created_by,background_image_url,start_at,end_at,content,quota) 
+	Values($1,$2,$3,$4,$5,$6,$7) RETURNING id`
 
 	err := r.pool.QueryRow(
 		ctx,
@@ -55,7 +55,8 @@ func (r *activityRepository) Create(ctx context.Context, activity model.Activity
 		activity.BackgroundImageUrl,
 		activity.StartAt,
 		activity.EndAt,
-		activity.Content).Scan(&ID)
+		activity.Content,
+		activity.Quota).Scan(&ID)
 	if err != nil {
 		return nil, fmt.Errorf("%s could not insert activity %w", errlogprefix, err)
 	}
@@ -133,7 +134,7 @@ func (r *activityRepository) GetParticipants(ctx context.Context, acitivityId in
 
 func (r *activityRepository) GetByID(ctx context.Context, id int64) (*model.Activity, error) {
 
-	q := `SELECT e.id, title, category, a.created_by,a.start_at,a.end_at
+	q := `SELECT a.id, title, category, a.created_by,a.start_at,a.end_at,a.content,a.quota,
 	 l.city
 	FROM activities a
 	LEFT JOIN user_profiles u ON a.created_by = u.id
@@ -142,7 +143,7 @@ func (r *activityRepository) GetByID(ctx context.Context, id int64) (*model.Acti
 	`
 	var activity model.Activity
 	err := r.pool.QueryRow(ctx, q, id).Scan(&activity.ID, &activity.Title, &activity.Category, &activity.CreatedBy.ID,
-		&activity.StartAt, &activity.EndAt, &activity.Location.City)
+		&activity.StartAt, &activity.EndAt, &activity.Content, &activity.Quota, &activity.Location.City)
 	if err != nil {
 		return nil, fmt.Errorf("%s could not get activity by id: %d %w", errlogprefix, id, err)
 	}
@@ -151,7 +152,7 @@ func (r *activityRepository) GetByID(ctx context.Context, id int64) (*model.Acti
 }
 func (r *activityRepository) GetByLocation(ctx context.Context, loc *model.Location) ([]model.Activity, error) {
 
-	q := `SELECT a.id, a.title, a.category,a.start_at, a.end_at
+	q := `SELECT a.id, a.title, a.category,a.start_at, a.end_at,a.content,a.quota,
 	u.id, u.name, u.last_name, u.profile_image_url, 
 	COALESCE(stats.point, 0.0)  as point
 	, l.city
@@ -169,7 +170,7 @@ func (r *activityRepository) GetByLocation(ctx context.Context, loc *model.Locat
 
 	for rows.Next() {
 		var res model.Activity
-		err := rows.Scan(&res.ID, &res.Title, &res.Category, &res.StartAt, &res.EndAt,
+		err := rows.Scan(&res.ID, &res.Title, &res.Category, &res.StartAt, &res.EndAt, &res.Content, &res.Quota,
 			&res.CreatedBy.ID, &res.CreatedBy.Name, &res.CreatedBy.LastName, &res.CreatedBy.ProfileImageUrl, &res.CreatedBy.ProfilePoint,
 			&res.Location.City)
 		if err != nil {
@@ -186,10 +187,11 @@ func (r *activityRepository) UpdateByID(ctx context.Context, id int64, activity 
 	q := `UPDATE activities
 	 SET title  = $1,
 	  category = $2,
-	  created_by = $3
+	  created_by = $3,
+	  quota = $4,
 	 WHERE id = $4
 	 `
-	_, err := r.pool.Exec(ctx, q, activity.Title, activity.Category, activity.CreatedBy.ID, id)
+	_, err := r.pool.Exec(ctx, q, activity.Title, activity.Category, activity.CreatedBy.ID, activity.Quota, id)
 	if err != nil {
 		return false, fmt.Errorf("%s could not update activity id: %d %w", errlogprefix, id, err)
 	}

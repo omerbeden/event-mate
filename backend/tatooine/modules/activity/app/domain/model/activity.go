@@ -15,6 +15,7 @@ type Activity struct {
 	Content            string    `json:"content"`
 	Rules              []string  `json:"rules"`
 	Flow               []string  `json:"flow"`
+	Quota              int       `json:"quota"`
 }
 
 type Location struct {

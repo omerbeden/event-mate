@@ -2,7 +2,8 @@ CREATE TABLE IF NOT EXISTS activities(
     id serial primary key ,
     title varchar(20),
 	category varchar(20),
-	created_by int 
+	created_by int ,
+	quota int
 );
 
 CREATE TABLE IF NOT EXISTS activity_locations(
