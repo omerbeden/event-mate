@@ -28,6 +28,7 @@ func (m *MockRow) Scan(dest ...any) error {
 
 type MockRows struct {
 	Activities []model.Activity
+	Rules      []string
 	Current    int
 }
 
@@ -44,23 +45,33 @@ func (m *MockRows) FieldDescriptions() []pgconn.FieldDescription {
 	panic("unimplemented")
 }
 func (m *MockRows) Next() bool {
-	return m.Current < len(m.Activities)
+	if len(m.Activities) > 0 {
+		return m.Current < len(m.Activities)
+	}
+	if len(m.Rules) > 0 {
+		return m.Current < len(m.Rules)
+	}
+	return false
 }
 func (m *MockRows) Scan(dest ...any) error {
-	activity := m.Activities[m.Current]
-	fmt.Printf("activities: %+v\n", activity)
-	*dest[0].(*int64) = activity.ID
-	*dest[1].(*string) = activity.Title
-	*dest[2].(*string) = activity.Category
-	*dest[3].(*time.Time) = activity.StartAt
-	*dest[4].(*time.Time) = activity.EndAt
-	*dest[5].(*int64) = activity.CreatedBy.ID
-	*dest[6].(*string) = activity.CreatedBy.Name
-	*dest[7].(*string) = activity.CreatedBy.LastName
-	*dest[8].(*string) = activity.CreatedBy.ProfileImageUrl
-	*dest[9].(*float64) = activity.CreatedBy.ProfilePoint
-	*dest[10].(*string) = activity.Location.City
-
+	if len(m.Activities) > 0 {
+		activity := m.Activities[m.Current]
+		*dest[0].(*int64) = activity.ID
+		*dest[1].(*string) = activity.Title
+		*dest[2].(*string) = activity.Category
+		*dest[3].(*time.Time) = activity.StartAt
+		*dest[4].(*time.Time) = activity.EndAt
+		*dest[5].(*int64) = activity.CreatedBy.ID
+		*dest[6].(*string) = activity.CreatedBy.Name
+		*dest[7].(*string) = activity.CreatedBy.LastName
+		*dest[8].(*string) = activity.CreatedBy.ProfileImageUrl
+		*dest[9].(*float64) = activity.CreatedBy.ProfilePoint
+		*dest[10].(*string) = activity.Location.City
+	}
+	if len(m.Rules) > 0 {
+		rule := m.Rules[m.Current]
+		*dest[0].(*string) = rule
+	}
 	m.Current++
 	return nil
 }
@@ -252,12 +263,8 @@ func TestAddParticipants(t *testing.T) {
 			},
 			expectError: true,
 			setupMock: func(md *MockDBExecuter) {
-				md.QueryRowFunc = func(ctx context.Context, sql string, args ...any) pgx.Row {
-					return &MockRow{
-						ScanFunc: func(dest ...any) error {
-							return errors.New("database error")
-						},
-					}
+				md.CopyFromFunc = func(ctx context.Context, tableName pgx.Identifier, columnNames []string, rowSrc pgx.CopyFromSource) (int64, error) {
+					return 0, errors.New("database error")
 				}
 			},
 		},

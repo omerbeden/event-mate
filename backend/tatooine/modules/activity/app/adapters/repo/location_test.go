@@ -81,7 +81,7 @@ func TestUpdateLocation(t *testing.T) {
 		expectError bool
 	}{
 		{
-			name: "should create location",
+			name: "should update location",
 			id:   1,
 			location: model.Location{
 				City: "London",

@@ -5,14 +5,13 @@ import (
 	"fmt"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type activityRulesRepository struct {
-	pool *pgxpool.Pool
+	pool DBExecutor
 }
 
-func NewActivityRulesRepo(pool *pgxpool.Pool) *activityRulesRepository {
+func NewActivityRulesRepo(pool DBExecutor) *activityRulesRepository {
 	return &activityRulesRepository{
 		pool: pool,
 	}
