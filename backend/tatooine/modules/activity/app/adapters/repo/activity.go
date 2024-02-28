@@ -43,7 +43,7 @@ func (r *activityRepository) Close() {
 func (r *activityRepository) Create(ctx context.Context, activity model.Activity) (*model.Activity, error) {
 
 	var ID int64
-	q := `INSERT INTO activities (title,category,created_by,background_image_url,start_at,end_at,content,quota) 
+	q := `INSERT INTO activities (title,category,created_by,start_at,end_at,content,quota) 
 	Values($1,$2,$3,$4,$5,$6,$7) RETURNING id`
 
 	err := r.pool.QueryRow(
@@ -52,7 +52,6 @@ func (r *activityRepository) Create(ctx context.Context, activity model.Activity
 		activity.Title,
 		activity.Category,
 		activity.CreatedBy.ID,
-		activity.BackgroundImageUrl,
 		activity.StartAt,
 		activity.EndAt,
 		activity.Content,
@@ -188,8 +187,8 @@ func (r *activityRepository) UpdateByID(ctx context.Context, id int64, activity 
 	 SET title  = $1,
 	  category = $2,
 	  created_by = $3,
-	  quota = $4,
-	 WHERE id = $4
+	  quota = $4
+	 WHERE id = $5
 	 `
 	_, err := r.pool.Exec(ctx, q, activity.Title, activity.Category, activity.CreatedBy.ID, activity.Quota, id)
 	if err != nil {

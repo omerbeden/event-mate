@@ -23,9 +23,11 @@ func TestInsertUser(t *testing.T) {
 	repository := repo.NewUserProfileRepo(pool)
 
 	user := model.UserProfile{
-		Name:               "oner1",
+		Name:               "oner",
 		LastName:           "beden",
 		About:              "about",
+		ExternalId:         "1c",
+		UserName:           "c",
 		AttandedActivities: []model.Activity{},
 		Adress: model.UserProfileAdress{
 			City: "Sakarya",
