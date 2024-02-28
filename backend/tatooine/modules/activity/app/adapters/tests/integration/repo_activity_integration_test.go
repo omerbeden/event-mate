@@ -1,3 +1,6 @@
+//go:build integration
+// +build integration
+
 package integration_test
 
 import (
@@ -30,40 +33,39 @@ func TestMain(m *testing.M) {
 
 func TestActivityRepository_Create(t *testing.T) {
 	activityRepo := repo.NewActivityRepo(pool)
-	defer activityRepo.Close()
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
 	activity := model.Activity{
+		ID:        int64(1),
 		Title:     "test",
 		Category:  "test",
-		CreatedBy: model.User{ID: 1, Name: "han", LastName: "solo"},
+		CreatedBy: model.User{ID: 1},
 		StartAt:   time.Now(),
 		EndAt:     time.Now(),
 		Content:   "test",
 		Quota:     1,
-		Location:  model.Location{City: "test"},
+		Location:  model.Location{ActivityId: int64(1), City: "London"},
 	}
 
 	result, err := activityRepo.Create(ctx, activity)
 
 	assert.NotNil(t, result)
 	assert.NoError(t, err)
-	assert.Equal(t, activity, result)
+	assert.Equal(t, &activity, result)
 }
 
 func TestActivityRepository_AddParticipants(t *testing.T) {
 	activityRepo := repo.NewActivityRepo(pool)
-	defer activityRepo.Close()
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
 	activityId := int64(1)
 	participants := []model.User{
-		{ID: 2, Name: "john", LastName: "wick"},
-		{ID: 3, Name: "alcapone", LastName: "noname"},
+		{ID: 6},
+		{ID: 7},
 	}
 	err := activityRepo.AddParticipants(ctx, activityId, participants)
 
@@ -71,13 +73,12 @@ func TestActivityRepository_AddParticipants(t *testing.T) {
 }
 func TestActivityRepository_AddParticipant(t *testing.T) {
 	activityRepo := repo.NewActivityRepo(pool)
-	defer activityRepo.Close()
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
 	activityId := int64(1)
-	participant := model.User{ID: 4, Name: "obi-wan", LastName: "kenobi"}
+	participant := model.User{ID: 8}
 
 	err := activityRepo.AddParticipant(ctx, activityId, participant)
 
@@ -86,7 +87,6 @@ func TestActivityRepository_AddParticipant(t *testing.T) {
 }
 func TestActivityRepository_GetParticipants(t *testing.T) {
 	activityRepo := repo.NewActivityRepo(pool)
-	defer activityRepo.Close()
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
@@ -101,7 +101,6 @@ func TestActivityRepository_GetParticipants(t *testing.T) {
 }
 func TestActivityRepository_GetByID(t *testing.T) {
 	activityRepo := repo.NewActivityRepo(pool)
-	defer activityRepo.Close()
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
@@ -115,12 +114,11 @@ func TestActivityRepository_GetByID(t *testing.T) {
 }
 func TestActivityRepository_GetByLocation(t *testing.T) {
 	activityRepo := repo.NewActivityRepo(pool)
-	defer activityRepo.Close()
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	location := model.Location{City: "test"}
+	location := model.Location{City: "London"}
 
 	activities, err := activityRepo.GetByLocation(ctx, &location)
 
@@ -131,13 +129,12 @@ func TestActivityRepository_GetByLocation(t *testing.T) {
 }
 func TestActivityRepository_UpdateByID(t *testing.T) {
 	activityRepo := repo.NewActivityRepo(pool)
-	defer activityRepo.Close()
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
 	activityId := int64(1)
-	activity := model.Activity{Category: "sport"}
+	activity := model.Activity{Category: "sport", Title: "changed title", CreatedBy: model.User{ID: 8}, Quota: 3}
 
 	res, err := activityRepo.UpdateByID(ctx, activityId, activity)
 
@@ -146,7 +143,6 @@ func TestActivityRepository_UpdateByID(t *testing.T) {
 }
 func TestActivityRepository_DeleteByID(t *testing.T) {
 	activityRepo := repo.NewActivityRepo(pool)
-	defer activityRepo.Close()
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
