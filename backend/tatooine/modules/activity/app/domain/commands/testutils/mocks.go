@@ -81,7 +81,7 @@ func (m *MockActivityRulesRepo) CreateActivityRules(ctx context.Context, activit
 	return nil
 }
 func (m *MockActivityRulesRepo) GetActivityRules(ctx context.Context, activityId int64) ([]string, error) {
-	if m.CreateActivityRulesFunc != nil {
+	if m.GetActivityRulesFunc != nil {
 		return m.GetActivityRulesFunc(ctx, activityId)
 	}
 	return m.Rules, nil
@@ -100,7 +100,7 @@ func (m *MockActivityFlowRepo) CreateActivityFlow(ctx context.Context, activityI
 	return nil
 }
 func (m *MockActivityFlowRepo) GetActivityFlow(ctx context.Context, activityId int64) ([]string, error) {
-	if m.CreateActivityFlowFunc != nil {
+	if m.GetActivityFlowFunc != nil {
 		return m.GetActivityFlowFunc(ctx, activityId)
 	}
 	return m.Flow, nil

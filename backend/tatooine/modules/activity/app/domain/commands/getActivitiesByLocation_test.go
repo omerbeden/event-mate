@@ -50,9 +50,10 @@ func TestGetActivitiesByLocation_Handle(t *testing.T) {
 		setupGetByLocationFunc func(*testutils.MockActivityRepo)
 	}{
 		{
-			name:      "should get activities successfully",
-			location:  model.Location{City: "London"},
-			wantError: false,
+			name:           "should get activities successfully from redis",
+			location:       model.Location{City: "London"},
+			wantError:      false,
+			addmockToRedis: true,
 		},
 		{
 			name:           "should get activities successfully from db when redis key not found",
