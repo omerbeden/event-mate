@@ -15,7 +15,7 @@ MIGRATIONS_PATH := /Users/omerbeden/golang_workspace/event-mate/backend/tatooine
 DATABASE_URL := "postgres://${DB_USER}:${DB_PASSWORD}@localhost:${DB_PORT}/${DB_NAME}?sslmode=disable"
 
 	
-.PHONY: help network-up db-up db-down migrate-up integration-test-setup
+.PHONY: help network-up db-up db-down migrate-up migrate-down integration-test-setup
 
 
 # Display help for each command
@@ -54,6 +54,9 @@ db-down:
 # Run database migrations
 migrate-up:	
 	migrate -path $(MIGRATIONS_PATH) -database $(DATABASE_URL) -verbose up
+
+migrate-down:	
+	migrate -path $(MIGRATIONS_PATH) -database $(DATABASE_URL) -verbose down
 
 # Target to run before integration tests
 integration-test-setup: db-up migrate-up
