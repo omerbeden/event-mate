@@ -10,6 +10,7 @@ import (
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/adapters/repo"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/domain/model"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/entrypoints"
+	"github.com/omerbeden/event-mate/backend/tatooine/pkg/cache"
 	postgres "github.com/omerbeden/event-mate/backend/tatooine/pkg/database"
 	"github.com/stretchr/testify/assert"
 )
@@ -26,10 +27,13 @@ func TestCreateActivity(t *testing.T) {
 
 		ActivityRepository: repo.NewActivityRepo(pool),
 		LocationReposiroy:  repo.NewLocationRepo(pool),
-		RedisClient: *redis.NewClient(&redis.Options{
-			Addr:     "Localhost:6379",
-			Password: "",
-			DB:       0,
+		RedisClient: *cache.NewRedisClient(cache.RedisOption{
+			Options: &redis.Options{
+				Addr:     "Localhost:6379",
+				Password: "",
+				DB:       0,
+			},
+			ExpirationTime: 0,
 		}),
 	}
 
@@ -61,10 +65,13 @@ func TestGetActivitiesByLocation(t *testing.T) {
 
 		ActivityRepository: repo.NewActivityRepo(pool),
 		LocationReposiroy:  repo.NewLocationRepo(pool),
-		RedisClient: *redis.NewClient(&redis.Options{
-			Addr:     "Localhost:6379",
-			Password: "",
-			DB:       0,
+		RedisClient: *cache.NewRedisClient(cache.RedisOption{
+			Options: &redis.Options{
+				Addr:     "Localhost:6379",
+				Password: "",
+				DB:       0,
+			},
+			ExpirationTime: 0,
 		}),
 	}
 	loc := model.Location{
@@ -92,10 +99,13 @@ func TestAddParticipant(t *testing.T) {
 
 		ActivityRepository: repo.NewActivityRepo(pool),
 		LocationReposiroy:  repo.NewLocationRepo(pool),
-		RedisClient: *redis.NewClient(&redis.Options{
-			Addr:     "Localhost:6379",
-			Password: "",
-			DB:       0,
+		RedisClient: *cache.NewRedisClient(cache.RedisOption{
+			Options: &redis.Options{
+				Addr:     "Localhost:6379",
+				Password: "",
+				DB:       0,
+			},
+			ExpirationTime: 0,
 		}),
 	}
 
@@ -118,10 +128,13 @@ func TestGetParticipants(t *testing.T) {
 
 		ActivityRepository: repo.NewActivityRepo(pool),
 		LocationReposiroy:  repo.NewLocationRepo(pool),
-		RedisClient: *redis.NewClient(&redis.Options{
-			Addr:     "Localhost:6379",
-			Password: "",
-			DB:       0,
+		RedisClient: *cache.NewRedisClient(cache.RedisOption{
+			Options: &redis.Options{
+				Addr:     "Localhost:6379",
+				Password: "",
+				DB:       0,
+			},
+			ExpirationTime: 0,
 		}),
 	}
 
@@ -142,10 +155,13 @@ func TestGetActivityFromDBWhenRedisDown(t *testing.T) {
 
 		ActivityRepository: repo.NewActivityRepo(pool),
 		LocationReposiroy:  repo.NewLocationRepo(pool),
-		RedisClient: *redis.NewClient(&redis.Options{
-			Addr:     "Localhost:6379",
-			Password: "",
-			DB:       0,
+		RedisClient: *cache.NewRedisClient(cache.RedisOption{
+			Options: &redis.Options{
+				Addr:     "Localhost:6379",
+				Password: "",
+				DB:       0,
+			},
+			ExpirationTime: 0,
 		}),
 	}
 
@@ -167,10 +183,13 @@ func TestGetActivityByIDReturnErrorWhenActivityIdNotFound(t *testing.T) {
 
 		ActivityRepository: repo.NewActivityRepo(pool),
 		LocationReposiroy:  repo.NewLocationRepo(pool),
-		RedisClient: *redis.NewClient(&redis.Options{
-			Addr:     "Localhost:6379",
-			Password: "",
-			DB:       0,
+		RedisClient: *cache.NewRedisClient(cache.RedisOption{
+			Options: &redis.Options{
+				Addr:     "Localhost:6379",
+				Password: "",
+				DB:       0,
+			},
+			ExpirationTime: 0,
 		}),
 	}
 
@@ -192,10 +211,13 @@ func TestGetActivityByLocationFromDBWhenRedisDown(t *testing.T) {
 
 		ActivityRepository: repo.NewActivityRepo(pool),
 		LocationReposiroy:  repo.NewLocationRepo(pool),
-		RedisClient: *redis.NewClient(&redis.Options{
-			Addr:     "Localhost:6379",
-			Password: "",
-			DB:       0,
+		RedisClient: *cache.NewRedisClient(cache.RedisOption{
+			Options: &redis.Options{
+				Addr:     "Localhost:6379",
+				Password: "",
+				DB:       0,
+			},
+			ExpirationTime: 0,
 		}),
 	}
 
@@ -222,10 +244,13 @@ func TestGetActivityByLocationReturnErrorWhenCityNotFound(t *testing.T) {
 
 		ActivityRepository: repo.NewActivityRepo(pool),
 		LocationReposiroy:  repo.NewLocationRepo(pool),
-		RedisClient: *redis.NewClient(&redis.Options{
-			Addr:     "Localhost:6379",
-			Password: "",
-			DB:       0,
+		RedisClient: *cache.NewRedisClient(cache.RedisOption{
+			Options: &redis.Options{
+				Addr:     "Localhost:6379",
+				Password: "",
+				DB:       0,
+			},
+			ExpirationTime: 0,
 		}),
 	}
 

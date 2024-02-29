@@ -5,21 +5,22 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/adapters/cacheadapter"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/domain/model"
-	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/domain/ports/caching"
 	repo "github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/domain/ports/repositories"
+	"github.com/omerbeden/event-mate/backend/tatooine/pkg/cache"
 )
 
 type GetByLocationCommand struct {
 	Location model.Location
 	Repo     repo.ActivityRepository
-	Redis    caching.Cache
+	Redis    cache.Cache
 }
 
 func (gc *GetByLocationCommand) Handle(ctx context.Context) ([]model.Activity, error) {
-	cityKey := fmt.Sprintf("%s:%s", CITY_KEY, gc.Location.City)
+	cityKey := fmt.Sprintf("%s:%s", cacheadapter.CITY_CACHE_KEY, gc.Location.City)
 
-	activities, redisErr := gc.Redis.GetMembers(cityKey)
+	activities, redisErr := gc.Redis.GetMembers(ctx, cityKey)
 	if redisErr != nil {
 		fmt.Printf("redis error %s \n returning from db", redisErr.Error()) // log error
 		return gc.Repo.GetByLocation(ctx, &gc.Location)

@@ -2,23 +2,25 @@ package commands
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/adapters/cachedapter"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/model"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/ports/repositories"
+	"github.com/omerbeden/event-mate/backend/tatooine/pkg/cache"
 )
 
 var errLogPrefixCurrentGetUserProfileCommand = "GetUserProfile"
 
 type GetCurrentUserProfileCommand struct {
 	Repo       repositories.UserProfileRepository
-	Cache      cachedapter.Cache
+	Cache      cache.Cache
 	ExternalId string
 }
 
 func (cmd *GetCurrentUserProfileCommand) Handle(ctx context.Context) (*model.UserProfile, error) {
-	user, err := cmd.getFromCache(cmd.ExternalId)
+	user, err := cmd.getFromCache(ctx, cmd.ExternalId)
 	if err != nil {
 		fmt.Printf("%s: error while getting user profile %s from cache, returning from db", errLogPrefixCurrentGetUserProfileCommand, cmd.ExternalId)
 		return cmd.Repo.GetCurrentUserProfile(ctx, cmd.ExternalId)
@@ -27,7 +29,18 @@ func (cmd *GetCurrentUserProfileCommand) Handle(ctx context.Context) (*model.Use
 	return user, nil
 }
 
-func (cmd *GetCurrentUserProfileCommand) getFromCache(externalId string) (*model.UserProfile, error) {
-	cacheKey := fmt.Sprintf("%s:%s", userProfileCacheKey, externalId)
-	return cmd.Cache.GetUserProfile(cacheKey)
+func (cmd *GetCurrentUserProfileCommand) getFromCache(ctx context.Context, externalId string) (*model.UserProfile, error) {
+	profileKey := fmt.Sprintf("%s:%s", cachedapter.USER_PROFILE_CACHE_KEY, externalId)
+	cacheResult, err := cmd.Cache.Get(ctx, profileKey)
+	if err != nil {
+		return nil, fmt.Errorf("%s could not get user profile for key: %s ", errLogPrefixCurrentGetUserProfileCommand, profileKey)
+	}
+
+	var user model.UserProfile
+	err = json.Unmarshal([]byte(cacheResult.(string)), &user)
+	if err != nil {
+		return nil, fmt.Errorf("%s could not unmarshal result of the cache key: %s ", errLogPrefixCurrentGetUserProfileCommand, profileKey)
+	}
+
+	return &user, nil
 }

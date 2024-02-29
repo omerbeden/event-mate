@@ -6,11 +6,12 @@ import (
 
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/adapters/cachedapter"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/ports/repositories"
+	"github.com/omerbeden/event-mate/backend/tatooine/pkg/cache"
 )
 
 type DeleteProfileCommand struct {
 	Repo       repositories.UserProfileRepository
-	Cache      cachedapter.Cache
+	Cache      cache.Cache
 	ExternalId string
 	UserName   string
 }
@@ -21,19 +22,19 @@ func (c *DeleteProfileCommand) Handle(ctx context.Context) error {
 		return err
 	}
 
-	return c.deleteFromCache()
+	return c.deleteFromCache(ctx)
 }
 
-func (c *DeleteProfileCommand) deleteFromCache() error {
-	cacheKeyExternalId := fmt.Sprintf("%s:%s", userProfileCacheKey, c.ExternalId)
-	cacheKeyUserName := fmt.Sprintf("%s:%s", userProfileCacheKey, c.UserName)
+func (c *DeleteProfileCommand) deleteFromCache(ctx context.Context) error {
+	cacheKeyExternalId := fmt.Sprintf("%s:%s", cachedapter.USER_PROFILE_CACHE_KEY, c.ExternalId)
+	cacheKeyUserName := fmt.Sprintf("%s:%s", cachedapter.USER_PROFILE_CACHE_KEY, c.UserName)
 
-	err := c.Cache.Delete(cacheKeyExternalId)
+	err := c.Cache.Delete(ctx, cacheKeyExternalId)
 	if err != nil {
 		return err
 	}
 
-	err = c.Cache.Delete(cacheKeyUserName)
+	err = c.Cache.Delete(ctx, cacheKeyUserName)
 	if err != nil {
 		return err
 	}

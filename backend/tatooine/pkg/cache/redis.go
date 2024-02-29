@@ -10,6 +10,8 @@ import (
 
 var ErrRedisMember = errors.New("members Nil or Blank")
 
+const ATTANDED_ACTIVITIES_CACHE_KEY = "attandedActivities"
+
 type RedisOption struct {
 	*redis.Options
 	ExpirationTime time.Duration
@@ -32,9 +34,16 @@ func NewRedisClient(option RedisOption) *RedisClient {
 	}
 }
 
-func (client *RedisClient) Set(key string, value any) error {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
+func (client *RedisClient) Close() error {
+	err := client.redis.Close()
+	if err != nil {
+		return err
+	}
+
+	return err
+}
+
+func (client *RedisClient) Set(ctx context.Context, key string, value any) error {
 
 	_, err := client.redis.Set(ctx, key, value, client.options.ExpirationTime).Result()
 
@@ -45,9 +54,7 @@ func (client *RedisClient) Set(key string, value any) error {
 
 }
 
-func (client *RedisClient) Get(key string) (any, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
+func (client *RedisClient) Get(ctx context.Context, key string) (any, error) {
 
 	result, err := client.redis.Get(ctx, key).Result()
 	if err != nil {
@@ -56,10 +63,7 @@ func (client *RedisClient) Get(key string) (any, error) {
 	return result, nil
 }
 
-func (client *RedisClient) Delete(key string) error {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
-
+func (client *RedisClient) Delete(ctx context.Context, key string) error {
 	_, err := client.redis.Del(ctx, key).Result()
 	if err != nil {
 		return err
@@ -67,9 +71,7 @@ func (client *RedisClient) Delete(key string) error {
 	return nil
 }
 
-func (client *RedisClient) AddMember(key string, members ...any) error {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
+func (client *RedisClient) AddMember(ctx context.Context, key string, members ...any) error {
 
 	if members == nil || len(members) < 1 {
 		return ErrRedisMember
@@ -83,9 +85,7 @@ func (client *RedisClient) AddMember(key string, members ...any) error {
 
 }
 
-func (client *RedisClient) GetMembers(key string) ([]string, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
+func (client *RedisClient) GetMembers(ctx context.Context, key string) ([]string, error) {
 	result, err := client.redis.SMembers(ctx, key).Result()
 	if err != nil {
 		return nil, err

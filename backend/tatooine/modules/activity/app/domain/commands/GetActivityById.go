@@ -6,9 +6,10 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/adapters/cacheadapter"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/domain/model"
-	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/domain/ports/caching"
 	repo "github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/domain/ports/repositories"
+	"github.com/omerbeden/event-mate/backend/tatooine/pkg/cache"
 )
 
 type GetByIDCommand struct {
@@ -16,15 +17,15 @@ type GetByIDCommand struct {
 	Repo              repo.ActivityRepository
 	ActivityRulesRepo repo.ActivityRulesRepository
 	ActivityFlowRepo  repo.ActivityFlowRepository
-	Redis             caching.Cache
+	Redis             cache.Cache
 }
 
 func (gc *GetByIDCommand) Handle(ctx context.Context) (*model.Activity, error) {
 
 	activityId := strconv.FormatInt(gc.ActivityId, 10)
-	activityKey := fmt.Sprintf("%s:%s", ACTIVITY_KEY, activityId)
+	activityKey := fmt.Sprintf("%s:%s", cacheadapter.ACTIVITY_CACHE_KEY, activityId)
 
-	result, redisErr := gc.Redis.Get(activityKey)
+	result, redisErr := gc.Redis.Get(ctx, activityKey)
 	if redisErr != nil {
 		fmt.Printf("redis error %s \n returning from db", redisErr.Error()) // log error
 		return gc.getActivityFromDb(ctx)
@@ -37,7 +38,7 @@ func (gc *GetByIDCommand) Handle(ctx context.Context) (*model.Activity, error) {
 		return gc.getActivityFromDb(ctx)
 	}
 
-	if result != nil && err == nil {
+	if result != nil {
 		fmt.Printf("returning from redis %+v\n", activity)
 		return &activity, err
 	}

@@ -11,9 +11,8 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/omerbeden/event-mate/backend/tatooine/cmd/api/routes"
-	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/adapters/redisadapter"
 	activityRepo "github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/adapters/repo"
-	activityService "github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/entrypoints"
+	activityServiceEntryPoints "github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/entrypoints"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/adapters/repo"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/entrypoints"
 	"github.com/omerbeden/event-mate/backend/tatooine/pkg/cache"
@@ -27,14 +26,14 @@ func main() {
 		ConnectionString: "postgres://postgres:password@localhost:5432/test",
 		Config:           pgxpool.Config{MinConns: 5, MaxConns: 10}})
 
-	var redisOption = redisadapter.RedisOption()
-	redisClient := redis.NewClient(redisOption)
+	var redisOption = cache.RedisOption{}
+	redisClient := cache.NewRedisClient(redisOption)
 	activityRepository := activityRepo.NewActivityRepo(dbPool)
 	activityRulesRepository := activityRepo.NewActivityRulesRepo(dbPool)
 	activityFlowRepository := activityRepo.NewActivityFlowRepo(dbPool)
 	locationRepository := activityRepo.NewLocationRepo(dbPool)
 
-	activityService := activityService.NewService(activityRepository, activityRulesRepository, activityFlowRepository, locationRepository, *redisClient)
+	activityService := activityServiceEntryPoints.NewService(activityRepository, activityRulesRepository, activityFlowRepository, locationRepository, *redisClient)
 
 	userRepository := repo.NewUserProfileRepo(dbPool)
 	userService := entrypoints.NewService(userRepository, *cache.NewRedisClient(cache.RedisOption{

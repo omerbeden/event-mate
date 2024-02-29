@@ -3,14 +3,14 @@ package commands
 import (
 	"context"
 
-	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/adapters/cachedapter"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/model"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/ports/repositories"
+	"github.com/omerbeden/event-mate/backend/tatooine/pkg/cache"
 )
 
 type GetUserProfileStatsCommand struct {
 	Repo   repositories.UserProfileRepository
-	Cache  cachedapter.Cache
+	Cache  cache.Cache
 	UserId int64
 }
 

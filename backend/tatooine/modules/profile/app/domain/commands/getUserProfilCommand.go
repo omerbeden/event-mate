@@ -2,23 +2,25 @@ package commands
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/adapters/cachedapter"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/model"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/ports/repositories"
+	"github.com/omerbeden/event-mate/backend/tatooine/pkg/cache"
 )
 
 var errLogPrefixGetUserProfileCommand = "GetUserProfile"
 
 type GetUserProfileCommand struct {
 	Repo     repositories.UserProfileRepository
-	Cache    cachedapter.Cache
+	Cache    cache.Cache
 	UserName string
 }
 
 func (cmd *GetUserProfileCommand) Handle(ctx context.Context) (*model.UserProfile, error) {
-	user, err := cmd.getFromCache(cmd.UserName)
+	user, err := cmd.getFromCache(ctx, cmd.UserName)
 	if err != nil {
 		fmt.Printf("%s: error while getting user profile %s from cache, returning from db", errLogPrefixGetUserProfileCommand, cmd.UserName)
 		return cmd.Repo.GetUserProfile(ctx, cmd.UserName)
@@ -27,7 +29,18 @@ func (cmd *GetUserProfileCommand) Handle(ctx context.Context) (*model.UserProfil
 	return user, nil
 }
 
-func (cmd *GetUserProfileCommand) getFromCache(userName string) (*model.UserProfile, error) {
-	cacheKey := fmt.Sprintf("%s:%s", userProfileCacheKey, userName)
-	return cmd.Cache.GetUserProfile(cacheKey)
+func (cmd *GetUserProfileCommand) getFromCache(ctx context.Context, userName string) (*model.UserProfile, error) {
+	profileKey := fmt.Sprintf("%s:%s", cachedapter.USER_PROFILE_CACHE_KEY, userName)
+	cacheResult, err := cmd.Cache.Get(ctx, profileKey)
+	if err != nil {
+		return nil, fmt.Errorf("%s could not get user profile for key: %s ", errLogPrefixGetUserProfileCommand, profileKey)
+	}
+
+	var user model.UserProfile
+	err = json.Unmarshal([]byte(cacheResult.(string)), &user)
+	if err != nil {
+		return nil, fmt.Errorf("%s could not unmarshal result of the cache key: %s ", errLogPrefixGetUserProfileCommand, profileKey)
+	}
+
+	return &user, nil
 }

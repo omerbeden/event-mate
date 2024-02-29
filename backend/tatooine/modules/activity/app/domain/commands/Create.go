@@ -7,13 +7,12 @@ import (
 	"strconv"
 	"sync"
 
+	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/adapters/cacheadapter"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/domain/model"
-	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/domain/ports/caching"
+	"github.com/omerbeden/event-mate/backend/tatooine/pkg/cache"
+
 	repo "github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/domain/ports/repositories"
 )
-
-const CITY_KEY = "city"
-const ACTIVITY_KEY = "activity"
 
 type CreateCommand struct {
 	Activity          model.Activity
@@ -21,7 +20,7 @@ type CreateCommand struct {
 	ActivityRulesRepo repo.ActivityRulesRepository
 	ActivityFlowRepo  repo.ActivityFlowRepository
 	LocRepo           repo.LocationRepository
-	Redis             caching.Cache
+	Redis             cache.Cache
 }
 
 func (ccmd *CreateCommand) Handle(ctx context.Context) (bool, error) {
@@ -52,9 +51,9 @@ func (ccmd *CreateCommand) Handle(ctx context.Context) (bool, error) {
 	}
 
 	activityId := strconv.FormatInt(activity.ID, 10)
-	activityKey := fmt.Sprintf("%s:%s", ACTIVITY_KEY, activityId)
+	activityKey := fmt.Sprintf("%s:%s", cacheadapter.ACTIVITY_CACHE_KEY, activityId)
 
-	err = ccmd.Redis.Set(activityKey, jsonActivity)
+	err = ccmd.Redis.Set(ctx, activityKey, jsonActivity)
 	if err != nil {
 		fmt.Printf("activity could not inserted to Redis %s\n", activityId)
 	}
@@ -63,7 +62,7 @@ func (ccmd *CreateCommand) Handle(ctx context.Context) (bool, error) {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		ccmd.addCityToRedis(activity.Location.City, jsonActivity)
+		ccmd.addCityToRedis(ctx, activity.Location.City, jsonActivity)
 	}()
 
 	wg.Wait()
@@ -71,8 +70,8 @@ func (ccmd *CreateCommand) Handle(ctx context.Context) (bool, error) {
 
 }
 
-func (ccmd *CreateCommand) addCityToRedis(city string, valueJson []byte) error {
-	cityKey := fmt.Sprintf("%s:%s", CITY_KEY, city)
+func (ccmd *CreateCommand) addCityToRedis(ctx context.Context, city string, valueJson []byte) error {
+	cityKey := fmt.Sprintf("%s:%s", cacheadapter.CITY_CACHE_KEY, city)
 
-	return ccmd.Redis.AddMember(cityKey, valueJson)
+	return ccmd.Redis.AddMember(ctx, cityKey, valueJson)
 }

@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/adapters/cachedapter"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/commands"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/model"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/ports/repositories"
@@ -30,7 +29,7 @@ func (service *UserService) CreateUser(ctx context.Context, user *model.UserProf
 	createCmd := &commands.CreateProfileCommand{
 		Profile: *user,
 		Repo:    service.userRepository,
-		Cache:   *cachedapter.NewCache(&service.redisClient),
+		Cache:   &service.redisClient,
 	}
 
 	return createCmd.Handle(ctx)
@@ -39,7 +38,7 @@ func (service *UserService) CreateUser(ctx context.Context, user *model.UserProf
 func (service *UserService) DeleteUser(ctx context.Context, externalId, userName string) error {
 	deleteCmd := &commands.DeleteProfileCommand{
 		Repo:       service.userRepository,
-		Cache:      *cachedapter.NewCache(&service.redisClient),
+		Cache:      &service.redisClient,
 		ExternalId: externalId,
 		UserName:   userName,
 	}
@@ -50,7 +49,7 @@ func (service *UserService) DeleteUser(ctx context.Context, externalId, userName
 func (service *UserService) GetAttandedActivities(ctx context.Context, userId int64) ([]model.Activity, error) {
 	cmd := &commands.GetAttandedActivitiesCommand{
 		Repo:   service.userRepository,
-		Cache:  *cachedapter.NewCache(&service.redisClient),
+		Cache:  &service.redisClient,
 		UserId: userId,
 	}
 
@@ -60,7 +59,7 @@ func (service *UserService) GetAttandedActivities(ctx context.Context, userId in
 func (service *UserService) UpdateProfileImage(ctx context.Context, externalId string, imageUrl string) error {
 	cmd := &commands.UpdateProfileImageCommand{
 		Repo:       service.userRepository,
-		Cache:      *cachedapter.NewCache(&service.redisClient),
+		Cache:      &service.redisClient,
 		ImageUrl:   imageUrl,
 		ExternalId: externalId,
 	}
@@ -71,7 +70,7 @@ func (service *UserService) UpdateProfileImage(ctx context.Context, externalId s
 func (service *UserService) GetUserProfileStats(ctx context.Context, userId int64) (*model.UserProfileStat, error) {
 	cmd := &commands.GetUserProfileStatsCommand{
 		Repo:   service.userRepository,
-		Cache:  *cachedapter.NewCache(&service.redisClient),
+		Cache:  &service.redisClient,
 		UserId: userId,
 	}
 
@@ -81,7 +80,7 @@ func (service *UserService) GetUserProfileStats(ctx context.Context, userId int6
 func (service *UserService) GetCurrentUserProfile(ctx context.Context, externalId string) (*model.UserProfile, error) {
 	cmd := &commands.GetCurrentUserProfileCommand{
 		Repo:       service.userRepository,
-		Cache:      *cachedapter.NewCache(&service.redisClient),
+		Cache:      &service.redisClient,
 		ExternalId: externalId,
 	}
 
@@ -103,7 +102,7 @@ func (service *UserService) GetCurrentUserProfile(ctx context.Context, externalI
 func (service *UserService) GetUserProfile(ctx context.Context, userName string) (*model.UserProfile, error) {
 	cmd := &commands.GetUserProfileCommand{
 		Repo:     service.userRepository,
-		Cache:    *cachedapter.NewCache(&service.redisClient),
+		Cache:    &service.redisClient,
 		UserName: userName,
 	}
 
@@ -125,7 +124,7 @@ func (service *UserService) GetUserProfile(ctx context.Context, userName string)
 func (service *UserService) GivePointsToUser(ctx context.Context, receiverUserName string, point float32) error {
 	cmd := &commands.GiveUserPointCommand{
 		Repo:             service.userRepository,
-		Cache:            *cachedapter.NewCache(&service.redisClient),
+		Cache:            &service.redisClient,
 		ReceiverUserName: receiverUserName,
 		Point:            point,
 	}

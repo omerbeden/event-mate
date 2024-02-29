@@ -8,11 +8,12 @@ import (
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/adapters/cachedapter"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/model"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/ports/repositories"
+	"github.com/omerbeden/event-mate/backend/tatooine/pkg/cache"
 )
 
 type GiveUserPointCommand struct {
 	Repo             repositories.UserProfileRepository
-	Cache            cachedapter.Cache
+	Cache            cache.Cache
 	ReceiverUserName string
 	Point            float32
 	ExternalId       string
@@ -29,24 +30,24 @@ func (cmd *GiveUserPointCommand) Handle(ctx context.Context) error {
 		return err
 	}
 
-	return cmd.updateCache(updatedUser)
+	return cmd.updateCache(ctx, updatedUser)
 }
 
-func (cmd *GiveUserPointCommand) updateCache(updatedUser *model.UserProfile) error {
+func (cmd *GiveUserPointCommand) updateCache(ctx context.Context, updatedUser *model.UserProfile) error {
 	jsonValue, err := json.Marshal(updatedUser)
 	if err != nil {
 		return fmt.Errorf("parsing json error %w", err)
 	}
 
-	cacheKeyExternalId := fmt.Sprintf("%s:%s", userProfileCacheKey, updatedUser.ExternalId)
-	cacheKeyUserName := fmt.Sprintf("%s:%s", userProfileCacheKey, updatedUser.UserName)
+	cacheKeyExternalId := fmt.Sprintf("%s:%s", cachedapter.USER_PROFILE_CACHE_KEY, updatedUser.ExternalId)
+	cacheKeyUserName := fmt.Sprintf("%s:%s", cachedapter.USER_PROFILE_CACHE_KEY, updatedUser.UserName)
 
-	err = cmd.Cache.Set(cacheKeyExternalId, jsonValue)
+	err = cmd.Cache.Set(ctx, cacheKeyExternalId, jsonValue)
 	if err != nil {
 		return err
 	}
 
-	err = cmd.Cache.Set(cacheKeyUserName, jsonValue)
+	err = cmd.Cache.Set(ctx, cacheKeyUserName, jsonValue)
 	if err != nil {
 		return err
 	}
