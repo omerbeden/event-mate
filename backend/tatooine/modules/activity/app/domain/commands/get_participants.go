@@ -33,7 +33,7 @@ func (command *GetParticipantsCommand) getFromRedis(ctx context.Context) ([]mode
 	redisKey := fmt.Sprintf("%s:%d", cacheadapter.PARTICIPANT_CACHE_KEY, command.ActivityId)
 
 	redisResult, err := command.Redis.GetMembers(ctx, redisKey)
-	if err != nil {
+	if err != nil || len(redisResult) < 1 {
 		return nil, fmt.Errorf("%s could not get participants from redis , %d, %w", ERR_PREFIX_GET_PARTICIPANTS, command.ActivityId, err)
 	}
 
@@ -48,5 +48,6 @@ func (command *GetParticipantsCommand) getFromRedis(ctx context.Context) ([]mode
 		participants = append(participants, participant)
 	}
 
+	fmt.Println(participants)
 	return participants, nil
 }
