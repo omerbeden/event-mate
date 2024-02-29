@@ -6,17 +6,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/alicebob/miniredis/v2"
-	"github.com/go-redis/redis/v8"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/domain/commands"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/domain/commands/testutils"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/domain/model"
-	"github.com/omerbeden/event-mate/backend/tatooine/pkg/cache"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestCreateCommand_Handle(t *testing.T) {
-	mr, mockRedisClient := setupMiniredis(t)
+	mr, mockRedisClient := testutils.SetupMiniredis(t)
 	defer mr.Close()
 	defer mockRedisClient.Close()
 
@@ -142,25 +139,4 @@ func TestCreateCommand_Handle(t *testing.T) {
 			}
 		})
 	}
-}
-
-func setupMiniredis(t *testing.T) (*miniredis.Miniredis, *cache.RedisClient) {
-	t.Helper()
-
-	mr, err := miniredis.Run()
-	if err != nil {
-		t.Fatalf("an error '%s' occurred when starting miniredis", err)
-	}
-
-	redisOpt := cache.RedisOption{
-		Options: &redis.Options{
-			Addr:     mr.Addr(),
-			DB:       0,
-			Password: "",
-		},
-		ExpirationTime: 1 * time.Hour,
-	}
-	client := cache.NewRedisClient(redisOpt)
-
-	return mr, client
 }
