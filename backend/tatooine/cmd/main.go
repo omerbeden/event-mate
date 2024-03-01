@@ -26,7 +26,15 @@ func main() {
 		ConnectionString: "postgres://postgres:password@localhost:5432/test",
 		Config:           pgxpool.Config{MinConns: 5, MaxConns: 10}})
 
-	var redisOption = cache.RedisOption{}
+	var redisOption = cache.RedisOption{
+		Options: &redis.Options{
+			Addr:     "Localhost:6379",
+			Password: "",
+			DB:       0,
+		},
+		ExpirationTime: 0,
+	}
+
 	redisClient := cache.NewRedisClient(redisOption)
 	activityRepository := activityRepo.NewActivityRepo(dbPool)
 	activityRulesRepository := activityRepo.NewActivityRulesRepo(dbPool)
@@ -36,14 +44,7 @@ func main() {
 	activityService := activityServiceEntryPoints.NewService(activityRepository, activityRulesRepository, activityFlowRepository, locationRepository, *redisClient)
 
 	userRepository := repo.NewUserProfileRepo(dbPool)
-	userService := entrypoints.NewService(userRepository, *cache.NewRedisClient(cache.RedisOption{
-		Options: &redis.Options{
-			Addr:     "Localhost:6379",
-			Password: "",
-			DB:       0,
-		},
-		ExpirationTime: 0,
-	}))
+	userService := entrypoints.NewService(userRepository, *redisClient)
 
 	app := fiber.New()
 	api := app.Group("/api")
