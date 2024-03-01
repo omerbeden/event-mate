@@ -26,8 +26,8 @@ func TestInsertUser(t *testing.T) {
 		Name:               "oner",
 		LastName:           "beden",
 		About:              "about",
-		ExternalId:         "1c",
-		UserName:           "c",
+		ExternalId:         "1a",
+		UserName:           "ca",
 		AttandedActivities: []model.Activity{},
 		Adress: model.UserProfileAdress{
 			City: "Sakarya",

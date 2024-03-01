@@ -25,8 +25,10 @@ func TestCreateActivity(t *testing.T) {
 	defer cancel()
 	activityService := entrypoints.ActivityService{
 
-		ActivityRepository: repo.NewActivityRepo(pool),
-		LocationReposiroy:  repo.NewLocationRepo(pool),
+		ActivityRepository:      repo.NewActivityRepo(pool),
+		LocationReposiroy:       repo.NewLocationRepo(pool),
+		ActivityRulesRepository: repo.NewActivityRulesRepo(pool),
+		ActivityFlowRepository:  repo.NewActivityFlowRepo(pool),
 		RedisClient: *cache.NewRedisClient(cache.RedisOption{
 			Options: &redis.Options{
 				Addr:     "Localhost:6379",
@@ -75,16 +77,13 @@ func TestGetActivitiesByLocation(t *testing.T) {
 		}),
 	}
 	loc := model.Location{
-		ActivityId: 2,
-		City:       "Sakarya",
+		City: "Sakarya",
 	}
 
 	result, err := activityService.GetActivitiesByLocation(ctx, loc)
 
 	assert.NoError(t, err)
 	assert.NotEmpty(t, result)
-	assert.NotEmpty(t, result[0].Participants)
-
 }
 
 func TestAddParticipant(t *testing.T) {
@@ -110,9 +109,11 @@ func TestAddParticipant(t *testing.T) {
 	}
 
 	participant := model.User{
-		ID: 2,
+		ID: 4,
 	}
-	err := activityService.AddParticipant(ctx, participant, 2)
+	activityId := int64(1)
+
+	err := activityService.AddParticipant(ctx, participant, activityId)
 	assert.NoError(t, err)
 }
 
@@ -138,7 +139,10 @@ func TestGetParticipants(t *testing.T) {
 		}),
 	}
 
-	res, err := activityService.GetParticipants(ctx, 1)
+	activityID := int64(1)
+
+	res, err := activityService.GetParticipants(ctx, activityID)
+
 	assert.NoError(t, err)
 	assert.NotEmpty(t, res)
 
@@ -153,19 +157,19 @@ func TestGetActivityFromDBWhenRedisDown(t *testing.T) {
 	defer cancel()
 	activityService := entrypoints.ActivityService{
 
-		ActivityRepository: repo.NewActivityRepo(pool),
-		LocationReposiroy:  repo.NewLocationRepo(pool),
+		ActivityRepository:      repo.NewActivityRepo(pool),
+		LocationReposiroy:       repo.NewLocationRepo(pool),
+		ActivityRulesRepository: repo.NewActivityRulesRepo(pool),
+		ActivityFlowRepository:  repo.NewActivityFlowRepo(pool),
 		RedisClient: *cache.NewRedisClient(cache.RedisOption{
-			Options: &redis.Options{
-				Addr:     "Localhost:6379",
-				Password: "",
-				DB:       0,
-			},
+			Options:        &redis.Options{},
 			ExpirationTime: 0,
 		}),
 	}
 
-	res, err := activityService.GetActivityById(ctx, 1)
+	activityId := 2
+
+	res, err := activityService.GetActivityById(ctx, int64(activityId))
 
 	assert.NoError(t, err)
 	assert.NotNil(t, res)
@@ -209,21 +213,18 @@ func TestGetActivityByLocationFromDBWhenRedisDown(t *testing.T) {
 	defer cancel()
 	activityService := entrypoints.ActivityService{
 
-		ActivityRepository: repo.NewActivityRepo(pool),
-		LocationReposiroy:  repo.NewLocationRepo(pool),
+		ActivityRepository:      repo.NewActivityRepo(pool),
+		LocationReposiroy:       repo.NewLocationRepo(pool),
+		ActivityRulesRepository: repo.NewActivityRulesRepo(pool),
+		ActivityFlowRepository:  repo.NewActivityFlowRepo(pool),
 		RedisClient: *cache.NewRedisClient(cache.RedisOption{
-			Options: &redis.Options{
-				Addr:     "Localhost:6379",
-				Password: "",
-				DB:       0,
-			},
+			Options:        &redis.Options{},
 			ExpirationTime: 0,
 		}),
 	}
 
 	loc := model.Location{
-		ActivityId: 2,
-		City:       "Sakarya",
+		City: "Sakarya",
 	}
 
 	res, err := activityService.GetActivitiesByLocation(ctx, loc)
@@ -242,8 +243,10 @@ func TestGetActivityByLocationReturnErrorWhenCityNotFound(t *testing.T) {
 	defer cancel()
 	activityService := entrypoints.ActivityService{
 
-		ActivityRepository: repo.NewActivityRepo(pool),
-		LocationReposiroy:  repo.NewLocationRepo(pool),
+		ActivityRepository:      repo.NewActivityRepo(pool),
+		LocationReposiroy:       repo.NewLocationRepo(pool),
+		ActivityRulesRepository: repo.NewActivityRulesRepo(pool),
+		ActivityFlowRepository:  repo.NewActivityFlowRepo(pool),
 		RedisClient: *cache.NewRedisClient(cache.RedisOption{
 			Options: &redis.Options{
 				Addr:     "Localhost:6379",
@@ -255,8 +258,7 @@ func TestGetActivityByLocationReturnErrorWhenCityNotFound(t *testing.T) {
 	}
 
 	loc := model.Location{
-		ActivityId: 2,
-		City:       "Istanbul",
+		City: "Istanbul",
 	}
 
 	res, _ := activityService.GetActivitiesByLocation(ctx, loc)

@@ -133,7 +133,7 @@ func (r *activityRepository) GetParticipants(ctx context.Context, acitivityId in
 
 func (r *activityRepository) GetByID(ctx context.Context, id int64) (*model.Activity, error) {
 
-	q := `SELECT a.id, title, category, a.created_by,a.start_at,a.end_at,a.content,a.quota,
+	q := `SELECT a.id, a.title, a.category, a.created_by,a.start_at,a.end_at,a.content,a.quota,
 	 l.city
 	FROM activities a
 	LEFT JOIN user_profiles u ON a.created_by = u.id

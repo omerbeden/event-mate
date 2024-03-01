@@ -28,7 +28,8 @@ func (command *AddParticipantCommand) Handle(ctx context.Context) error {
 	}
 	err = command.addParticipantToRedis(ctx, command.ActivityId, valueJSON)
 	if err != nil {
-		return fmt.Errorf("%s could not add participant member to redis for activity id %d", ERR_PREFIX_ADD_PARTICIPANT, command.ActivityId)
+		fmt.Printf("%s could not add participant member to redis for activity id %d, adding to db", ERR_PREFIX_ADD_PARTICIPANT, command.ActivityId)
+		return command.ActivityRepository.AddParticipant(ctx, command.ActivityId, command.Participant)
 	}
 
 	err = command.addAttandedActivitiesForUser(ctx, command.Participant.ID, valueJSON)
