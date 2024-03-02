@@ -145,31 +145,3 @@ func TestCreateProfileCommand_Handle(t *testing.T) {
 		})
 	}
 }
-
-/*
-func TestCreateProfileCommand_Handle(t *testing.T) {
-
-	tests := []struct {
-		name    string
-		wantErr bool
-	}{}
-
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-
-			cmd := commands.CreateProfileCommand{}
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-			defer cancel()
-
-			err := cmd.Handle(ctx)
-
-			if tc.wantErr {
-				assert.Error(t, err)
-			} else {
-				assert.NoError(t, err)
-			}
-
-		})
-	}
-}
-*/
