@@ -67,16 +67,6 @@ func (service *UserService) UpdateProfileImage(ctx context.Context, externalId s
 	return cmd.Handle(ctx)
 }
 
-func (service *UserService) GetUserProfileStats(ctx context.Context, userId int64) (*model.UserProfileStat, error) {
-	cmd := &commands.GetUserProfileStatsCommand{
-		Repo:   service.userRepository,
-		Cache:  &service.redisClient,
-		UserId: userId,
-	}
-
-	return cmd.Handle(ctx)
-}
-
 func (service *UserService) GetCurrentUserProfile(ctx context.Context, externalId string) (*model.UserProfile, error) {
 	cmd := &commands.GetCurrentUserProfileCommand{
 		Repo:       service.userRepository,

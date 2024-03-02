@@ -106,32 +106,6 @@ func TestGetAttandedActivities(t *testing.T) {
 	assert.NotEmpty(t, attandedActivities)
 }
 
-func TestGetUserProfileStats(t *testing.T) {
-	dbConfig := postgres.PostgresConfig{
-		ConnectionString: "postgres://postgres:password@localhost:5432/test",
-		Config:           pgxpool.Config{MinConns: 5, MaxConns: 10},
-	}
-
-	pool := postgres.NewConn(&dbConfig)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
-
-	redis := cache.NewRedisClient(cache.RedisOption{
-		Options: &redis.Options{
-			Addr:     "Localhost:6379",
-			Password: "",
-			DB:       0,
-		},
-		ExpirationTime: 0,
-	})
-
-	service := entrypoints.NewService(repo.NewUserProfileRepo(pool), *redis)
-	attandedActivities, err := service.GetUserProfileStats(ctx, 1)
-
-	assert.NoError(t, err)
-	assert.NotNil(t, attandedActivities)
-}
-
 func TestGetUserProfile(t *testing.T) {
 	dbConfig := postgres.PostgresConfig{
 		ConnectionString: "postgres://postgres:password@localhost:5432/test",

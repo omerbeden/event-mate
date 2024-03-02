@@ -124,22 +124,6 @@ func (r *userProfileRepo) GetAttandedActivities(ctx context.Context, userId int6
 	return activities, nil
 }
 
-// dont need to anymore
-func (r *userProfileRepo) GetUserProfileStats(ctx context.Context, userId int64) (*model.UserProfileStat, error) {
-
-	q := `SELECT profile_id, (point/point_giving_count) as point , attanded_activities FROM user_profile_stats
-	WHERE profile_id = $1`
-
-	var stat model.UserProfileStat
-	err := r.pool.QueryRow(ctx, q, userId).Scan(&stat.ProfileId, &stat.Point, &stat.AttandedActivities)
-	if err != nil {
-		return nil, fmt.Errorf("%s could not get user profile stats for : %d %w", errlogprefix, userId, err)
-
-	}
-
-	return &stat, nil
-}
-
 func (r *userProfileRepo) GetCurrentUserProfile(ctx context.Context, externalId string) (*model.UserProfile, error) {
 
 	q := `SELECT up.id, up.name, up.last_name, up.about, up.profile_image_url, up.external_id, up.user_name,

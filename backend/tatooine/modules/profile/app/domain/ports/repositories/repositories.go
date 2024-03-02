@@ -13,7 +13,6 @@ type UserProfileRepository interface {
 	UpdateProfilePoints(context.Context, string, float32) error
 	DeleteUser(context.Context, string) error
 	GetAttandedActivities(context.Context, int64) ([]model.Activity, error)
-	GetUserProfileStats(context.Context, int64) (*model.UserProfileStat, error)
 	GetCurrentUserProfile(context.Context, string) (*model.UserProfile, error)
 	GetUserProfile(context.Context, string) (*model.UserProfile, error)
 }
