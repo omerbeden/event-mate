@@ -12,7 +12,7 @@ import (
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/model"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/entrypoints"
 	"github.com/omerbeden/event-mate/backend/tatooine/pkg/cache"
-	postgres "github.com/omerbeden/event-mate/backend/tatooine/pkg/database"
+	"github.com/omerbeden/event-mate/backend/tatooine/pkg/db/postgres"
 	"github.com/stretchr/testify/assert"
 )
 

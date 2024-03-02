@@ -5,19 +5,19 @@ import (
 	"fmt"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/model"
 	customerrors "github.com/omerbeden/event-mate/backend/tatooine/pkg/customErrors"
+	"github.com/omerbeden/event-mate/backend/tatooine/pkg/db"
 )
 
 type userProfileRepo struct {
-	pool *pgxpool.Pool
+	pool db.DBExecutor
 }
 
 const errlogprefix = "repo:userProfile"
 
-func NewUserProfileRepo(pool *pgxpool.Pool) *userProfileRepo {
+func NewUserProfileRepo(pool db.DBExecutor) *userProfileRepo {
 	return &userProfileRepo{
 		pool: pool,
 	}
