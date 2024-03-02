@@ -12,8 +12,8 @@ type userProfileAddressRepo struct {
 	pool db.DBExecutor
 }
 
-func NewUserProfileAddressRepo(pool db.DBExecutor) *userProfileRepo {
-	return &userProfileRepo{
+func NewUserProfileAddressRepo(pool db.DBExecutor) *userProfileAddressRepo {
+	return &userProfileAddressRepo{
 		pool: pool,
 	}
 }
