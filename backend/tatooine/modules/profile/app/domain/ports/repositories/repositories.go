@@ -8,7 +8,7 @@ import (
 
 type UserProfileRepository interface {
 	GetUsersByAddress(context.Context, model.UserProfileAdress) ([]model.UserProfile, error)
-	InsertUser(context.Context, *model.UserProfile) (*model.UserProfile, error)
+	Insert(context.Context, *model.UserProfile) (*model.UserProfile, error)
 	UpdateProfileImage(context.Context, string, string) error
 	UpdateProfilePoints(context.Context, string, float32) error
 	DeleteUser(context.Context, string) error
@@ -16,4 +16,11 @@ type UserProfileRepository interface {
 	GetUserProfileStats(context.Context, int64) (*model.UserProfileStat, error)
 	GetCurrentUserProfile(context.Context, string) (*model.UserProfile, error)
 	GetUserProfile(context.Context, string) (*model.UserProfile, error)
+}
+
+type UserProfileAddressRepository interface {
+	Insert(context.Context, int64, model.UserProfileAdress) error
+}
+type UserProfileStatRepository interface {
+	Insert(ctx context.Context, user model.UserProfile) error
 }

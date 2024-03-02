@@ -27,9 +27,9 @@ func NewService(
 
 func (service *UserService) CreateUser(ctx context.Context, user *model.UserProfile) error {
 	createCmd := &commands.CreateProfileCommand{
-		Profile: *user,
-		Repo:    service.userRepository,
-		Cache:   &service.redisClient,
+		Profile:  *user,
+		UserRepo: service.userRepository,
+		Cache:    &service.redisClient,
 	}
 
 	return createCmd.Handle(ctx)

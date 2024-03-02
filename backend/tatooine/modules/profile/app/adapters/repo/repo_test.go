@@ -2,99 +2,279 @@ package repo_test
 
 import (
 	"context"
+	"errors"
 	"testing"
 	"time"
 
-	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/adapters/repo"
+	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/adapters/repo/testutils"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/model"
-	postgres "github.com/omerbeden/event-mate/backend/tatooine/pkg/database"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestInsertUser(t *testing.T) {
-	dbConfig := postgres.PostgresConfig{
-		ConnectionString: "postgres://postgres:password@localhost:5432/test",
-		Config:           pgxpool.Config{MinConns: 5, MaxConns: 10},
-	}
-	pool := postgres.NewConn(&dbConfig)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
-	repository := repo.NewUserProfileRepo(pool)
 
-	user := model.UserProfile{
-		Name:               "oner",
-		LastName:           "beden",
-		About:              "about",
-		ExternalId:         "1a",
-		UserName:           "ca",
-		AttandedActivities: []model.Activity{},
-		Adress: model.UserProfileAdress{
-			City: "Sakarya",
+	tests := []struct {
+		name      string
+		setupMock func(*testutils.MockDBExecuter)
+		user      model.UserProfile
+		wantErr   bool
+	}{
+		{
+			name:    "should insert user successfully",
+			wantErr: false,
+			setupMock: func(md *testutils.MockDBExecuter) {
+				md.QueryRowFunc = func(ctx context.Context, sql string, args ...interface{}) pgx.Row {
+					return &testutils.MockRow{
+						ScanFunc: func(dest ...any) error {
+							*dest[0].(*int64) = int64(1)
+							return nil
+						},
+					}
+				}
+			},
 		},
-		Stat: model.UserProfileStat{
-			Point: 3.5,
+		{
+			name:    "should return an error while inserting user",
+			wantErr: true,
+			setupMock: func(md *testutils.MockDBExecuter) {
+				md.QueryRowFunc = func(ctx context.Context, sql string, args ...interface{}) pgx.Row {
+					return &testutils.MockRow{
+						ScanFunc: func(dest ...any) error {
+							return errors.New("database error")
+						},
+					}
+				}
+			},
 		},
-		ProfileImageUrl: "image url",
 	}
 
-	result, err := repository.InsertUser(ctx, &user)
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			mockDB := new(testutils.MockDBExecuter)
+			if tc.setupMock != nil {
+				tc.setupMock(mockDB)
+			}
 
-	assert.NoError(t, err)
-	assert.NotNil(t, result)
+			userRepository := repo.NewUserProfileRepo(mockDB)
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+			defer cancel()
 
+			res, err := userRepository.Insert(ctx, &tc.user)
+
+			if tc.wantErr {
+				assert.Error(t, err)
+				assert.Nil(t, res)
+			} else {
+				assert.NoError(t, err)
+				assert.NotNil(t, res)
+			}
+		})
+	}
 }
 
 func TestGetUsersByAddress(t *testing.T) {
-	dbConfig := postgres.PostgresConfig{
-		ConnectionString: "postgres://postgres:password@localhost:5432/test",
-		Config:           pgxpool.Config{MinConns: 5, MaxConns: 10},
+
+	users := []model.UserProfile{
+		{
+			Id: 1,
+			Adress: model.UserProfileAdress{
+				ProfileId: int64(1),
+				City:      "San Francisco",
+			},
+			About:           "about",
+			Name:            "name",
+			LastName:        "lastName",
+			ProfileImageUrl: "profileImageUrl",
+			Stat: model.UserProfileStat{
+				AttandedActivities: 0,
+				Point:              0,
+			},
+			ExternalId: "ex1",
+		},
+		{
+			Id: 1,
+			Adress: model.UserProfileAdress{
+				ProfileId: int64(2),
+				City:      "San Francisco",
+			},
+			About:           "about2",
+			Name:            "name2",
+			LastName:        "lastName2",
+			ProfileImageUrl: "profileImageUrl2",
+			Stat: model.UserProfileStat{
+				AttandedActivities: 0,
+				Point:              0,
+			},
+			ExternalId: "ex2",
+		},
 	}
-	pool := postgres.NewConn(&dbConfig)
+	tests := []struct {
+		name      string
+		setupMock func(*testutils.MockDBExecuter)
+		users     []model.UserProfile
+		address   model.UserProfileAdress
+		wantErr   bool
+	}{
+		{
+			name:    "should get users successfully",
+			wantErr: false,
+			address: model.UserProfileAdress{
+				City: "San Francisco",
+			},
+			setupMock: func(md *testutils.MockDBExecuter) {
+				md.QueryFunc = func(ctx context.Context, sql string, args ...any) (pgx.Rows, error) {
+					return &testutils.MockRows{
+						Users:   users,
+						Current: 0,
+					}, nil
+				}
+			},
+		},
 
-	repository := repo.NewUserProfileRepo(pool)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
-
-	address := model.UserProfileAdress{
-		City: "Sakarya",
+		{
+			name: "should return database error",
+			address: model.UserProfileAdress{
+				City: "San Francisco",
+			},
+			wantErr: true,
+			setupMock: func(md *testutils.MockDBExecuter) {
+				md.QueryFunc = func(ctx context.Context, sql string, args ...any) (pgx.Rows, error) {
+					return nil, errors.New("database error")
+				}
+			},
+		},
 	}
 
-	result, err := repository.GetUsersByAddress(ctx, address)
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			mockDB := new(testutils.MockDBExecuter)
+			if tc.setupMock != nil {
+				tc.setupMock(mockDB)
+			}
 
-	assert.NoError(t, err)
-	assert.NotNil(t, result)
-	assert.NotEmpty(t, result)
-	assert.Equal(t, result[0].Adress.City, address.City)
+			repository := repo.NewUserProfileRepo(mockDB)
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+			defer cancel()
+
+			result, err := repository.GetUsersByAddress(ctx, tc.address)
+
+			if tc.wantErr {
+				assert.Error(t, err)
+				assert.Nil(t, result)
+			} else {
+				assert.NoError(t, err)
+				assert.NotEmpty(t, result)
+			}
+		})
+	}
 }
 
 func TestUpdateProfileImage(t *testing.T) {
-	dbConfig := postgres.PostgresConfig{
-		ConnectionString: "postgres://postgres:password@localhost:5432/test",
-		Config:           pgxpool.Config{MinConns: 5, MaxConns: 10},
+
+	test := []struct {
+		name       string
+		setupMock  func(*testutils.MockDBExecuter)
+		externalId string
+		imageUrl   string
+		wantErr    bool
+	}{
+		{
+			name:       "should update profile image successfully",
+			wantErr:    false,
+			imageUrl:   "new image url.png",
+			externalId: "1",
+			setupMock: func(md *testutils.MockDBExecuter) {
+				md.ExecFunc = func(ctx context.Context, sql string, arguments ...any) (pgconn.CommandTag, error) {
+					return pgconn.NewCommandTag(""), nil
+				}
+			},
+		},
+		{
+			name:       "should return an error",
+			wantErr:    true,
+			imageUrl:   "new image url.png",
+			externalId: "1",
+			setupMock: func(md *testutils.MockDBExecuter) {
+				md.ExecFunc = func(ctx context.Context, sql string, arguments ...any) (pgconn.CommandTag, error) {
+					return pgconn.NewCommandTag(""), errors.New("database error")
+				}
+			},
+		},
 	}
-	pool := postgres.NewConn(&dbConfig)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
 
-	repository := repo.NewUserProfileRepo(pool)
+	for _, tc := range test {
+		t.Run(tc.name, func(t *testing.T) {
+			mockDB := new(testutils.MockDBExecuter)
+			if tc.setupMock != nil {
+				tc.setupMock(mockDB)
+			}
 
-	err := repository.UpdateProfileImage(ctx, "", "new image.png")
-	assert.NoError(t, err)
+			userRepository := repo.NewUserProfileRepo(mockDB)
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+			defer cancel()
 
+			err := userRepository.UpdateProfileImage(ctx, tc.externalId, tc.imageUrl)
+
+			if tc.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+			}
+		})
+	}
 }
 
 func TestDeleteUserById(t *testing.T) {
-	dbConfig := postgres.PostgresConfig{
-		ConnectionString: "postgres://postgres:password@localhost:5432/test",
-		Config:           pgxpool.Config{MinConns: 5, MaxConns: 10},
+
+	tests := []struct {
+		name       string
+		externalId string
+		setupMock  func(*testutils.MockDBExecuter)
+		wantErr    bool
+	}{
+		{
+			name:       "should delete user successfully",
+			externalId: "1",
+			wantErr:    false,
+			setupMock: func(md *testutils.MockDBExecuter) {
+				md.ExecFunc = func(ctx context.Context, sql string, arguments ...any) (pgconn.CommandTag, error) {
+					return pgconn.NewCommandTag(""), nil
+				}
+			},
+		},
+		{
+			name:       "should return an error",
+			externalId: "1",
+			wantErr:    true,
+			setupMock: func(md *testutils.MockDBExecuter) {
+				md.ExecFunc = func(ctx context.Context, sql string, arguments ...any) (pgconn.CommandTag, error) {
+					return pgconn.NewCommandTag(""), errors.New("database error")
+				}
+			},
+		},
 	}
-	pool := postgres.NewConn(&dbConfig)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
 
-	repository := repo.NewUserProfileRepo(pool)
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			mockDB := new(testutils.MockDBExecuter)
+			if tc.setupMock != nil {
+				tc.setupMock(mockDB)
+			}
 
-	err := repository.DeleteUser(ctx, "externalId")
-	assert.NoError(t, err)
+			repository := repo.NewUserProfileRepo(mockDB)
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+			defer cancel()
+
+			err := repository.DeleteUser(ctx, tc.externalId)
+
+			if tc.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+			}
+		})
+	}
 }

@@ -14,18 +14,33 @@ import (
 var errLogPrefixCreateCommand = "profile:createCommand"
 
 type CreateProfileCommand struct {
-	Profile model.UserProfile
-	Repo    repositories.UserProfileRepository
-	Cache   cache.Cache
+	Profile     model.UserProfile
+	UserRepo    repositories.UserProfileRepository
+	AddressRepo repositories.UserProfileAddressRepository
+	StatRepo    repositories.UserProfileStatRepository
+	Cache       cache.Cache
 }
 
-func (ccmd *CreateProfileCommand) Handle(ctx context.Context) error {
-	userProfile, err := ccmd.Repo.InsertUser(ctx, &ccmd.Profile)
+func (cmd *CreateProfileCommand) Handle(ctx context.Context) error {
+	userProfile, err := cmd.UserRepo.Insert(ctx, &cmd.Profile)
 	if err != nil {
-		return err
+		return fmt.Errorf("error while inserting user profile %w", err)
 	}
 
-	return ccmd.addUserProfileToCache(ctx, userProfile)
+	err = cmd.AddressRepo.Insert(ctx, userProfile.Id, cmd.Profile.Adress)
+	if err != nil {
+		return fmt.Errorf("error while inserting user profile address %w", err)
+	}
+
+	err = cmd.StatRepo.Insert(ctx, cmd.Profile)
+	if err != nil {
+		return fmt.Errorf("error while inserting user profile stat %w", err)
+	}
+
+	userProfile.Adress.ProfileId = userProfile.Id
+	userProfile.Stat.ProfileId = userProfile.Id
+
+	return cmd.addUserProfileToCache(ctx, userProfile)
 
 }
 

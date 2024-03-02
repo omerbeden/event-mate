@@ -53,7 +53,7 @@ func (r *userProfileRepo) GetUsersByAddress(ctx context.Context, address model.U
 	}
 	return users, nil
 }
-func (r *userProfileRepo) InsertUser(ctx context.Context, user *model.UserProfile) (*model.UserProfile, error) {
+func (r *userProfileRepo) Insert(ctx context.Context, user *model.UserProfile) (*model.UserProfile, error) {
 
 	q := `INSERT INTO user_profiles
 	 (name,last_name,profile_image_url,about,external_id,user_name)
@@ -66,17 +66,7 @@ func (r *userProfileRepo) InsertUser(ctx context.Context, user *model.UserProfil
 	}
 
 	user.Id = id
-	errAdress := r.insertProfileAdress(ctx, user)
-	if errAdress != nil {
-		return nil, errAdress
-	}
-	errStat := r.insertProfileStat(ctx, user)
-	if errStat != nil {
-		return nil, errStat
-	}
 
-	user.Stat.ProfileId = user.Id
-	user.Adress.ProfileId = user.Id
 	return user, nil
 }
 func (r *userProfileRepo) UpdateProfileImage(ctx context.Context, externalId string, imageUrl string) error {
@@ -132,32 +122,6 @@ func (r *userProfileRepo) GetAttandedActivities(ctx context.Context, userId int6
 	}
 
 	return activities, nil
-}
-
-func (r *userProfileRepo) insertProfileAdress(ctx context.Context, user *model.UserProfile) error {
-
-	q := `INSERT INTO user_profile_addresses (profile_id,city) Values($1,$2)`
-	_, err := r.pool.Exec(ctx, q, user.Id, user.Adress.City)
-	if err != nil {
-		return fmt.Errorf("%s could not insert profile adress %w", errlogprefix, err)
-	}
-
-	return nil
-}
-
-func (r *userProfileRepo) insertProfileStat(ctx context.Context, user *model.UserProfile) error {
-
-	q := fmt.Sprintf(
-		`INSERT INTO user_profile_stats
-		 (profile_id, point, attanded_activities)
-		 Values(%d,%f,%d)`, user.Id, user.Stat.Point, user.Stat.AttandedActivities)
-	_, err := r.pool.Exec(ctx, q)
-	if err != nil {
-		return fmt.Errorf("%s could not insert profile stats %w", errlogprefix, err)
-	}
-
-	return nil
-
 }
 
 // dont need to anymore
