@@ -12,7 +12,8 @@ import (
 )
 
 type GiveUserPointCommand struct {
-	Repo             repositories.UserProfileRepository
+	UserRepo         repositories.UserProfileRepository
+	StatRepo         repositories.UserProfileStatRepository
 	Cache            cache.Cache
 	ReceiverUserName string
 	Point            float32
@@ -20,12 +21,12 @@ type GiveUserPointCommand struct {
 }
 
 func (cmd *GiveUserPointCommand) Handle(ctx context.Context) error {
-	err := cmd.Repo.UpdateProfilePoints(ctx, cmd.ReceiverUserName, cmd.Point)
+	err := cmd.StatRepo.UpdateProfilePoints(ctx, cmd.ReceiverUserName, cmd.Point)
 	if err != nil {
 		return err
 	}
 
-	updatedUser, err := cmd.Repo.GetUserProfile(ctx, cmd.ReceiverUserName)
+	updatedUser, err := cmd.UserRepo.GetUserProfile(ctx, cmd.ReceiverUserName)
 	if err != nil {
 		return err
 	}

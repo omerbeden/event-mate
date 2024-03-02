@@ -113,7 +113,7 @@ func (service *UserService) GetUserProfile(ctx context.Context, userName string)
 
 func (service *UserService) GivePointsToUser(ctx context.Context, receiverUserName string, point float32) error {
 	cmd := &commands.GiveUserPointCommand{
-		Repo:             service.userRepository,
+		UserRepo:         service.userRepository,
 		Cache:            &service.redisClient,
 		ReceiverUserName: receiverUserName,
 		Point:            point,

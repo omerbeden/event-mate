@@ -10,7 +10,6 @@ type UserProfileRepository interface {
 	GetUsersByAddress(context.Context, model.UserProfileAdress) ([]model.UserProfile, error)
 	Insert(context.Context, *model.UserProfile) (*model.UserProfile, error)
 	UpdateProfileImage(context.Context, string, string) error
-	UpdateProfilePoints(context.Context, string, float32) error
 	DeleteUser(context.Context, string) error
 	GetAttandedActivities(context.Context, int64) ([]model.Activity, error)
 	GetCurrentUserProfile(context.Context, string) (*model.UserProfile, error)
@@ -22,4 +21,5 @@ type UserProfileAddressRepository interface {
 }
 type UserProfileStatRepository interface {
 	Insert(ctx context.Context, user model.UserProfile) error
+	UpdateProfilePoints(context.Context, string, float32) error
 }
