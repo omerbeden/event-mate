@@ -27,18 +27,18 @@ func (cmd *CreateProfileCommand) Handle(ctx context.Context) error {
 		return fmt.Errorf("error while inserting user profile %w", err)
 	}
 
-	err = cmd.AddressRepo.Insert(ctx, userProfile.Id, cmd.Profile.Adress)
+	userProfile.Adress.ProfileId = userProfile.Id
+
+	err = cmd.AddressRepo.Insert(ctx, cmd.Profile.Adress)
 	if err != nil {
 		return fmt.Errorf("error while inserting user profile address %w", err)
 	}
 
-	err = cmd.StatRepo.Insert(ctx, cmd.Profile)
+	userProfile.Stat.ProfileId = userProfile.Id
+	err = cmd.StatRepo.Insert(ctx, cmd.Profile.Stat)
 	if err != nil {
 		return fmt.Errorf("error while inserting user profile stat %w", err)
 	}
-
-	userProfile.Adress.ProfileId = userProfile.Id
-	userProfile.Stat.ProfileId = userProfile.Id
 
 	return cmd.addUserProfileToCache(ctx, userProfile)
 

@@ -17,9 +17,9 @@ type UserProfileRepository interface {
 }
 
 type UserProfileAddressRepository interface {
-	Insert(context.Context, int64, model.UserProfileAdress) error
+	Insert(ctx context.Context, address model.UserProfileAdress) error
 }
 type UserProfileStatRepository interface {
-	Insert(ctx context.Context, user model.UserProfile) error
+	Insert(ctx context.Context, stat model.UserProfileStat) error
 	UpdateProfilePoints(context.Context, string, float32) error
 }

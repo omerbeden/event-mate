@@ -12,20 +12,20 @@ type userProfileStatRepo struct {
 	pool db.DBExecutor
 }
 
-func NewUserProfileStatRepo(pool db.DBExecutor) *userProfileRepo {
-	return &userProfileRepo{
+func NewUserProfileStatRepo(pool db.DBExecutor) *userProfileStatRepo {
+	return &userProfileStatRepo{
 		pool: pool,
 	}
 }
 
-func (r *userProfileStatRepo) Insert(ctx context.Context, user model.UserProfile) error {
+func (r *userProfileStatRepo) Insert(ctx context.Context, stat model.UserProfileStat) error {
 	q := fmt.Sprintf(
 		`INSERT INTO user_profile_stats
 		 (profile_id, point, attanded_activities)
-		 Values(%d,%f,%d)`, user.Id, user.Stat.Point, user.Stat.AttandedActivities)
+		 Values(%d,%f,%d)`, stat.ProfileId, stat.Point, stat.AttandedActivities)
 	_, err := r.pool.Exec(ctx, q)
 	if err != nil {
-		return fmt.Errorf("%s could not insert profile stats %w", errlogprefix, err)
+		return fmt.Errorf("could not insert profile stats %w", err)
 	}
 
 	return nil
