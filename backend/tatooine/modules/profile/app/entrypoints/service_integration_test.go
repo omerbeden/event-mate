@@ -35,11 +35,57 @@ func TestCreateUserProfile(t *testing.T) {
 		ExpirationTime: 0,
 	})
 
-	service := entrypoints.NewService(repo.NewUserProfileRepo(pool), *redis)
+	service := entrypoints.NewService(
+		repo.NewUserProfileRepo(pool),
+		repo.NewUserProfileStatRepo(pool),
+		repo.NewUserProfileAddressRepo(pool),
+		*redis)
 	user := &model.UserProfile{
 		Name:               "omer",
 		LastName:           "beden",
 		About:              "backend developer",
+		ExternalId:         "1b",
+		UserName:           "omerbeden2",
+		AttandedActivities: []model.Activity{},
+		Adress:             model.UserProfileAdress{City: "Sakarya"},
+		Stat: model.UserProfileStat{
+			AttandedActivities: 3,
+			Point:              5,
+		},
+		ProfileImageUrl: "profileImage.png",
+	}
+
+	err := service.CreateUser(ctx, user)
+
+	assert.NoError(t, err)
+}
+
+func TestCreateUserProfileWithoutRedis(t *testing.T) {
+	dbConfig := postgres.PostgresConfig{
+		ConnectionString: "postgres://postgres:password@localhost:5432/test",
+		Config:           pgxpool.Config{MinConns: 5, MaxConns: 10},
+	}
+
+	pool := postgres.NewConn(&dbConfig)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	redis := cache.NewRedisClient(cache.RedisOption{
+		Options:        &redis.Options{},
+		ExpirationTime: 0,
+	})
+
+	service := entrypoints.NewService(
+		repo.NewUserProfileRepo(pool),
+		repo.NewUserProfileStatRepo(pool),
+		repo.NewUserProfileAddressRepo(pool),
+		*redis)
+	user := &model.UserProfile{
+		Name:               "omer",
+		LastName:           "beden",
+		About:              "backend developer",
+		ExternalId:         "redis",
+		UserName:           "omerbeden3",
 		AttandedActivities: []model.Activity{},
 		Adress:             model.UserProfileAdress{City: "Sakarya"},
 		Stat: model.UserProfileStat{
@@ -73,9 +119,37 @@ func TestUpdateUserProfileImage(t *testing.T) {
 		ExpirationTime: 0,
 	})
 
-	service := entrypoints.NewService(repo.NewUserProfileRepo(pool), *redis)
+	service := entrypoints.NewService(
+		repo.NewUserProfileRepo(pool),
+		repo.NewUserProfileStatRepo(pool),
+		repo.NewUserProfileAddressRepo(pool),
+		*redis)
+	err := service.UpdateProfileImage(ctx, "1b", "new profile image9.png")
 
-	err := service.UpdateProfileImage(ctx, "", "new profile image9.png")
+	assert.NoError(t, err)
+}
+
+func TestUpdateUserProfileImageWithoutRedis(t *testing.T) {
+	dbConfig := postgres.PostgresConfig{
+		ConnectionString: "postgres://postgres:password@localhost:5432/test",
+		Config:           pgxpool.Config{MinConns: 5, MaxConns: 10},
+	}
+
+	pool := postgres.NewConn(&dbConfig)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	redis := cache.NewRedisClient(cache.RedisOption{
+		Options:        &redis.Options{},
+		ExpirationTime: 0,
+	})
+
+	service := entrypoints.NewService(
+		repo.NewUserProfileRepo(pool),
+		repo.NewUserProfileStatRepo(pool),
+		repo.NewUserProfileAddressRepo(pool),
+		*redis)
+	err := service.UpdateProfileImage(ctx, "1b", "new profile image10.png")
 
 	assert.NoError(t, err)
 }
@@ -98,8 +172,14 @@ func TestGetAttandedActivities(t *testing.T) {
 		ExpirationTime: 0,
 	})
 
-	service := entrypoints.NewService(repo.NewUserProfileRepo(pool), *redis)
-	attandedActivities, err := service.GetAttandedActivities(ctx, 1)
+	service := entrypoints.NewService(
+		repo.NewUserProfileRepo(pool),
+		repo.NewUserProfileStatRepo(pool),
+		repo.NewUserProfileAddressRepo(pool),
+		*redis)
+
+	userId := int64(7)
+	attandedActivities, err := service.GetAttandedActivities(ctx, userId)
 
 	assert.NoError(t, err)
 	assert.NotNil(t, attandedActivities)
@@ -124,9 +204,14 @@ func TestGetUserProfile(t *testing.T) {
 		ExpirationTime: 0,
 	})
 
-	service := entrypoints.NewService(repo.NewUserProfileRepo(pool), *redis)
+	service := entrypoints.NewService(
+		repo.NewUserProfileRepo(pool),
+		repo.NewUserProfileStatRepo(pool),
+		repo.NewUserProfileAddressRepo(pool),
+		*redis)
 
-	user, err := service.GetUserProfile(ctx, "")
+	userName := "omerbeden3"
+	user, err := service.GetUserProfile(ctx, userName)
 	fmt.Printf("user: %+v", user)
 	assert.NoError(t, err)
 	assert.NotNil(t, user)
@@ -150,10 +235,14 @@ func TestAddPointsToUser(t *testing.T) {
 		ExpirationTime: 0,
 	})
 
-	receiverId := "testUserName"
+	receiverId := "omerbeden3"
 	point := float32(3.5)
 
-	service := entrypoints.NewService(repo.NewUserProfileRepo(pool), *redis)
+	service := entrypoints.NewService(
+		repo.NewUserProfileRepo(pool),
+		repo.NewUserProfileStatRepo(pool),
+		repo.NewUserProfileAddressRepo(pool),
+		*redis)
 	err := service.GivePointsToUser(ctx, receiverId, point)
 
 	assert.NoError(t, err)
@@ -178,7 +267,11 @@ func TestDeleteUser(t *testing.T) {
 		ExpirationTime: 0,
 	})
 
-	service := entrypoints.NewService(repo.NewUserProfileRepo(pool), *redis)
+	service := entrypoints.NewService(
+		repo.NewUserProfileRepo(pool),
+		repo.NewUserProfileStatRepo(pool),
+		repo.NewUserProfileAddressRepo(pool),
+		*redis)
 	err := service.DeleteUser(ctx, "externalId", "userName")
 
 	assert.NoError(t, err)

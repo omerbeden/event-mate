@@ -37,7 +37,7 @@ func (r *userProfileStatRepo) UpdateProfilePoints(ctx context.Context, receiverU
 		SET point = point + $1,
 		point_giving_count = point_giving_count + 1
 		FROM user_profiles
-		WHERE user_profile_stas.profile_id = user_profiles.id
+		WHERE user_profile_stats.profile_id = user_profiles.id
 		AND user_profiles.user_name = $2`
 
 	_, err := r.pool.Exec(ctx, q, point, receiverUserName)

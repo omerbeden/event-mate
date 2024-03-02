@@ -11,25 +11,33 @@ import (
 )
 
 type UserService struct {
-	userRepository repositories.UserProfileRepository
-	redisClient    cache.RedisClient
+	userRepository        repositories.UserProfileRepository
+	userStatRepository    repositories.UserProfileStatRepository
+	userAddressRepository repositories.UserProfileAddressRepository
+	redisClient           cache.RedisClient
 }
 
 func NewService(
 	userRepository repositories.UserProfileRepository,
+	userStatRepository repositories.UserProfileStatRepository,
+	userAddressRepository repositories.UserProfileAddressRepository,
 	redisClient cache.RedisClient,
 ) *UserService {
 	return &UserService{
-		userRepository: userRepository,
-		redisClient:    redisClient,
+		userRepository:        userRepository,
+		userStatRepository:    userStatRepository,
+		userAddressRepository: userAddressRepository,
+		redisClient:           redisClient,
 	}
 }
 
 func (service *UserService) CreateUser(ctx context.Context, user *model.UserProfile) error {
 	createCmd := &commands.CreateProfileCommand{
-		Profile:  *user,
-		UserRepo: service.userRepository,
-		Cache:    &service.redisClient,
+		Profile:     *user,
+		UserRepo:    service.userRepository,
+		AddressRepo: service.userAddressRepository,
+		StatRepo:    service.userStatRepository,
+		Cache:       &service.redisClient,
 	}
 
 	return createCmd.Handle(ctx)
@@ -114,6 +122,7 @@ func (service *UserService) GetUserProfile(ctx context.Context, userName string)
 func (service *UserService) GivePointsToUser(ctx context.Context, receiverUserName string, point float32) error {
 	cmd := &commands.GiveUserPointCommand{
 		UserRepo:         service.userRepository,
+		StatRepo:         service.userStatRepository,
 		Cache:            &service.redisClient,
 		ReceiverUserName: receiverUserName,
 		Point:            point,

@@ -40,7 +40,12 @@ func (cmd *CreateProfileCommand) Handle(ctx context.Context) error {
 		return fmt.Errorf("error while inserting user profile stat %w", err)
 	}
 
-	return cmd.addUserProfileToCache(ctx, userProfile)
+	cacheResult := cmd.addUserProfileToCache(ctx, userProfile)
+	if cacheResult != nil {
+		fmt.Printf("error while inserting user profile to cache %w", cacheResult)
+	}
+
+	return nil
 
 }
 

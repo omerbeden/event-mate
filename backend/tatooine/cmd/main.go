@@ -44,7 +44,9 @@ func main() {
 	activityService := activityServiceEntryPoints.NewService(activityRepository, activityRulesRepository, activityFlowRepository, locationRepository, *redisClient)
 
 	userRepository := repo.NewUserProfileRepo(dbPool)
-	userService := entrypoints.NewService(userRepository, *redisClient)
+	userAddressRepo := repo.NewUserProfileAddressRepo(dbPool)
+	userStatRepo := repo.NewUserProfileStatRepo(dbPool)
+	userService := entrypoints.NewService(userRepository, userStatRepo, userAddressRepo, *redisClient)
 
 	app := fiber.New()
 	api := app.Group("/api")

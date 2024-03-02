@@ -95,7 +95,7 @@ func (r *userProfileRepo) DeleteUser(ctx context.Context, externalId string) err
 
 func (r *userProfileRepo) GetAttandedActivities(ctx context.Context, userId int64) ([]model.Activity, error) {
 
-	q := `SELECT a.id , a.title, a.category, a.background_image_url, a.content , a.start_at,
+	q := `SELECT a.id , a.title, a.category, a.content , a.start_at,
 	loc.city
 	FROM participants attended
 	JOIN user_profiles p ON p.id = attended.user_id
@@ -107,16 +107,16 @@ func (r *userProfileRepo) GetAttandedActivities(ctx context.Context, userId int6
 
 	rows, err := r.pool.Query(ctx, q, userId)
 	if err != nil {
-		return nil, fmt.Errorf("%s could not get activities for user: %d", errlogprefix, userId)
+		return nil, fmt.Errorf("%s could not get activities for user: %d %w", errlogprefix, userId, err)
 	}
 
 	var activities []model.Activity
 	for rows.Next() {
 		var activity model.Activity
-		err := rows.Scan(&activity.ID, &activity.Title, &activity.Category, &activity.BackgroundImageUrl, &activity.Content, &activity.StartAt,
+		err := rows.Scan(&activity.ID, &activity.Title, &activity.Category, &activity.Content, &activity.StartAt,
 			&activity.Location.City)
 		if err != nil {
-			return nil, fmt.Errorf("%s error getting rows for user : %d", errlogprefix, userId)
+			return nil, fmt.Errorf("%s error getting rows for user : %d %w", errlogprefix, userId, err)
 		}
 		activities = append(activities, activity)
 	}
@@ -153,7 +153,7 @@ func (r *userProfileRepo) GetCurrentUserProfile(ctx context.Context, externalId 
 
 	user.AttandedActivities, err = r.GetAttandedActivities(ctx, user.Id)
 	if err != nil {
-		return nil, fmt.Errorf("%s could not get attanded activities for profile: %d %w", errlogprefix, user.Id, err)
+		return nil, err
 
 	}
 
