@@ -41,11 +41,11 @@ func TestCreateUserProfile(t *testing.T) {
 		repo.NewUserProfileAddressRepo(pool),
 		*redis)
 	user := &model.UserProfile{
-		Name:               "omer",
+		Name:               "onat",
 		LastName:           "beden",
-		About:              "backend developer",
-		ExternalId:         "1b",
-		UserName:           "omerbeden2",
+		About:              "mimar",
+		ExternalId:         "1d",
+		UserName:           "onatbeden2",
 		AttandedActivities: []model.Activity{},
 		Adress:             model.UserProfileAdress{City: "Sakarya"},
 		Stat: model.UserProfileStat{
@@ -217,7 +217,7 @@ func TestGetUserProfile(t *testing.T) {
 	assert.NotNil(t, user)
 }
 
-func TestAddPointsToUser(t *testing.T) {
+func TestEvaluateUser(t *testing.T) {
 	dbConfig := postgres.PostgresConfig{
 		ConnectionString: "postgres://postgres:password@localhost:5432/test",
 		Config:           pgxpool.Config{MinConns: 5, MaxConns: 10},
@@ -235,15 +235,20 @@ func TestAddPointsToUser(t *testing.T) {
 		ExpirationTime: 0,
 	})
 
-	receiverId := "omerbeden3"
-	point := float32(3.5)
+	evaluation := model.UserEvaluation{
+		ReceiverId: "1c",
+		GiverId:    "1d",
+		Points:     3.5,
+		Comment:    "test comment",
+	}
 
 	service := entrypoints.NewService(
 		repo.NewUserProfileRepo(pool),
 		repo.NewUserProfileStatRepo(pool),
 		repo.NewUserProfileAddressRepo(pool),
 		*redis)
-	err := service.GivePointsToUser(ctx, receiverId, point)
+
+	err := service.EvaluateUser(ctx, evaluation)
 
 	assert.NoError(t, err)
 

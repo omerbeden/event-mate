@@ -73,18 +73,22 @@ func TestUserProfileStatRepo_Insert(t *testing.T) {
 	}
 }
 
-func TestUserProfileStatRepo_UpdateProfilePoints(t *testing.T) {
+func TestUserProfileStatRepo_EvaluateUser(t *testing.T) {
 	test := []struct {
-		name             string
-		wantErr          bool
-		receiverUserName string
-		point            float32
-		setupMock        func(*testutils.MockDBExecuter)
+		name       string
+		wantErr    bool
+		evaluation model.UserEvaluation
+		setupMock  func(*testutils.MockDBExecuter)
 	}{
 		{
-			name:             "should insert a profile stat successfully",
-			wantErr:          false,
-			receiverUserName: "testuser",
+			name:    "should insert a profile stat successfully",
+			wantErr: false,
+			evaluation: model.UserEvaluation{
+				GiverId:    "1",
+				ReceiverId: "2",
+				Points:     1,
+				Comment:    "test comment",
+			},
 			setupMock: func(md *testutils.MockDBExecuter) {
 				md.ExecFunc = func(ctx context.Context, sql string, arguments ...any) (pgconn.CommandTag, error) {
 					return pgconn.NewCommandTag(""), nil
@@ -92,9 +96,14 @@ func TestUserProfileStatRepo_UpdateProfilePoints(t *testing.T) {
 			},
 		},
 		{
-			name:             "should return error",
-			wantErr:          true,
-			receiverUserName: "testuser",
+			name:    "should return error",
+			wantErr: true,
+			evaluation: model.UserEvaluation{
+				GiverId:    "1",
+				ReceiverId: "2",
+				Points:     1,
+				Comment:    "test comment",
+			},
 			setupMock: func(md *testutils.MockDBExecuter) {
 				md.ExecFunc = func(ctx context.Context, sql string, arguments ...any) (pgconn.CommandTag, error) {
 					return pgconn.NewCommandTag(""), errors.New("database error")
@@ -116,7 +125,7 @@ func TestUserProfileStatRepo_UpdateProfilePoints(t *testing.T) {
 
 			repository := repo.NewUserProfileStatRepo(mockDB)
 
-			err := repository.UpdateProfilePoints(ctx, tc.receiverUserName, 3)
+			err := repository.EvaluateUser(ctx, tc.evaluation)
 
 			if tc.wantErr {
 				assert.Error(t, err)

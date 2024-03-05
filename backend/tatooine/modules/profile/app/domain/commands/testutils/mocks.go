@@ -90,8 +90,8 @@ func (m *MockAddressRepository) Insert(ctx context.Context, address model.UserPr
 var _ repositories.UserProfileAddressRepository = (*MockAddressRepository)(nil)
 
 type MockStatRepository struct {
-	InsertFunc              func(ctx context.Context, stat model.UserProfileStat) error
-	UpdateProfilePointsFunc func(context.Context, string, float32) error
+	InsertFunc       func(ctx context.Context, stat model.UserProfileStat) error
+	EvaluateUserFunc func(ctx context.Context, eval model.UserEvaluation) error
 }
 
 var _ repositories.UserProfileStatRepository = (*MockStatRepository)(nil)
@@ -103,9 +103,9 @@ func (m *MockStatRepository) Insert(ctx context.Context, stat model.UserProfileS
 	return nil
 }
 
-func (m *MockStatRepository) UpdateProfilePoints(ctx context.Context, receiverId string, point float32) error {
-	if m.UpdateProfilePointsFunc != nil {
-		return m.UpdateProfilePoints(ctx, receiverId, point)
+func (m *MockStatRepository) EvaluateUser(ctx context.Context, eval model.UserEvaluation) error {
+	if m.EvaluateUserFunc != nil {
+		return m.EvaluateUserFunc(ctx, eval)
 	}
 	return nil
 }

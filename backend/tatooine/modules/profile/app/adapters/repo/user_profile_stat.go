@@ -2,9 +2,12 @@ package repo
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/model"
+	customerrors "github.com/omerbeden/event-mate/backend/tatooine/pkg/customErrors"
 	"github.com/omerbeden/event-mate/backend/tatooine/pkg/db"
 )
 
@@ -31,18 +34,21 @@ func (r *userProfileStatRepo) Insert(ctx context.Context, stat model.UserProfile
 	return nil
 }
 
-func (r *userProfileStatRepo) UpdateProfilePoints(ctx context.Context, receiverUserName string, point float32) error {
+func (r *userProfileStatRepo) EvaluateUser(ctx context.Context, eval model.UserEvaluation) error {
 
-	q := `UPDATE user_profile_stats
-		SET point = point + $1,
-		point_giving_count = point_giving_count + 1
-		FROM user_profiles
-		WHERE user_profile_stats.profile_id = user_profiles.id
-		AND user_profiles.user_name = $2`
+	q := `INSERT INTO user_points(giver_id,receiver_id,points,comment) 
+		VALUES ($1,$2,$3,$4);`
 
-	_, err := r.pool.Exec(ctx, q, point, receiverUserName)
+	_, err := r.pool.Exec(ctx, q, eval.GiverId, eval.ReceiverId, eval.Points, eval.Comment)
+
 	if err != nil {
-		return fmt.Errorf("%s could not update user %s , %w", errlogprefix, receiverUserName, err)
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) {
+			if pgErr.Code == "23505" {
+				return customerrors.ErrDublicateKey
+			}
+		}
+		return fmt.Errorf("could not evaluate user %s , %w", eval.ReceiverId, err)
 	}
 
 	return nil

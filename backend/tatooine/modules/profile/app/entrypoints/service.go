@@ -119,13 +119,12 @@ func (service *UserService) GetUserProfile(ctx context.Context, userName string)
 	return user, nil
 }
 
-func (service *UserService) GivePointsToUser(ctx context.Context, receiverUserName string, point float32) error {
-	cmd := &commands.GiveUserPointCommand{
-		UserRepo:         service.userRepository,
-		StatRepo:         service.userStatRepository,
-		Cache:            &service.redisClient,
-		ReceiverUserName: receiverUserName,
-		Point:            point,
+func (service *UserService) EvaluateUser(ctx context.Context, evaluation model.UserEvaluation) error {
+	cmd := &commands.EvaluateUserCommand{
+		UserRepo:   service.userRepository,
+		StatRepo:   service.userStatRepository,
+		Cache:      &service.redisClient,
+		Evaluation: evaluation,
 	}
 
 	return cmd.Handle(ctx)

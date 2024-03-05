@@ -27,7 +27,7 @@ func (r *userProfileRepo) GetUsersByAddress(ctx context.Context, address model.U
 
 	q := `
 	Select p.id, p.name, p.last_name, p.profile_image_url, 
-	(stats.point/stats.point_giving.count) as point,
+	(SELECT ROUND(AVG(points),1) FROM user_points WHERE receiver_id = p.external_id) as point,
 	a.city
 	FROM user_profile_addresses a
 	JOIN user_profiles p ON p.id = a.profile_id
@@ -129,14 +129,13 @@ func (r *userProfileRepo) GetCurrentUserProfile(ctx context.Context, externalId 
 	q := `SELECT up.id, up.name, up.last_name, up.about, up.profile_image_url, up.external_id, up.user_name,
     upa.city,
     ups.attanded_activities, 
-		CASE 
-			WHEN ups.point_giving_count = 0 THEN ups.point
-			ELSE (ups.point / ups.point_giving_count) 
-		END as point
+	(SELECT ROUND(AVG(points),1) FROM user_points WHERE receiver_id = up.external_id) as point
 	FROM user_profiles up
 	JOIN user_profile_stats ups ON ups.profile_id = up.id
 	JOIN user_profile_addresses upa ON upa.profile_id = up.id
-	WHERE up.external_id = $1;`
+	LEFT JOIN user_points ON up.external_id = receiver_id
+	WHERE up.external_id = $1
+	`
 
 	var user model.UserProfile
 	err := r.pool.QueryRow(ctx, q, externalId).Scan(&user.Id, &user.Name, &user.LastName, &user.About, &user.ProfileImageUrl, &user.ExternalId, &user.UserName,
@@ -164,10 +163,7 @@ func (r *userProfileRepo) GetUserProfile(ctx context.Context, username string) (
 	q := `SELECT up.id, up.name, up.last_name, up.about, up.profile_image_url,
     upa.city,
     ups.attanded_activities, 
-		CASE 
-			WHEN ups.point_giving_count = 0 THEN ups.point
-			ELSE (ups.point / ups.point_giving_count) 
-		END as point
+	(SELECT ROUND(AVG(points),1) FROM user_points WHERE receiver_id = up.external_id) as point
 	FROM user_profiles up
 	JOIN user_profile_stats ups ON ups.profile_id = up.id
 	JOIN user_profile_addresses upa ON upa.profile_id = up.id

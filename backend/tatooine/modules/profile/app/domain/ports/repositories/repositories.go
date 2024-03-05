@@ -21,5 +21,5 @@ type UserProfileAddressRepository interface {
 }
 type UserProfileStatRepository interface {
 	Insert(ctx context.Context, stat model.UserProfileStat) error
-	UpdateProfilePoints(context.Context, string, float32) error
+	EvaluateUser(ctx context.Context, eval model.UserEvaluation) error
 }

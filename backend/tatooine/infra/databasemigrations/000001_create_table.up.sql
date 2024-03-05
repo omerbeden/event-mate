@@ -21,8 +21,8 @@ CREATE TABLE IF NOT EXISTS user_profiles(
 	last_name VARCHAR(20),
 	about VARCHAR(100),
 	profile_image_url TEXT,
-	external_id TEXT UNIQUE,
-	user_name VARCHAR(20) UNIQUE;
+	external_id VARCHAR UNIQUE,
+	user_name VARCHAR(20) UNIQUE
 );
 
 CREATE TABLE IF NOT EXISTS user_profile_addresses(
@@ -42,7 +42,8 @@ CREATE TABLE IF NOT EXISTS participants (
 	activity_id INT REFERENCES activities(id) ON DELETE CASCADE,
 	user_id INT REFERENCES user_profiles(id)ON DELETE CASCADE,
 	
-	CONSTRAINT participants_pk PRIMARY KEY(activity_id,user_id));
+	CONSTRAINT participants_pk PRIMARY KEY(activity_id,user_id)
+);
 
 
 CREATE TABLE IF NOT EXISTS activity_rules(
