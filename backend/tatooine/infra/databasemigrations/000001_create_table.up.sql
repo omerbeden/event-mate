@@ -1,56 +1,60 @@
 CREATE TABLE IF NOT EXISTS activities(
-    id serial primary key ,
-    title varchar(20),
-	category varchar(20),
-	created_by int ,
-	quota int
+    id SERIAL PRIMARY KEY ,
+    title VARCHAR(20),
+	category VARCHAR(20),
+	created_by INT ,
+	quota INT
 );
 
 CREATE TABLE IF NOT EXISTS activity_locations(
-	activity_id  int primary key references activities(id) ON DELETE CASCADE,
-	city varchar(20) NOT NULL,
-	district varchar(50) NOT NULL,
-	description text,
-	latitude real NOT NULL,
-	longitude real NOT NULL
+	activity_id  INT PRIMARY KEY REFERENCES activities(id) ON DELETE CASCADE,
+	city VARCHAR(20) NOT NULL,
+	district VARCHAR(50) NOT NULL,
+	description TEXT,
+	latitude REAL NOT NULL,
+	longitude REAL NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS user_profiles(
-	id  serial primary key ,
-	name varchar(20),
-	last_name varchar(20)
+	id  SERIAL PRIMARY KEY ,
+	name VARCHAR(20),
+	last_name VARCHAR(20),
+	about VARCHAR(100),
+	profile_image_url TEXT,
+	external_id TEXT UNIQUE,
+	user_name VARCHAR(20) UNIQUE;
 );
 
 CREATE TABLE IF NOT EXISTS user_profile_addresses(
-	profile_id  int primary key references user_profiles(id) ON DELETE CASCADE ,
-	City varchar(20)
+	profile_id  INT PRIMARY KEY REFERENCES user_profiles(id) ON DELETE CASCADE ,
+	City VARCHAR(20)
 );
 
 
 CREATE TABLE IF NOT EXISTS user_profile_stats(
-	profile_id  int primary key references user_profiles(id) ON DELETE CASCADE,
-	point real,
-	attanded_activities int
+	profile_id  INT PRIMARY KEY REFERENCES user_profiles(id) ON DELETE CASCADE,
+	point REAL,
+	attanded_activities INT
 );
 
 
 CREATE TABLE IF NOT EXISTS participants (
-	activity_id int references activities(id) ON DELETE CASCADE,
-	user_id int references user_profiles(id)ON DELETE CASCADE,
+	activity_id INT REFERENCES activities(id) ON DELETE CASCADE,
+	user_id INT REFERENCES user_profiles(id)ON DELETE CASCADE,
 	
 	CONSTRAINT participants_pk PRIMARY KEY(activity_id,user_id));
 
 
 CREATE TABLE IF NOT EXISTS activity_rules(
 	id SERIAL PRIMARY KEY,
-	activity_id int NOT NULL,
+	activity_id INT NOT NULL,
 	description TEXT NOT NULL,
 	FOREIGN KEY (activity_id) REFERENCES activities(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS activity_flows(
 	id SERIAL PRIMARY KEY,
-	activity_id int NOT NULL,
+	activity_id INT NOT NULL,
 	description TEXT NOT NULL,
 	FOREIGN KEY (activity_id) REFERENCES activities(id) ON DELETE CASCADE
 );
