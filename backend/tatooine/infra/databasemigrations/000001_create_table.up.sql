@@ -22,7 +22,9 @@ CREATE TABLE IF NOT EXISTS user_profiles(
 	about VARCHAR(100),
 	profile_image_url TEXT,
 	external_id VARCHAR UNIQUE,
-	user_name VARCHAR(20) UNIQUE
+	user_name VARCHAR(20) UNIQUE,
+	email VARCHAR(255) UNIQUE NOT NULL
+
 );
 
 CREATE TABLE IF NOT EXISTS user_profile_addresses(

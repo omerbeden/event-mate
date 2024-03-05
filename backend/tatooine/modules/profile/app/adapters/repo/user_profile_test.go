@@ -79,7 +79,7 @@ func TestGetUsersByAddress(t *testing.T) {
 
 	users := []model.UserProfile{
 		{
-			Id: 1,
+			Id: int64(1),
 			Adress: model.UserProfileAdress{
 				ProfileId: int64(1),
 				City:      "San Francisco",
@@ -93,9 +93,10 @@ func TestGetUsersByAddress(t *testing.T) {
 				Point:              0,
 			},
 			ExternalId: "ex1",
+			Email:      "test",
 		},
 		{
-			Id: 1,
+			Id: int64(1),
 			Adress: model.UserProfileAdress{
 				ProfileId: int64(2),
 				City:      "San Francisco",
@@ -109,6 +110,7 @@ func TestGetUsersByAddress(t *testing.T) {
 				Point:              0,
 			},
 			ExternalId: "ex2",
+			Email:      "test",
 		},
 	}
 	tests := []struct {

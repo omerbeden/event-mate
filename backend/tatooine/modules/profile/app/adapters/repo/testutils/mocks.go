@@ -54,8 +54,10 @@ func (m *MockRows) Scan(dest ...any) error {
 		*dest[1].(*string) = user.Name
 		*dest[2].(*string) = user.LastName
 		*dest[3].(*string) = user.ProfileImageUrl
-		*dest[4].(*float32) = user.Stat.Point
-		*dest[5].(*string) = user.Adress.City
+		*dest[4].(*string) = user.Email
+		*dest[5].(*float32) = user.Stat.Point
+		*dest[6].(*string) = user.Adress.City
+
 	}
 	m.Current++
 	return nil

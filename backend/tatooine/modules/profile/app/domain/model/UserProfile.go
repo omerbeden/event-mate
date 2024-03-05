@@ -11,4 +11,5 @@ type UserProfile struct {
 	ProfileImageUrl    string            `json:"profileImageUrl"`
 	ExternalId         string            `json:"externalId"`
 	UserName           string            `json:"userName"`
+	Email              string            `json:"email"`
 }
