@@ -22,33 +22,43 @@ type CreateCommand struct {
 	ActivityFlowRepo  repo.ActivityFlowRepository
 	LocRepo           repo.LocationRepository
 	Redis             cache.Cache
-	Tx                db.Tx
+	Tx                db.TransactionManager
 }
 
 func (cmd *CreateCommand) Handle(ctx context.Context) (bool, error) {
 
-	defer cmd.Tx.Rollback(ctx)
-	activity, errCreate := cmd.ActivityRepo.Create(ctx, cmd.Tx, cmd.Activity)
+	tx, err := cmd.Tx.Begin(ctx)
+	if err != nil {
+		return false, fmt.Errorf("failed to begin transaction: %w", err)
+	}
+
+	defer func() {
+		if err != nil {
+			tx.Rollback(ctx)
+		}
+	}()
+
+	activity, errCreate := cmd.ActivityRepo.Create(ctx, tx, cmd.Activity)
 	if errCreate != nil {
 		return false, errCreate
 	}
 
-	err := cmd.ActivityRulesRepo.CreateActivityRules(ctx, cmd.Tx, activity.ID, cmd.Activity.Rules)
+	err = cmd.ActivityRulesRepo.CreateActivityRules(ctx, tx, activity.ID, cmd.Activity.Rules)
 	if err != nil {
 		return false, err
 	}
 
-	err = cmd.ActivityFlowRepo.CreateActivityFlow(ctx, cmd.Tx, activity.ID, cmd.Activity.Flow)
+	err = cmd.ActivityFlowRepo.CreateActivityFlow(ctx, tx, activity.ID, cmd.Activity.Flow)
 	if err != nil {
 		return false, err
 	}
 
-	_, errLoc := cmd.LocRepo.Create(ctx, cmd.Tx, &activity.Location)
+	_, errLoc := cmd.LocRepo.Create(ctx, tx, &activity.Location)
 	if errLoc != nil {
 		return false, errLoc
 	}
 
-	err = cmd.Tx.Commit(ctx)
+	err = tx.Commit(ctx)
 	if err != nil {
 		return false, fmt.Errorf("failed to commit transaction: %w", err)
 	}

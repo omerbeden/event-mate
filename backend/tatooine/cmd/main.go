@@ -43,7 +43,7 @@ func main() {
 	activityFlowRepository := activityRepoAdapter.NewActivityFlowRepo(pgxAdapter)
 	locationRepository := activityRepoAdapter.NewLocationRepo(pgxAdapter)
 
-	activityService := activityServiceEntryPoints.NewService(activityRepository, activityRulesRepository, activityFlowRepository, locationRepository, *redisClient)
+	activityService := activityServiceEntryPoints.NewService(activityRepository, activityRulesRepository, activityFlowRepository, locationRepository, *redisClient, pgxAdapter)
 
 	userRepository := profileRepoAdapter.NewUserProfileRepo(pgxAdapter)
 	userAddressRepo := profileRepoAdapter.NewUserProfileAddressRepo(pgxAdapter)

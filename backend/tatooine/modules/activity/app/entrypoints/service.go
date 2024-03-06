@@ -7,14 +7,16 @@ import (
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/domain/model"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/domain/ports/repositories"
 	"github.com/omerbeden/event-mate/backend/tatooine/pkg/cache"
+	"github.com/omerbeden/event-mate/backend/tatooine/pkg/db"
 )
 
 type ActivityService struct {
-	ActivityRepository      repositories.ActivityRepository
-	ActivityRulesRepository repositories.ActivityRulesRepository
-	ActivityFlowRepository  repositories.ActivityFlowRepository
-	LocationReposiroy       repositories.LocationRepository
-	RedisClient             cache.RedisClient
+	activityRepository      repositories.ActivityRepository
+	activityRulesRepository repositories.ActivityRulesRepository
+	activityFlowRepository  repositories.ActivityFlowRepository
+	locationReposiroy       repositories.LocationRepository
+	redisClient             cache.RedisClient
+	tx                      db.TransactionManager
 }
 
 func NewService(
@@ -23,25 +25,28 @@ func NewService(
 	activityFlowRepository repositories.ActivityFlowRepository,
 	locationRepository repositories.LocationRepository,
 	redisClient cache.RedisClient,
+	tx db.TransactionManager,
 ) *ActivityService {
 	return &ActivityService{
-		ActivityRepository:      activityRepository,
-		ActivityRulesRepository: activityRulesRepository,
-		ActivityFlowRepository:  activityFlowRepository,
-		LocationReposiroy:       locationRepository,
-		RedisClient:             redisClient,
+		activityRepository:      activityRepository,
+		activityRulesRepository: activityRulesRepository,
+		activityFlowRepository:  activityFlowRepository,
+		locationReposiroy:       locationRepository,
+		redisClient:             redisClient,
+		tx:                      tx,
 	}
 }
 
 func (service ActivityService) CreateActivity(ctx context.Context, activity model.Activity) (bool, error) {
 
 	createCmd := &commands.CreateCommand{
-		ActivityRepo:      service.ActivityRepository,
-		LocRepo:           service.LocationReposiroy,
-		ActivityRulesRepo: service.ActivityRulesRepository,
-		ActivityFlowRepo:  service.ActivityFlowRepository,
+		ActivityRepo:      service.activityRepository,
+		LocRepo:           service.locationReposiroy,
+		ActivityRulesRepo: service.activityRulesRepository,
+		ActivityFlowRepo:  service.activityFlowRepository,
 		Activity:          activity,
-		Redis:             &service.RedisClient,
+		Redis:             &service.redisClient,
+		Tx:                service.tx,
 	}
 
 	createCmdResult, err := createCmd.Handle(ctx)
@@ -55,8 +60,8 @@ func (service ActivityService) CreateActivity(ctx context.Context, activity mode
 
 func (service ActivityService) AddParticipant(ctx context.Context, participant model.User, activityId int64) error {
 	addParticipantCommand := &commands.AddParticipantCommand{
-		ActivityRepository: service.ActivityRepository,
-		Redis:              &service.RedisClient,
+		ActivityRepository: service.activityRepository,
+		Redis:              &service.redisClient,
 		Participant:        participant,
 		ActivityId:         activityId,
 	}
@@ -67,8 +72,8 @@ func (service ActivityService) AddParticipant(ctx context.Context, participant m
 func (service ActivityService) GetParticipants(ctx context.Context, activityId int64) ([]model.User, error) {
 
 	getParticipantsCommand := &commands.GetParticipantsCommand{
-		ActivityRepository: service.ActivityRepository,
-		Redis:              &service.RedisClient,
+		ActivityRepository: service.activityRepository,
+		Redis:              &service.redisClient,
 		ActivityId:         activityId,
 	}
 
@@ -77,11 +82,11 @@ func (service ActivityService) GetParticipants(ctx context.Context, activityId i
 }
 func (service ActivityService) GetActivityById(ctx context.Context, activityId int64) (*model.Activity, error) {
 	getCommand := &commands.GetByIDCommand{
-		Repo:              service.ActivityRepository,
-		ActivityRulesRepo: service.ActivityRulesRepository,
-		ActivityFlowRepo:  service.ActivityFlowRepository,
+		Repo:              service.activityRepository,
+		ActivityRulesRepo: service.activityRulesRepository,
+		ActivityFlowRepo:  service.activityFlowRepository,
 		ActivityId:        activityId,
-		Redis:             &service.RedisClient,
+		Redis:             &service.redisClient,
 	}
 
 	commandResult, err := getCommand.Handle(ctx)
@@ -96,8 +101,8 @@ func (service ActivityService) GetActivityById(ctx context.Context, activityId i
 func (service ActivityService) GetActivitiesByLocation(ctx context.Context, loc model.Location) ([]model.Activity, error) {
 	getCommand := &commands.GetByLocationCommand{
 		Location: loc,
-		Repo:     service.ActivityRepository,
-		Redis:    &service.RedisClient,
+		Repo:     service.activityRepository,
+		Redis:    &service.redisClient,
 	}
 
 	activities, err := getCommand.Handle(ctx)

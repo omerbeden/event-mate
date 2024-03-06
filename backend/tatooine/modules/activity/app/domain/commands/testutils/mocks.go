@@ -3,6 +3,7 @@ package testutils
 import (
 	"context"
 
+	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/adapters/postgresadapter/testutils"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/domain/model"
 	"github.com/omerbeden/event-mate/backend/tatooine/pkg/db"
 )
@@ -123,4 +124,10 @@ func (m *MockLocationRepo) UpdateByID(ctx context.Context, activity model.Locati
 		return m.UpdateByIDFunc(ctx, activity)
 	}
 	return true, nil
+}
+
+type MockTxnManager struct{}
+
+func (m *MockTxnManager) Begin(ctx context.Context) (db.Tx, error) {
+	return &testutils.MockTx{}, nil
 }
