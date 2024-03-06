@@ -8,16 +8,16 @@ import (
 
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/model"
 	customerrors "github.com/omerbeden/event-mate/backend/tatooine/pkg/customErrors"
-	"github.com/omerbeden/event-mate/backend/tatooine/pkg/db"
+	"github.com/omerbeden/event-mate/backend/tatooine/pkg/db/postgres"
 )
 
 type userProfileRepo struct {
-	pool db.DBExecutor
+	pool postgres.PostgresExecutor
 }
 
 const errlogprefix = "repo:userProfile"
 
-func NewUserProfileRepo(pool db.DBExecutor) *userProfileRepo {
+func NewUserProfileRepo(pool postgres.PostgresExecutor) *userProfileRepo {
 	return &userProfileRepo{
 		pool: pool,
 	}

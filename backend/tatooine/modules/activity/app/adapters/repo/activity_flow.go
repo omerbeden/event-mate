@@ -5,14 +5,14 @@ import (
 	"fmt"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/omerbeden/event-mate/backend/tatooine/pkg/db"
+	"github.com/omerbeden/event-mate/backend/tatooine/pkg/db/postgres"
 )
 
 type activityFLowRepository struct {
-	pool db.DBExecutor
+	pool postgres.PostgresExecutor
 }
 
-func NewActivityFlowRepo(pool db.DBExecutor) *activityFLowRepository {
+func NewActivityFlowRepo(pool postgres.PostgresExecutor) *activityFLowRepository {
 	return &activityFLowRepository{
 		pool: pool,
 	}

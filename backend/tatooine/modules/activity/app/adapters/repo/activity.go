@@ -8,18 +8,18 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/domain/model"
-	"github.com/omerbeden/event-mate/backend/tatooine/pkg/db"
+	"github.com/omerbeden/event-mate/backend/tatooine/pkg/db/postgres"
 )
 
 const errlogprefix = "repo:activity"
 
 type activityRepository struct {
-	pool db.DBExecutor
+	pool postgres.PostgresExecutor
 }
 
-var _ db.DBExecutor = (*pgxpool.Pool)(nil)
+var _ postgres.PostgresExecutor = (*pgxpool.Pool)(nil)
 
-func NewActivityRepo(pool db.DBExecutor) *activityRepository {
+func NewActivityRepo(pool postgres.PostgresExecutor) *activityRepository {
 	return &activityRepository{
 		pool: pool,
 	}

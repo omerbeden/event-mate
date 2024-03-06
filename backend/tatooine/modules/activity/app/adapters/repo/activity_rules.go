@@ -5,14 +5,14 @@ import (
 	"fmt"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/omerbeden/event-mate/backend/tatooine/pkg/db"
+	"github.com/omerbeden/event-mate/backend/tatooine/pkg/db/postgres"
 )
 
 type activityRulesRepository struct {
-	pool db.DBExecutor
+	pool postgres.PostgresExecutor
 }
 
-func NewActivityRulesRepo(pool db.DBExecutor) *activityRulesRepository {
+func NewActivityRulesRepo(pool postgres.PostgresExecutor) *activityRulesRepository {
 	return &activityRulesRepository{
 		pool: pool,
 	}

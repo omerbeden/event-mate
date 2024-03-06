@@ -5,16 +5,16 @@ import (
 	"fmt"
 
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/domain/model"
-	"github.com/omerbeden/event-mate/backend/tatooine/pkg/db"
+	"github.com/omerbeden/event-mate/backend/tatooine/pkg/db/postgres"
 )
 
 const errLogPrefix = "repo:location"
 
 type LocationRepo struct {
-	pool db.DBExecutor
+	pool postgres.PostgresExecutor
 }
 
-func NewLocationRepo(pool db.DBExecutor) *LocationRepo {
+func NewLocationRepo(pool postgres.PostgresExecutor) *LocationRepo {
 	return &LocationRepo{
 		pool: pool,
 	}

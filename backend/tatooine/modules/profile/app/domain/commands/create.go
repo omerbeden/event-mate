@@ -9,7 +9,7 @@ import (
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/model"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/ports/repositories"
 	"github.com/omerbeden/event-mate/backend/tatooine/pkg/cache"
-	"github.com/omerbeden/event-mate/backend/tatooine/pkg/db"
+	"github.com/omerbeden/event-mate/backend/tatooine/pkg/db/postgres"
 )
 
 var errLogPrefixCreateCommand = "profile:createCommand"
@@ -20,7 +20,7 @@ type CreateProfileCommand struct {
 	AddressRepo      repositories.UserProfileAddressRepository
 	StatRepo         repositories.UserProfileStatRepository
 	Cache            cache.Cache
-	postgresExecutor db.DBExecutor
+	postgresExecutor postgres.PostgresExecutor
 }
 
 func (cmd *CreateProfileCommand) Handle(ctx context.Context) error {

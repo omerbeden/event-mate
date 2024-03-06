@@ -8,14 +8,14 @@ import (
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/model"
 	customerrors "github.com/omerbeden/event-mate/backend/tatooine/pkg/customErrors"
-	"github.com/omerbeden/event-mate/backend/tatooine/pkg/db"
+	"github.com/omerbeden/event-mate/backend/tatooine/pkg/db/postgres"
 )
 
 type userProfileStatRepo struct {
-	pool db.DBExecutor
+	pool postgres.PostgresExecutor
 }
 
-func NewUserProfileStatRepo(pool db.DBExecutor) *userProfileStatRepo {
+func NewUserProfileStatRepo(pool postgres.PostgresExecutor) *userProfileStatRepo {
 	return &userProfileStatRepo{
 		pool: pool,
 	}

@@ -5,14 +5,14 @@ import (
 	"fmt"
 
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/model"
-	"github.com/omerbeden/event-mate/backend/tatooine/pkg/db"
+	"github.com/omerbeden/event-mate/backend/tatooine/pkg/db/postgres"
 )
 
 type userProfileAddressRepo struct {
-	pool db.DBExecutor
+	pool postgres.PostgresExecutor
 }
 
-func NewUserProfileAddressRepo(pool db.DBExecutor) *userProfileAddressRepo {
+func NewUserProfileAddressRepo(pool postgres.PostgresExecutor) *userProfileAddressRepo {
 	return &userProfileAddressRepo{
 		pool: pool,
 	}
