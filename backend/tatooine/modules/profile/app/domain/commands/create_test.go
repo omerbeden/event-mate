@@ -9,6 +9,7 @@ import (
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/commands"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/commands/testutils"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/model"
+	"github.com/omerbeden/event-mate/backend/tatooine/pkg/db"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -18,9 +19,9 @@ func TestCreateProfileCommand_Handle(t *testing.T) {
 		name              string
 		wantErr           bool
 		profile           model.UserProfile
-		ProfileInsertFunc func(ctx context.Context, profile *model.UserProfile) (*model.UserProfile, error)
-		AddressInsertFunc func(ctx context.Context, address model.UserProfileAdress) error
-		StatInsertFunc    func(ctx context.Context, stat model.UserProfileStat) error
+		ProfileInsertFunc func(ctx context.Context, tx db.Tx, profile *model.UserProfile) (*model.UserProfile, error)
+		AddressInsertFunc func(ctx context.Context, tx db.Tx, address model.UserProfileAdress) error
+		StatInsertFunc    func(ctx context.Context, tx db.Tx, stat model.UserProfileStat) error
 	}{
 		{
 			name:    "should insert user profile successfully",
@@ -57,7 +58,7 @@ func TestCreateProfileCommand_Handle(t *testing.T) {
 					Point:              1,
 				},
 			},
-			ProfileInsertFunc: func(ctx context.Context, profile *model.UserProfile) (*model.UserProfile, error) {
+			ProfileInsertFunc: func(ctx context.Context, tx db.Tx, profile *model.UserProfile) (*model.UserProfile, error) {
 				return nil, errors.New("database error")
 			},
 		},
@@ -78,7 +79,7 @@ func TestCreateProfileCommand_Handle(t *testing.T) {
 					Point:              1,
 				},
 			},
-			AddressInsertFunc: func(ctx context.Context, address model.UserProfileAdress) error {
+			AddressInsertFunc: func(ctx context.Context, tx db.Tx, address model.UserProfileAdress) error {
 				return errors.New("database error")
 			},
 		},
@@ -99,7 +100,7 @@ func TestCreateProfileCommand_Handle(t *testing.T) {
 					Point:              1,
 				},
 			},
-			StatInsertFunc: func(ctx context.Context, stat model.UserProfileStat) error {
+			StatInsertFunc: func(ctx context.Context, tx db.Tx, stat model.UserProfileStat) error {
 				return errors.New("database error")
 			},
 		},
@@ -129,6 +130,7 @@ func TestCreateProfileCommand_Handle(t *testing.T) {
 				StatRepo:    statRepo,
 				Cache:       mockRedisClient,
 				Profile:     tc.profile,
+				Tx:          &testutils.MockTxnManager{},
 			}
 
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)

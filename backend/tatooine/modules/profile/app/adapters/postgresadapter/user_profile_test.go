@@ -3,6 +3,7 @@ package postgresadapter_test
 import (
 	"context"
 	"errors"
+	"fmt"
 	"testing"
 	"time"
 
@@ -25,26 +26,34 @@ func TestInsertUser(t *testing.T) {
 			name:    "should insert user successfully",
 			wantErr: false,
 			setupMock: func(md *testutils.MockDBExecuter) {
-				md.QueryRowFunc = func(ctx context.Context, sql string, args ...interface{}) db.Row {
-					return &testutils.MockRow{
-						ScanFunc: func(dest ...any) error {
-							*dest[0].(*int64) = int64(1)
-							return nil
+				md.BeginFunc = func(ctx context.Context) (db.Tx, error) {
+					return &testutils.MockTx{
+						QueryRowFunc: func(ctx context.Context, sql string, args ...any) db.Row {
+							return &testutils.MockRow{
+								ScanFunc: func(dest ...any) error {
+									*dest[0].(*int64) = int64(1)
+									return nil
+								},
+							}
 						},
-					}
+					}, nil
 				}
 			},
 		},
 		{
-			name:    "should return an error while inserting user",
+			name:    "should return an error while scanning user",
 			wantErr: true,
 			setupMock: func(md *testutils.MockDBExecuter) {
-				md.QueryRowFunc = func(ctx context.Context, sql string, args ...interface{}) db.Row {
-					return &testutils.MockRow{
-						ScanFunc: func(dest ...any) error {
-							return errors.New("database error")
+				md.BeginFunc = func(ctx context.Context) (db.Tx, error) {
+					return &testutils.MockTx{
+						QueryRowFunc: func(ctx context.Context, sql string, args ...any) db.Row {
+							return &testutils.MockRow{
+								ScanFunc: func(dest ...any) error {
+									return fmt.Errorf("database error")
+								},
+							}
 						},
-					}
+					}, nil
 				}
 			},
 		},
@@ -61,7 +70,8 @@ func TestInsertUser(t *testing.T) {
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 			defer cancel()
 
-			res, err := userRepository.Insert(ctx, &tc.user)
+			tx, _ := mockDB.BeginFunc(ctx)
+			res, err := userRepository.Insert(ctx, tx, &tc.user)
 
 			if tc.wantErr {
 				assert.Error(t, err)

@@ -62,7 +62,9 @@ func TestUserProfileStatRepo_Insert(t *testing.T) {
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 			defer cancel()
 
-			err := repository.Insert(ctx, tc.stat)
+			tx, _ := mockDB.Begin(ctx)
+
+			err := repository.Insert(ctx, tx, tc.stat)
 
 			if tc.wantErr {
 				assert.Error(t, err)

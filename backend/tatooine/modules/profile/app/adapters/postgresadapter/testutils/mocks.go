@@ -60,10 +60,64 @@ type MockDBExecuter struct {
 	QueryFunc    func(ctx context.Context, sql string, args ...any) (db.Rows, error)
 	CopyFromFunc func(ctx context.Context, tableName db.Identifier, columnNames []string, rowSrc db.CopyFromSource) (int64, error)
 	ExecFunc     func(ctx context.Context, sql string, arguments ...any) (db.CommandTag, error)
+	BeginFunc    func(ctx context.Context) (db.Tx, error)
 }
 
-func (*MockDBExecuter) Begin(ctx context.Context) (db.Tx, error) {
-	panic("unimplemented")
+type MockTx struct {
+	CommitFunc   func(ctx context.Context) error
+	RollbackFunc func(ctx context.Context) error
+	CopyFromFunc func(ctx context.Context, tableName db.Identifier, columnNames []string, rowSrc db.CopyFromSource) (int64, error)
+	ExecFunc     func(ctx context.Context, sql string, arguments ...any) (commandTag db.CommandTag, err error)
+	QueryFunc    func(ctx context.Context, sql string, args ...any) (db.Rows, error)
+	QueryRowFunc func(ctx context.Context, sql string, args ...any) db.Row
+}
+
+func (m *MockTx) Commit(ctx context.Context) error {
+	if m.CommitFunc != nil {
+		return m.CommitFunc(ctx)
+	}
+
+	return nil
+}
+func (m *MockTx) Rollback(ctx context.Context) error {
+	if m.RollbackFunc != nil {
+		m.RollbackFunc(ctx)
+	}
+	return nil
+}
+func (m *MockTx) CopyFrom(ctx context.Context, tableName db.Identifier, columnNames []string, rowSrc db.CopyFromSource) (int64, error) {
+	if m.CopyFromFunc != nil {
+		return m.CopyFromFunc(ctx, tableName, columnNames, rowSrc)
+	}
+
+	return 0, nil
+}
+func (m *MockTx) Exec(ctx context.Context, sql string, arguments ...any) (commandTag db.CommandTag, err error) {
+	if m.ExecFunc != nil {
+		m.ExecFunc(ctx, sql, arguments...)
+	}
+	return db.CommandTag{}, nil
+}
+func (m *MockTx) Query(ctx context.Context, sql string, args ...any) (db.Rows, error) {
+	if m.QueryFunc != nil {
+		return m.QueryFunc(ctx, sql, args...)
+	}
+	return &MockRows{}, nil
+}
+func (m *MockTx) QueryRow(ctx context.Context, sql string, args ...any) db.Row {
+	if m.QueryRowFunc != nil {
+		return m.QueryRowFunc(ctx, sql, args)
+	}
+
+	return &MockRow{}
+}
+
+func (m *MockDBExecuter) Begin(ctx context.Context) (db.Tx, error) {
+	if m.BeginFunc != nil {
+		return m.BeginFunc(ctx)
+	}
+
+	return &MockTx{}, fmt.Errorf("begin not set")
 }
 
 func (m *MockDBExecuter) CopyFrom(ctx context.Context, tableName db.Identifier, columnNames []string, rowSrc db.CopyFromSource) (int64, error) {

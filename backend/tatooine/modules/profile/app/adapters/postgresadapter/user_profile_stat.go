@@ -21,12 +21,12 @@ func NewUserProfileStatRepo(pool db.Executor) *userProfileStatRepo {
 	}
 }
 
-func (r *userProfileStatRepo) Insert(ctx context.Context, stat model.UserProfileStat) error {
+func (r *userProfileStatRepo) Insert(ctx context.Context, tx db.Tx, stat model.UserProfileStat) error {
 	q := fmt.Sprintf(
 		`INSERT INTO user_profile_stats
 		 (profile_id, point, attanded_activities)
 		 Values(%d,%f,%d)`, stat.ProfileId, stat.Point, stat.AttandedActivities)
-	_, err := r.pool.Exec(ctx, q)
+	_, err := tx.Exec(ctx, q)
 	if err != nil {
 		return fmt.Errorf("could not insert profile stats %w", err)
 	}

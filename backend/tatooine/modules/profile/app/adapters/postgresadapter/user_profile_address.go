@@ -18,9 +18,9 @@ func NewUserProfileAddressRepo(pool db.Executor) *userProfileAddressRepo {
 	}
 }
 
-func (r *userProfileAddressRepo) Insert(ctx context.Context, address model.UserProfileAdress) error {
+func (r *userProfileAddressRepo) Insert(ctx context.Context, tx db.Tx, address model.UserProfileAdress) error {
 	q := `INSERT INTO user_profile_addresses (profile_id,city) Values($1,$2)`
-	_, err := r.pool.Exec(ctx, q, address.ProfileId, address.City)
+	_, err := tx.Exec(ctx, q, address.ProfileId, address.City)
 	if err != nil {
 		return fmt.Errorf("%s could not insert profile adress %w", errlogprefix, err)
 	}

@@ -3,8 +3,10 @@ package testutils
 import (
 	"context"
 
+	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/adapters/postgresadapter/testutils"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/model"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/ports/repositories"
+	"github.com/omerbeden/event-mate/backend/tatooine/pkg/db"
 )
 
 type MockUserRepository struct {
@@ -16,7 +18,7 @@ type MockUserRepository struct {
 	GetCurrentUserProfileFunc func(context.Context, string) (*model.UserProfile, error)
 	GetUserProfileFunc        func(ctx context.Context, username string) (*model.UserProfile, error)
 	GetUsersByAddressFunc     func(context.Context, model.UserProfileAdress) ([]model.UserProfile, error)
-	InsertFunc                func(ctx context.Context, profile *model.UserProfile) (*model.UserProfile, error)
+	InsertFunc                func(ctx context.Context, tx db.Tx, profile *model.UserProfile) (*model.UserProfile, error)
 	UpdateProfileImageFunc    func(ctx context.Context, externalId string, imageUrl string) error
 }
 
@@ -58,9 +60,9 @@ func (m *MockUserRepository) GetUsersByAddress(ctx context.Context, address mode
 	return m.Profiles, nil
 }
 
-func (m *MockUserRepository) Insert(ctx context.Context, profile *model.UserProfile) (*model.UserProfile, error) {
+func (m *MockUserRepository) Insert(ctx context.Context, tx db.Tx, profile *model.UserProfile) (*model.UserProfile, error) {
 	if m.InsertFunc != nil {
-		return m.InsertFunc(ctx, profile)
+		return m.InsertFunc(ctx, tx, profile)
 	}
 
 	return &m.Profile, nil
@@ -76,12 +78,12 @@ func (m *MockUserRepository) UpdateProfileImage(ctx context.Context, externalId 
 var _ repositories.UserProfileRepository = (*MockUserRepository)(nil)
 
 type MockAddressRepository struct {
-	InsertFunc func(ctx context.Context, address model.UserProfileAdress) error
+	InsertFunc func(ctx context.Context, tx db.Tx, address model.UserProfileAdress) error
 }
 
-func (m *MockAddressRepository) Insert(ctx context.Context, address model.UserProfileAdress) error {
+func (m *MockAddressRepository) Insert(ctx context.Context, tx db.Tx, address model.UserProfileAdress) error {
 	if m.InsertFunc != nil {
-		return m.InsertFunc(ctx, address)
+		return m.InsertFunc(ctx, tx, address)
 	}
 
 	return nil
@@ -90,15 +92,15 @@ func (m *MockAddressRepository) Insert(ctx context.Context, address model.UserPr
 var _ repositories.UserProfileAddressRepository = (*MockAddressRepository)(nil)
 
 type MockStatRepository struct {
-	InsertFunc       func(ctx context.Context, stat model.UserProfileStat) error
+	InsertFunc       func(ctx context.Context, tx db.Tx, stat model.UserProfileStat) error
 	EvaluateUserFunc func(ctx context.Context, eval model.UserEvaluation) error
 }
 
 var _ repositories.UserProfileStatRepository = (*MockStatRepository)(nil)
 
-func (m *MockStatRepository) Insert(ctx context.Context, stat model.UserProfileStat) error {
+func (m *MockStatRepository) Insert(ctx context.Context, tx db.Tx, stat model.UserProfileStat) error {
 	if m.InsertFunc != nil {
-		return m.InsertFunc(ctx, stat)
+		return m.InsertFunc(ctx, tx, stat)
 	}
 	return nil
 }
@@ -108,4 +110,10 @@ func (m *MockStatRepository) EvaluateUser(ctx context.Context, eval model.UserEv
 		return m.EvaluateUserFunc(ctx, eval)
 	}
 	return nil
+}
+
+type MockTxnManager struct{}
+
+func (m *MockTxnManager) Begin(ctx context.Context) (db.Tx, error) {
+	return &testutils.MockTx{}, nil
 }

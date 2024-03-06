@@ -8,6 +8,7 @@ import (
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/adapters/cachedapter"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/model"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/ports/repositories"
+	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/ports/transaction"
 	"github.com/omerbeden/event-mate/backend/tatooine/pkg/cache"
 )
 
@@ -19,26 +20,37 @@ type CreateProfileCommand struct {
 	AddressRepo repositories.UserProfileAddressRepository
 	StatRepo    repositories.UserProfileStatRepository
 	Cache       cache.Cache
+	Tx          transaction.TransactionManager
 }
 
 func (cmd *CreateProfileCommand) Handle(ctx context.Context) error {
 
-	userProfile, err := cmd.UserRepo.Insert(ctx, &cmd.Profile)
+	tx, err := cmd.Tx.Begin(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	defer tx.Rollback(ctx)
+
+	userProfile, err := cmd.UserRepo.Insert(ctx, tx, &cmd.Profile)
 	if err != nil {
 		return fmt.Errorf("error while inserting user profile %w", err)
 	}
 
 	userProfile.Adress.ProfileId = userProfile.Id
 
-	err = cmd.AddressRepo.Insert(ctx, cmd.Profile.Adress)
+	err = cmd.AddressRepo.Insert(ctx, tx, cmd.Profile.Adress)
 	if err != nil {
 		return fmt.Errorf("error while inserting user profile address %w", err)
 	}
 
 	userProfile.Stat.ProfileId = userProfile.Id
-	err = cmd.StatRepo.Insert(ctx, cmd.Profile.Stat)
+	err = cmd.StatRepo.Insert(ctx, tx, cmd.Profile.Stat)
 	if err != nil {
 		return fmt.Errorf("error while inserting user profile stat %w", err)
+	}
+
+	if err = tx.Commit(ctx); err != nil {
+		return fmt.Errorf("failed to commit transaction: %w", err)
 	}
 
 	cacheResult := cmd.addUserProfileToCache(ctx, userProfile)

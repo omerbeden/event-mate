@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	repo "github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/adapters/postgresadapter"
+	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/adapters/postgresadapter"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/adapters/postgresadapter/testutils"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/model"
 	"github.com/omerbeden/event-mate/backend/tatooine/pkg/db"
@@ -56,11 +56,12 @@ func TestUserProfileAddressRepo_Insert(t *testing.T) {
 				tc.setupMock(mockDB)
 			}
 
-			repository := repo.NewUserProfileAddressRepo(mockDB)
+			repository := postgresadapter.NewUserProfileAddressRepo(mockDB)
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 			defer cancel()
 
-			err := repository.Insert(ctx, tc.address)
+			tx, _ := mockDB.Begin(ctx)
+			err := repository.Insert(ctx, tx, tc.address)
 
 			if tc.wantErr {
 				assert.Error(t, err)
