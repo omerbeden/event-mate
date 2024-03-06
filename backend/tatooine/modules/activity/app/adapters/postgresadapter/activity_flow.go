@@ -18,14 +18,14 @@ func NewActivityFlowRepo(pool db.Executor) *activityFLowRepository {
 	}
 }
 
-func (r *activityFLowRepository) CreateActivityFlow(ctx context.Context, acitivtyId int64, flows []string) error {
+func (r *activityFLowRepository) CreateActivityFlow(ctx context.Context, tx db.Tx, acitivtyId int64, flows []string) error {
 
 	var flowRows [][]interface{}
 	for _, flow := range flows {
 		flowRows = append(flowRows, []interface{}{acitivtyId, flow})
 	}
 
-	copyCount, err := r.pool.CopyFrom(ctx,
+	copyCount, err := tx.CopyFrom(ctx,
 		db.Identifier{"activity_flows"},
 		[]string{"activity_id", "description"},
 		pgx.CopyFromRows(flowRows))

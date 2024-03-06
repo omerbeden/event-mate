@@ -30,8 +30,12 @@ func TestCreateLocation(t *testing.T) {
 			},
 			expectError: false,
 			setupMock: func(md *testutils.MockDBExecuter) {
-				md.ExecFunc = func(ctx context.Context, sql string, arguments ...any) (db.CommandTag, error) {
-					return db.CommandTag{}, nil
+				md.BeginFunc = func(ctx context.Context) (db.Tx, error) {
+					return &testutils.MockTx{
+						ExecFunc: func(ctx context.Context, sql string, arguments ...any) (commandTag db.CommandTag, err error) {
+							return db.CommandTag{}, nil
+						},
+					}, nil
 				}
 			},
 		},
@@ -43,8 +47,12 @@ func TestCreateLocation(t *testing.T) {
 			},
 			expectError: true,
 			setupMock: func(md *testutils.MockDBExecuter) {
-				md.ExecFunc = func(ctx context.Context, sql string, arguments ...any) (db.CommandTag, error) {
-					return db.CommandTag{}, errors.New("database error")
+				md.BeginFunc = func(ctx context.Context) (db.Tx, error) {
+					return &testutils.MockTx{
+						ExecFunc: func(ctx context.Context, sql string, arguments ...any) (commandTag db.CommandTag, err error) {
+							return db.CommandTag{}, fmt.Errorf("database error")
+						},
+					}, nil
 				}
 			},
 		},
@@ -61,7 +69,8 @@ func TestCreateLocation(t *testing.T) {
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 			defer cancel()
 
-			res, err := repo.Create(ctx, &tc.location)
+			tx, _ := mockDB.Begin(ctx)
+			res, err := repo.Create(ctx, tx, &tc.location)
 
 			if tc.expectError {
 				assert.Error(t, err)

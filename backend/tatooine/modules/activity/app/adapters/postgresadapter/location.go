@@ -20,10 +20,10 @@ func NewLocationRepo(pool db.Executor) *LocationRepo {
 	}
 }
 
-func (r *LocationRepo) Create(ctx context.Context, location *model.Location) (bool, error) {
+func (r *LocationRepo) Create(ctx context.Context, tx db.Tx, location *model.Location) (bool, error) {
 
 	ql := `INSERT INTO activity_locations(activity_id,city,district,description,latitude,longitude) Values($1,$2,$3,$4,$5,$6)`
-	_, err := r.pool.Exec(ctx, ql, location.ActivityId, location.City, location.District, location.Description, location.Latitude, location.Longitude)
+	_, err := tx.Exec(ctx, ql, location.ActivityId, location.City, location.District, location.Description, location.Latitude, location.Longitude)
 	if err != nil {
 		return false, fmt.Errorf("%s could not create location for activity %d  %w", errLogPrefix, location.ActivityId, err)
 	}

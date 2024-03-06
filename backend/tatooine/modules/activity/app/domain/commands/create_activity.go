@@ -10,6 +10,7 @@ import (
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/adapters/cacheadapter"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/domain/model"
 	"github.com/omerbeden/event-mate/backend/tatooine/pkg/cache"
+	"github.com/omerbeden/event-mate/backend/tatooine/pkg/db"
 
 	repo "github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/domain/ports/repositories"
 )
@@ -21,26 +22,31 @@ type CreateCommand struct {
 	ActivityFlowRepo  repo.ActivityFlowRepository
 	LocRepo           repo.LocationRepository
 	Redis             cache.Cache
+	Tx                db.TransactionManager
 }
 
-func (ccmd *CreateCommand) Handle(ctx context.Context) (bool, error) {
+func (cmd *CreateCommand) Handle(ctx context.Context) (bool, error) {
 
-	activity, errCreate := ccmd.ActivityRepo.Create(ctx, ccmd.Activity)
+	tx, err := cmd.Tx.Begin(ctx)
+	if err != nil {
+		return false, fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	activity, errCreate := cmd.ActivityRepo.Create(ctx, tx, cmd.Activity)
 	if errCreate != nil {
 		return false, errCreate
 	}
 
-	err := ccmd.ActivityRulesRepo.CreateActivityRules(ctx, activity.ID, ccmd.Activity.Rules)
+	err = cmd.ActivityRulesRepo.CreateActivityRules(ctx, tx, activity.ID, cmd.Activity.Rules)
 	if err != nil {
 		return false, err
 	}
 
-	err = ccmd.ActivityFlowRepo.CreateActivityFlow(ctx, activity.ID, ccmd.Activity.Flow)
+	err = cmd.ActivityFlowRepo.CreateActivityFlow(ctx, tx, activity.ID, cmd.Activity.Flow)
 	if err != nil {
 		return false, err
 	}
 
-	_, errLoc := ccmd.LocRepo.Create(ctx, &activity.Location)
+	_, errLoc := cmd.LocRepo.Create(ctx, tx, &activity.Location)
 	if errLoc != nil {
 		return false, errLoc
 	}
@@ -53,7 +59,7 @@ func (ccmd *CreateCommand) Handle(ctx context.Context) (bool, error) {
 	activityId := strconv.FormatInt(activity.ID, 10)
 	activityKey := fmt.Sprintf("%s:%s", cacheadapter.ACTIVITY_CACHE_KEY, activityId)
 
-	err = ccmd.Redis.Set(ctx, activityKey, jsonActivity)
+	err = cmd.Redis.Set(ctx, activityKey, jsonActivity)
 	if err != nil {
 		fmt.Printf("activity could not inserted to Redis %s\n", activityId)
 	}
@@ -62,7 +68,7 @@ func (ccmd *CreateCommand) Handle(ctx context.Context) (bool, error) {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		ccmd.addCityToRedis(ctx, activity.Location.City, jsonActivity)
+		cmd.addCityToRedis(ctx, activity.Location.City, jsonActivity)
 	}()
 
 	wg.Wait()

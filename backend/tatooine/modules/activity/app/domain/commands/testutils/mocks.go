@@ -3,13 +3,15 @@ package testutils
 import (
 	"context"
 
+	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/adapters/postgresadapter/testutils"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/domain/model"
+	"github.com/omerbeden/event-mate/backend/tatooine/pkg/db"
 )
 
 type MockActivityRepo struct {
 	Activity            model.Activity
 	Activities          []model.Activity
-	CreateFunc          func(ctx context.Context, activity model.Activity) (*model.Activity, error)
+	CreateFunc          func(ctx context.Context, tx db.Tx, activity model.Activity) (*model.Activity, error)
 	GetByIDFunc         func(ctx context.Context, id int64) (*model.Activity, error)
 	GetByLocationFunc   func(ctx context.Context, location *model.Location) ([]model.Activity, error)
 	UpdateByIDFunc      func(ctx context.Context, activityId int64, activity model.Activity) (bool, error)
@@ -19,9 +21,9 @@ type MockActivityRepo struct {
 	GetPartipantsFunc   func(ctx context.Context, activityId int64) ([]model.User, error)
 }
 
-func (m *MockActivityRepo) Create(ctx context.Context, activity model.Activity) (*model.Activity, error) {
+func (m *MockActivityRepo) Create(ctx context.Context, tx db.Tx, activity model.Activity) (*model.Activity, error) {
 	if m.CreateFunc != nil {
-		return m.CreateFunc(ctx, activity)
+		return m.CreateFunc(ctx, tx, activity)
 	}
 	return &m.Activity, nil
 }
@@ -71,12 +73,12 @@ func (m *MockActivityRepo) GetParticipants(ctx context.Context, activityId int64
 type MockActivityRulesRepo struct {
 	Rules                   []string
 	GetActivityRulesFunc    func(ctx context.Context, activityId int64) ([]string, error)
-	CreateActivityRulesFunc func(ctx context.Context, activityId int64, rules []string) error
+	CreateActivityRulesFunc func(ctx context.Context, tx db.Tx, activityId int64, rules []string) error
 }
 
-func (m *MockActivityRulesRepo) CreateActivityRules(ctx context.Context, activityId int64, rules []string) error {
+func (m *MockActivityRulesRepo) CreateActivityRules(ctx context.Context, tx db.Tx, activityId int64, rules []string) error {
 	if m.CreateActivityRulesFunc != nil {
-		return m.CreateActivityRulesFunc(ctx, activityId, rules)
+		return m.CreateActivityRulesFunc(ctx, tx, activityId, rules)
 	}
 	return nil
 }
@@ -89,13 +91,13 @@ func (m *MockActivityRulesRepo) GetActivityRules(ctx context.Context, activityId
 
 type MockActivityFlowRepo struct {
 	Flow                   []string
-	CreateActivityFlowFunc func(ctx context.Context, activityId int64, flow []string) error
+	CreateActivityFlowFunc func(ctx context.Context, tx db.Tx, activityId int64, flow []string) error
 	GetActivityFlowFunc    func(context.Context, int64) ([]string, error)
 }
 
-func (m *MockActivityFlowRepo) CreateActivityFlow(ctx context.Context, activityId int64, flow []string) error {
+func (m *MockActivityFlowRepo) CreateActivityFlow(ctx context.Context, tx db.Tx, activityId int64, flow []string) error {
 	if m.CreateActivityFlowFunc != nil {
-		return m.CreateActivityFlowFunc(ctx, activityId, flow)
+		return m.CreateActivityFlowFunc(ctx, tx, activityId, flow)
 	}
 	return nil
 }
@@ -107,13 +109,13 @@ func (m *MockActivityFlowRepo) GetActivityFlow(ctx context.Context, activityId i
 }
 
 type MockLocationRepo struct {
-	CreateFunc     func(ctx context.Context, location *model.Location) (bool, error)
+	CreateFunc     func(ctx context.Context, tx db.Tx, location *model.Location) (bool, error)
 	UpdateByIDFunc func(ctx context.Context, activity model.Location) (bool, error)
 }
 
-func (m *MockLocationRepo) Create(ctx context.Context, location *model.Location) (bool, error) {
+func (m *MockLocationRepo) Create(ctx context.Context, tx db.Tx, location *model.Location) (bool, error) {
 	if m.CreateFunc != nil {
-		return m.CreateFunc(ctx, location)
+		return m.CreateFunc(ctx, tx, location)
 	}
 	return true, nil
 }
@@ -122,4 +124,10 @@ func (m *MockLocationRepo) UpdateByID(ctx context.Context, activity model.Locati
 		return m.UpdateByIDFunc(ctx, activity)
 	}
 	return true, nil
+}
+
+type MockTxnManager struct{}
+
+func (m *MockTxnManager) Begin(ctx context.Context) (db.Tx, error) {
+	return &testutils.MockTx{}, nil
 }

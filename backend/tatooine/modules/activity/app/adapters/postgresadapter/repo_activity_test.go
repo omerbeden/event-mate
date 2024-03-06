@@ -39,13 +39,17 @@ func TestCreateActivity(t *testing.T) {
 			},
 			expectError: false,
 			setupMock: func(md *testutils.MockDBExecuter) {
-				md.QueryRowFunc = func(ctx context.Context, sql string, args ...any) db.Row {
-					return &testutils.MockRow{
-						ScanFunc: func(dest ...any) error {
-							*dest[0].(*int64) = int64(1)
-							return nil
+				md.BeginFunc = func(ctx context.Context) (db.Tx, error) {
+					return &testutils.MockTx{
+						QueryRowFunc: func(ctx context.Context, sql string, args ...any) db.Row {
+							return &testutils.MockRow{
+								ScanFunc: func(dest ...any) error {
+									*dest[0].(*int64) = int64(1)
+									return nil
+								},
+							}
 						},
-					}
+					}, nil
 				}
 			},
 		},
@@ -63,12 +67,16 @@ func TestCreateActivity(t *testing.T) {
 			},
 			expectError: true,
 			setupMock: func(md *testutils.MockDBExecuter) {
-				md.QueryRowFunc = func(ctx context.Context, sql string, args ...any) db.Row {
-					return &testutils.MockRow{
-						ScanFunc: func(dest ...any) error {
-							return errors.New("database error")
+				md.BeginFunc = func(ctx context.Context) (db.Tx, error) {
+					return &testutils.MockTx{
+						QueryRowFunc: func(ctx context.Context, sql string, args ...any) db.Row {
+							return &testutils.MockRow{
+								ScanFunc: func(dest ...any) error {
+									return fmt.Errorf("database error")
+								},
+							}
 						},
-					}
+					}, nil
 				}
 			},
 		},
@@ -84,7 +92,8 @@ func TestCreateActivity(t *testing.T) {
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 			defer cancel()
 
-			res, err := activityRepository.Create(ctx, *tc.activity)
+			tx, _ := mockDB.Begin(ctx)
+			res, err := activityRepository.Create(ctx, tx, *tc.activity)
 
 			if tc.expectError {
 				assert.Error(t, err)

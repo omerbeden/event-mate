@@ -30,8 +30,13 @@ func TestCreateActivityRules(t *testing.T) {
 			rules:       []string{"rule1", "rule2"},
 			expectError: false,
 			setupMock: func(md *testutils.MockDBExecuter) {
-				md.CopyFromFunc = func(ctx context.Context, tableName db.Identifier, columnNames []string, rowSrc db.CopyFromSource) (int64, error) {
-					return 2, nil
+				md.BeginFunc = func(ctx context.Context) (db.Tx, error) {
+					return &testutils.MockTx{
+						CopyFromFunc: func(ctx context.Context, tableName db.Identifier, columnNames []string, rowSrc db.CopyFromSource) (int64, error) {
+							return 2, nil
+
+						},
+					}, nil
 				}
 			},
 		},
@@ -42,8 +47,13 @@ func TestCreateActivityRules(t *testing.T) {
 			rules:       []string{"rule1", "rule2"},
 			expectError: true,
 			setupMock: func(md *testutils.MockDBExecuter) {
-				md.CopyFromFunc = func(ctx context.Context, tableName db.Identifier, columnNames []string, rowSrc db.CopyFromSource) (int64, error) {
-					return 0, errors.New("database error")
+				md.BeginFunc = func(ctx context.Context) (db.Tx, error) {
+					return &testutils.MockTx{
+						CopyFromFunc: func(ctx context.Context, tableName db.Identifier, columnNames []string, rowSrc db.CopyFromSource) (int64, error) {
+							return 0, fmt.Errorf("database error")
+
+						},
+					}, nil
 				}
 			},
 		},
@@ -60,7 +70,8 @@ func TestCreateActivityRules(t *testing.T) {
 				tc.setupMock(mockDB)
 			}
 
-			err := repo.CreateActivityRules(ctx, tc.activityId, tc.rules)
+			tx, _ := mockDB.Begin(ctx)
+			err := repo.CreateActivityRules(ctx, tx, tc.activityId, tc.rules)
 
 			if tc.expectError {
 				assert.Error(t, err)

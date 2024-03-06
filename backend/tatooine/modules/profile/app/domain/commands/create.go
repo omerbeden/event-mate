@@ -8,8 +8,8 @@ import (
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/adapters/cachedapter"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/model"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/ports/repositories"
-	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/ports/transaction"
 	"github.com/omerbeden/event-mate/backend/tatooine/pkg/cache"
+	"github.com/omerbeden/event-mate/backend/tatooine/pkg/db"
 )
 
 var errLogPrefixCreateCommand = "profile:createCommand"
@@ -20,7 +20,7 @@ type CreateProfileCommand struct {
 	AddressRepo repositories.UserProfileAddressRepository
 	StatRepo    repositories.UserProfileStatRepository
 	Cache       cache.Cache
-	Tx          transaction.TransactionManager
+	Tx          db.TransactionManager
 }
 
 func (cmd *CreateProfileCommand) Handle(ctx context.Context) error {

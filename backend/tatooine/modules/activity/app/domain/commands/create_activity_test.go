@@ -9,6 +9,7 @@ import (
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/domain/commands"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/domain/commands/testutils"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/domain/model"
+	"github.com/omerbeden/event-mate/backend/tatooine/pkg/db"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -54,7 +55,8 @@ func TestCreateCommand_Handle(t *testing.T) {
 			activity:  expected,
 			wantError: true,
 			setupCreateActivityFunc: func(ar *testutils.MockActivityRepo) {
-				ar.CreateFunc = func(ctx context.Context, activity model.Activity) (*model.Activity, error) {
+
+				ar.CreateFunc = func(ctx context.Context, tx db.Tx, activity model.Activity) (*model.Activity, error) {
 					return nil, fmt.Errorf("an error occurred when creating")
 				}
 			},
@@ -64,7 +66,7 @@ func TestCreateCommand_Handle(t *testing.T) {
 			activity:  expected,
 			wantError: true,
 			setupActivityRulesFunc: func(ar *testutils.MockActivityRulesRepo) {
-				ar.CreateActivityRulesFunc = func(ctx context.Context, activityId int64, rules []string) error {
+				ar.CreateActivityRulesFunc = func(ctx context.Context, tx db.Tx, activityId int64, rules []string) error {
 					return fmt.Errorf("an error occurred when creating")
 				}
 			},
@@ -74,7 +76,7 @@ func TestCreateCommand_Handle(t *testing.T) {
 			activity:  expected,
 			wantError: true,
 			setupActivityFlowFunc: func(ar *testutils.MockActivityFlowRepo) {
-				ar.CreateActivityFlowFunc = func(ctx context.Context, activityId int64, rules []string) error {
+				ar.CreateActivityFlowFunc = func(ctx context.Context, tx db.Tx, activityId int64, rules []string) error {
 					return fmt.Errorf("an error occurred when creating")
 				}
 			},
@@ -84,7 +86,7 @@ func TestCreateCommand_Handle(t *testing.T) {
 			activity:  expected,
 			wantError: true,
 			setupLocationFunc: func(ar *testutils.MockLocationRepo) {
-				ar.CreateFunc = func(ctx context.Context, location *model.Location) (bool, error) {
+				ar.CreateFunc = func(ctx context.Context, tx db.Tx, location *model.Location) (bool, error) {
 					return false, fmt.Errorf("an error occurred when creating")
 				}
 			},
@@ -126,6 +128,7 @@ func TestCreateCommand_Handle(t *testing.T) {
 				ActivityFlowRepo:  mockActivityFlowRepo,
 				LocRepo:           mockLocationRepo,
 				Redis:             mockRedisClient,
+				Tx:                &testutils.MockTxnManager{},
 			}
 
 			res, err := ccmd.Handle(ctx)

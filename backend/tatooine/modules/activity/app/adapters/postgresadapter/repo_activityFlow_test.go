@@ -31,8 +31,13 @@ func TestCreateActivityFlow(t *testing.T) {
 			flow:        flow,
 			expectError: false,
 			setupMock: func(md *testutils.MockDBExecuter) {
-				md.CopyFromFunc = func(ctx context.Context, tableName db.Identifier, columnNames []string, rowSrc db.CopyFromSource) (int64, error) {
-					return 2, nil
+				md.BeginFunc = func(ctx context.Context) (db.Tx, error) {
+					return &testutils.MockTx{
+						CopyFromFunc: func(ctx context.Context, tableName db.Identifier, columnNames []string, rowSrc db.CopyFromSource) (int64, error) {
+							return 2, nil
+
+						},
+					}, nil
 				}
 			},
 		},
@@ -43,8 +48,12 @@ func TestCreateActivityFlow(t *testing.T) {
 			flow:        flow,
 			expectError: true,
 			setupMock: func(md *testutils.MockDBExecuter) {
-				md.CopyFromFunc = func(ctx context.Context, tableName db.Identifier, columnNames []string, rowSrc db.CopyFromSource) (int64, error) {
-					return 0, errors.New("database error")
+				md.BeginFunc = func(ctx context.Context) (db.Tx, error) {
+					return &testutils.MockTx{
+						CopyFromFunc: func(ctx context.Context, tableName db.Identifier, columnNames []string, rowSrc db.CopyFromSource) (int64, error) {
+							return 0, errors.New("database error")
+						},
+					}, nil
 				}
 			},
 		},
@@ -61,7 +70,9 @@ func TestCreateActivityFlow(t *testing.T) {
 				tc.setupMock(mockDB)
 			}
 
-			err := repo.CreateActivityFlow(ctx, tc.activityId, tc.flow)
+			tx, _ := mockDB.Begin(ctx)
+
+			err := repo.CreateActivityFlow(ctx, tx, tc.activityId, tc.flow)
 
 			if tc.expectError {
 				assert.Error(t, err)

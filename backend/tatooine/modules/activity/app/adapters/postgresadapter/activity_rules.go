@@ -18,14 +18,14 @@ func NewActivityRulesRepo(pool db.Executor) *activityRulesRepository {
 	}
 }
 
-func (r *activityRulesRepository) CreateActivityRules(ctx context.Context, acitivtyId int64, rules []string) error {
+func (r *activityRulesRepository) CreateActivityRules(ctx context.Context, tx db.Tx, acitivtyId int64, rules []string) error {
 
 	var ruleRows [][]interface{}
 	for _, rule := range rules {
 		ruleRows = append(ruleRows, []interface{}{acitivtyId, rule})
 	}
 
-	copyCount, err := r.pool.CopyFrom(ctx,
+	copyCount, err := tx.CopyFrom(ctx,
 		db.Identifier{"activity_rules"},
 		[]string{"activity_id", "description"},
 		pgx.CopyFromRows(ruleRows))

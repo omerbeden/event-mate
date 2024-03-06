@@ -4,30 +4,31 @@ import (
 	"context"
 
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/domain/model"
+	"github.com/omerbeden/event-mate/backend/tatooine/pkg/db"
 )
 
 type ActivityRepository interface {
-	Create(context.Context, model.Activity) (*model.Activity, error)
-	GetByID(context.Context, int64) (*model.Activity, error)
-	GetByLocation(context.Context, *model.Location) ([]model.Activity, error)
-	UpdateByID(context.Context, int64, model.Activity) (bool, error)
-	DeleteByID(context.Context, int64) (bool, error)
-	AddParticipants(context.Context, int64, []model.User) error
-	AddParticipant(context.Context, int64, model.User) error
-	GetParticipants(context.Context, int64) ([]model.User, error)
+	Create(ctx context.Context, tx db.Tx, activity model.Activity) (*model.Activity, error)
+	GetByID(ctx context.Context, activityId int64) (*model.Activity, error)
+	GetByLocation(ctx context.Context, location *model.Location) ([]model.Activity, error)
+	UpdateByID(ctx context.Context, activityId int64, activity model.Activity) (bool, error)
+	DeleteByID(ctx context.Context, activityId int64) (bool, error)
+	AddParticipants(ctx context.Context, activityId int64, participants []model.User) error
+	AddParticipant(ctx context.Context, activityId int64, participant model.User) error
+	GetParticipants(ctx context.Context, activityId int64) ([]model.User, error)
 }
 
 type ActivityRulesRepository interface {
-	CreateActivityRules(context.Context, int64, []string) error
-	GetActivityRules(context.Context, int64) ([]string, error)
+	CreateActivityRules(ctx context.Context, tx db.Tx, activityId int64, rules []string) error
+	GetActivityRules(ctx context.Context, activityId int64) ([]string, error)
 }
 
 type ActivityFlowRepository interface {
-	CreateActivityFlow(context.Context, int64, []string) error
-	GetActivityFlow(context.Context, int64) ([]string, error)
+	CreateActivityFlow(ctx context.Context, tx db.Tx, activityId int64, flows []string) error
+	GetActivityFlow(ctx context.Context, activityId int64) ([]string, error)
 }
 
 type LocationRepository interface {
-	Create(context.Context, *model.Location) (bool, error)
-	UpdateByID(context.Context, model.Location) (bool, error)
+	Create(ctx context.Context, tx db.Tx, location *model.Location) (bool, error)
+	UpdateByID(ctx context.Context, location model.Location) (bool, error)
 }

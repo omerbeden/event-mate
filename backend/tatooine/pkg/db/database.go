@@ -40,3 +40,7 @@ type Rows interface {
 	Next() bool
 	Scan(dest ...any) error
 }
+
+type TransactionManager interface {
+	Begin(ctx context.Context) (Tx, error)
+}

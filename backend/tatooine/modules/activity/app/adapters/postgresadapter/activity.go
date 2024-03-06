@@ -22,13 +22,13 @@ func NewActivityRepo(pool db.Executor) *activityRepository {
 	}
 }
 
-func (r *activityRepository) Create(ctx context.Context, activity model.Activity) (*model.Activity, error) {
+func (r *activityRepository) Create(ctx context.Context, tx db.Tx, activity model.Activity) (*model.Activity, error) {
 
 	var ID int64
 	q := `INSERT INTO activities (title,category,created_by,start_at,end_at,content,quota) 
 	Values($1,$2,$3,$4,$5,$6,$7) RETURNING id`
 
-	err := r.pool.QueryRow(
+	err := tx.QueryRow(
 		ctx,
 		q,
 		activity.Title,
