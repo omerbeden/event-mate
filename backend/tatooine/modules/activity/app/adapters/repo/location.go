@@ -20,10 +20,6 @@ func NewLocationRepo(pool db.DBExecutor) *LocationRepo {
 	}
 }
 
-func (r *LocationRepo) Close() {
-	r.pool.Close()
-}
-
 func (r *LocationRepo) Create(ctx context.Context, location *model.Location) (bool, error) {
 
 	ql := `INSERT INTO activity_locations(activity_id,city,district,description,latitude,longitude) Values($1,$2,$3,$4,$5,$6)`

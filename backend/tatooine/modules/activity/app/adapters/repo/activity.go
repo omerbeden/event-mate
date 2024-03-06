@@ -25,10 +25,6 @@ func NewActivityRepo(pool db.DBExecutor) *activityRepository {
 	}
 }
 
-func (r *activityRepository) Close() {
-	r.pool.Close()
-}
-
 func (r *activityRepository) Create(ctx context.Context, activity model.Activity) (*model.Activity, error) {
 
 	var ID int64

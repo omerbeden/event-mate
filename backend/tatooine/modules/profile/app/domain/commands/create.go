@@ -9,19 +9,23 @@ import (
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/model"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/ports/repositories"
 	"github.com/omerbeden/event-mate/backend/tatooine/pkg/cache"
+	"github.com/omerbeden/event-mate/backend/tatooine/pkg/db"
 )
 
 var errLogPrefixCreateCommand = "profile:createCommand"
 
 type CreateProfileCommand struct {
-	Profile     model.UserProfile
-	UserRepo    repositories.UserProfileRepository
-	AddressRepo repositories.UserProfileAddressRepository
-	StatRepo    repositories.UserProfileStatRepository
-	Cache       cache.Cache
+	Profile          model.UserProfile
+	UserRepo         repositories.UserProfileRepository
+	AddressRepo      repositories.UserProfileAddressRepository
+	StatRepo         repositories.UserProfileStatRepository
+	Cache            cache.Cache
+	postgresExecutor db.DBExecutor
 }
 
 func (cmd *CreateProfileCommand) Handle(ctx context.Context) error {
+
+	//tx, err := cmd.postgresExecutor.Begin(ctx)
 	userProfile, err := cmd.UserRepo.Insert(ctx, &cmd.Profile)
 	if err != nil {
 		return fmt.Errorf("error while inserting user profile %w", err)

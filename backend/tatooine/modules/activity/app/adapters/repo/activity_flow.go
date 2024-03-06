@@ -17,9 +17,6 @@ func NewActivityFlowRepo(pool db.DBExecutor) *activityFLowRepository {
 		pool: pool,
 	}
 }
-func (r *activityFLowRepository) Close() {
-	r.pool.Close()
-}
 
 func (r *activityFLowRepository) CreateActivityFlow(ctx context.Context, acitivtyId int64, flows []string) error {
 

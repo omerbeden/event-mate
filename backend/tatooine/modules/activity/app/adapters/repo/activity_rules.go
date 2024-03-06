@@ -17,9 +17,6 @@ func NewActivityRulesRepo(pool db.DBExecutor) *activityRulesRepository {
 		pool: pool,
 	}
 }
-func (r *activityRulesRepository) Close() {
-	r.pool.Close()
-}
 
 func (r *activityRulesRepository) CreateActivityRules(ctx context.Context, acitivtyId int64, rules []string) error {
 
