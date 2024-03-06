@@ -35,17 +35,22 @@ func TestCreateUserProfile(t *testing.T) {
 		ExpirationTime: 0,
 	})
 
+	pgxAdapter := postgresadapter.NewPgxAdapter(pool)
+
 	service := entrypoints.NewService(
-		postgresadapter.NewUserProfileRepo(postgresadapter.NewPgxAdapter(pool)),
-		postgresadapter.NewUserProfileStatRepo(postgresadapter.NewPgxAdapter(pool)),
-		postgresadapter.NewUserProfileAddressRepo(postgresadapter.NewPgxAdapter(pool)),
-		*redis)
+		postgresadapter.NewUserProfileRepo(pgxAdapter),
+		postgresadapter.NewUserProfileStatRepo(pgxAdapter),
+		postgresadapter.NewUserProfileAddressRepo(pgxAdapter),
+		*redis,
+		pgxAdapter,
+	)
 	user := &model.UserProfile{
-		Name:               "onat",
+		Name:               "omer",
 		LastName:           "beden",
-		About:              "mimar",
-		ExternalId:         "1d",
-		UserName:           "onatbeden2",
+		About:              "pc",
+		ExternalId:         "1a",
+		UserName:           "omr",
+		Email:              "test",
 		AttandedActivities: []model.Activity{},
 		Adress:             model.UserProfileAdress{City: "Sakarya"},
 		Stat: model.UserProfileStat{
@@ -75,11 +80,12 @@ func TestCreateUserProfileWithoutRedis(t *testing.T) {
 		ExpirationTime: 0,
 	})
 
+	pgxAdapter := postgresadapter.NewPgxAdapter(pool)
 	service := entrypoints.NewService(
-		postgresadapter.NewUserProfileRepo(postgresadapter.NewPgxAdapter(pool)),
-		postgresadapter.NewUserProfileStatRepo(postgresadapter.NewPgxAdapter(pool)),
-		postgresadapter.NewUserProfileAddressRepo(postgresadapter.NewPgxAdapter(pool)),
-		*redis)
+		postgresadapter.NewUserProfileRepo(pgxAdapter),
+		postgresadapter.NewUserProfileStatRepo(pgxAdapter),
+		postgresadapter.NewUserProfileAddressRepo(pgxAdapter),
+		*redis, pgxAdapter)
 	user := &model.UserProfile{
 		Name:               "omer",
 		LastName:           "beden",
@@ -119,11 +125,13 @@ func TestUpdateUserProfileImage(t *testing.T) {
 		ExpirationTime: 0,
 	})
 
+	pgxAdapter := postgresadapter.NewPgxAdapter(pool)
 	service := entrypoints.NewService(
-		postgresadapter.NewUserProfileRepo(postgresadapter.NewPgxAdapter(pool)),
-		postgresadapter.NewUserProfileStatRepo(postgresadapter.NewPgxAdapter(pool)),
-		postgresadapter.NewUserProfileAddressRepo(postgresadapter.NewPgxAdapter(pool)),
-		*redis)
+		postgresadapter.NewUserProfileRepo(pgxAdapter),
+		postgresadapter.NewUserProfileStatRepo(pgxAdapter),
+		postgresadapter.NewUserProfileAddressRepo(pgxAdapter),
+		*redis, pgxAdapter)
+
 	err := service.UpdateProfileImage(ctx, "1b", "new profile image9.png")
 
 	assert.NoError(t, err)
@@ -144,11 +152,13 @@ func TestUpdateUserProfileImageWithoutRedis(t *testing.T) {
 		ExpirationTime: 0,
 	})
 
+	pgxAdapter := postgresadapter.NewPgxAdapter(pool)
+
 	service := entrypoints.NewService(
-		postgresadapter.NewUserProfileRepo(postgresadapter.NewPgxAdapter(pool)),
-		postgresadapter.NewUserProfileStatRepo(postgresadapter.NewPgxAdapter(pool)),
-		postgresadapter.NewUserProfileAddressRepo(postgresadapter.NewPgxAdapter(pool)),
-		*redis)
+		postgresadapter.NewUserProfileRepo(pgxAdapter),
+		postgresadapter.NewUserProfileStatRepo(pgxAdapter),
+		postgresadapter.NewUserProfileAddressRepo(pgxAdapter),
+		*redis, pgxAdapter)
 	err := service.UpdateProfileImage(ctx, "1b", "new profile image10.png")
 
 	assert.NoError(t, err)
@@ -171,12 +181,12 @@ func TestGetAttandedActivities(t *testing.T) {
 		},
 		ExpirationTime: 0,
 	})
-
+	pgxAdapter := postgresadapter.NewPgxAdapter(pool)
 	service := entrypoints.NewService(
-		postgresadapter.NewUserProfileRepo(postgresadapter.NewPgxAdapter(pool)),
-		postgresadapter.NewUserProfileStatRepo(postgresadapter.NewPgxAdapter(pool)),
-		postgresadapter.NewUserProfileAddressRepo(postgresadapter.NewPgxAdapter(pool)),
-		*redis)
+		postgresadapter.NewUserProfileRepo(pgxAdapter),
+		postgresadapter.NewUserProfileStatRepo(pgxAdapter),
+		postgresadapter.NewUserProfileAddressRepo(pgxAdapter),
+		*redis, pgxAdapter)
 
 	userId := int64(7)
 	attandedActivities, err := service.GetAttandedActivities(ctx, userId)
@@ -203,12 +213,13 @@ func TestGetUserProfile(t *testing.T) {
 		},
 		ExpirationTime: 0,
 	})
+	pgxAdapter := postgresadapter.NewPgxAdapter(pool)
 
 	service := entrypoints.NewService(
-		postgresadapter.NewUserProfileRepo(postgresadapter.NewPgxAdapter(pool)),
-		postgresadapter.NewUserProfileStatRepo(postgresadapter.NewPgxAdapter(pool)),
-		postgresadapter.NewUserProfileAddressRepo(postgresadapter.NewPgxAdapter(pool)),
-		*redis)
+		postgresadapter.NewUserProfileRepo(pgxAdapter),
+		postgresadapter.NewUserProfileStatRepo(pgxAdapter),
+		postgresadapter.NewUserProfileAddressRepo(pgxAdapter),
+		*redis, pgxAdapter)
 
 	userName := "omerbeden3"
 	user, err := service.GetUserProfile(ctx, userName)
@@ -241,12 +252,13 @@ func TestEvaluateUser(t *testing.T) {
 		Points:     3.5,
 		Comment:    "test comment",
 	}
+	pgxAdapter := postgresadapter.NewPgxAdapter(pool)
 
 	service := entrypoints.NewService(
-		postgresadapter.NewUserProfileRepo(postgresadapter.NewPgxAdapter(pool)),
-		postgresadapter.NewUserProfileStatRepo(postgresadapter.NewPgxAdapter(pool)),
-		postgresadapter.NewUserProfileAddressRepo(postgresadapter.NewPgxAdapter(pool)),
-		*redis)
+		postgresadapter.NewUserProfileRepo(pgxAdapter),
+		postgresadapter.NewUserProfileStatRepo(pgxAdapter),
+		postgresadapter.NewUserProfileAddressRepo(pgxAdapter),
+		*redis, pgxAdapter)
 
 	err := service.EvaluateUser(ctx, evaluation)
 
@@ -271,12 +283,13 @@ func TestDeleteUser(t *testing.T) {
 		},
 		ExpirationTime: 0,
 	})
+	pgxAdapter := postgresadapter.NewPgxAdapter(pool)
 
 	service := entrypoints.NewService(
-		postgresadapter.NewUserProfileRepo(postgresadapter.NewPgxAdapter(pool)),
-		postgresadapter.NewUserProfileStatRepo(postgresadapter.NewPgxAdapter(pool)),
-		postgresadapter.NewUserProfileAddressRepo(postgresadapter.NewPgxAdapter(pool)),
-		*redis)
+		postgresadapter.NewUserProfileRepo(pgxAdapter),
+		postgresadapter.NewUserProfileStatRepo(pgxAdapter),
+		postgresadapter.NewUserProfileAddressRepo(pgxAdapter),
+		*redis, pgxAdapter)
 	err := service.DeleteUser(ctx, "externalId", "userName")
 
 	assert.NoError(t, err)

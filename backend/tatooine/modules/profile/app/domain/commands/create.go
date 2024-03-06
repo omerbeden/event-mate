@@ -29,7 +29,12 @@ func (cmd *CreateProfileCommand) Handle(ctx context.Context) error {
 	if err != nil {
 		return fmt.Errorf("failed to begin transaction: %w", err)
 	}
-	defer tx.Rollback(ctx)
+
+	defer func() {
+		if err != nil {
+			tx.Rollback(ctx)
+		}
+	}()
 
 	userProfile, err := cmd.UserRepo.Insert(ctx, tx, &cmd.Profile)
 	if err != nil {

@@ -36,17 +36,21 @@ func main() {
 	}
 
 	redisClient := cache.NewRedisClient(redisOption)
-	activityRepository := activityRepoAdapter.NewActivityRepo(activityRepoAdapter.NewPgxAdapter(dbPool))
-	activityRulesRepository := activityRepoAdapter.NewActivityRulesRepo(activityRepoAdapter.NewPgxAdapter(dbPool))
-	activityFlowRepository := activityRepoAdapter.NewActivityFlowRepo(activityRepoAdapter.NewPgxAdapter(dbPool))
-	locationRepository := activityRepoAdapter.NewLocationRepo(activityRepoAdapter.NewPgxAdapter(dbPool))
+	pgxAdapter := activityRepoAdapter.NewPgxAdapter(dbPool)
+
+	activityRepository := activityRepoAdapter.NewActivityRepo(pgxAdapter)
+	activityRulesRepository := activityRepoAdapter.NewActivityRulesRepo(pgxAdapter)
+	activityFlowRepository := activityRepoAdapter.NewActivityFlowRepo(pgxAdapter)
+	locationRepository := activityRepoAdapter.NewLocationRepo(pgxAdapter)
 
 	activityService := activityServiceEntryPoints.NewService(activityRepository, activityRulesRepository, activityFlowRepository, locationRepository, *redisClient)
 
-	userRepository := profileRepoAdapter.NewUserProfileRepo(profileRepoAdapter.NewPgxAdapter(dbPool))
-	userAddressRepo := profileRepoAdapter.NewUserProfileAddressRepo(profileRepoAdapter.NewPgxAdapter(dbPool))
-	userStatRepo := profileRepoAdapter.NewUserProfileStatRepo(profileRepoAdapter.NewPgxAdapter(dbPool))
-	userService := entrypoints.NewService(userRepository, userStatRepo, userAddressRepo, *redisClient)
+	profileRepoAdapterPgx := profileRepoAdapter.NewPgxAdapter(dbPool)
+
+	userRepository := profileRepoAdapter.NewUserProfileRepo(profileRepoAdapterPgx)
+	userAddressRepo := profileRepoAdapter.NewUserProfileAddressRepo(profileRepoAdapterPgx)
+	userStatRepo := profileRepoAdapter.NewUserProfileStatRepo(profileRepoAdapterPgx)
+	userService := entrypoints.NewService(userRepository, userStatRepo, userAddressRepo, *redisClient, profileRepoAdapterPgx)
 
 	app := fiber.New()
 	api := app.Group("/api")

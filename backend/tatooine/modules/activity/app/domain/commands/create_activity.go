@@ -22,33 +22,35 @@ type CreateCommand struct {
 	ActivityFlowRepo  repo.ActivityFlowRepository
 	LocRepo           repo.LocationRepository
 	Redis             cache.Cache
-	Tx                db.TransactionManager
+	Tx                db.Tx
 }
 
 func (cmd *CreateCommand) Handle(ctx context.Context) (bool, error) {
 
-	tx, err := cmd.Tx.Begin(ctx)
-	if err != nil {
-		return false, fmt.Errorf("failed to begin transaction: %w", err)
-	}
-	activity, errCreate := cmd.ActivityRepo.Create(ctx, tx, cmd.Activity)
+	defer cmd.Tx.Rollback(ctx)
+	activity, errCreate := cmd.ActivityRepo.Create(ctx, cmd.Tx, cmd.Activity)
 	if errCreate != nil {
 		return false, errCreate
 	}
 
-	err = cmd.ActivityRulesRepo.CreateActivityRules(ctx, tx, activity.ID, cmd.Activity.Rules)
+	err := cmd.ActivityRulesRepo.CreateActivityRules(ctx, cmd.Tx, activity.ID, cmd.Activity.Rules)
 	if err != nil {
 		return false, err
 	}
 
-	err = cmd.ActivityFlowRepo.CreateActivityFlow(ctx, tx, activity.ID, cmd.Activity.Flow)
+	err = cmd.ActivityFlowRepo.CreateActivityFlow(ctx, cmd.Tx, activity.ID, cmd.Activity.Flow)
 	if err != nil {
 		return false, err
 	}
 
-	_, errLoc := cmd.LocRepo.Create(ctx, tx, &activity.Location)
+	_, errLoc := cmd.LocRepo.Create(ctx, cmd.Tx, &activity.Location)
 	if errLoc != nil {
 		return false, errLoc
+	}
+
+	err = cmd.Tx.Commit(ctx)
+	if err != nil {
+		return false, fmt.Errorf("failed to commit transaction: %w", err)
 	}
 
 	jsonActivity, errMarshall := json.Marshal(activity)

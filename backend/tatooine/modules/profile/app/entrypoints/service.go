@@ -8,6 +8,7 @@ import (
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/model"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/ports/repositories"
 	"github.com/omerbeden/event-mate/backend/tatooine/pkg/cache"
+	"github.com/omerbeden/event-mate/backend/tatooine/pkg/db"
 )
 
 type UserService struct {
@@ -15,6 +16,7 @@ type UserService struct {
 	userStatRepository    repositories.UserProfileStatRepository
 	userAddressRepository repositories.UserProfileAddressRepository
 	redisClient           cache.RedisClient
+	tx                    db.TransactionManager
 }
 
 func NewService(
@@ -22,12 +24,14 @@ func NewService(
 	userStatRepository repositories.UserProfileStatRepository,
 	userAddressRepository repositories.UserProfileAddressRepository,
 	redisClient cache.RedisClient,
+	tx db.TransactionManager,
 ) *UserService {
 	return &UserService{
 		userRepository:        userRepository,
 		userStatRepository:    userStatRepository,
 		userAddressRepository: userAddressRepository,
 		redisClient:           redisClient,
+		tx:                    tx,
 	}
 }
 
@@ -38,6 +42,7 @@ func (service *UserService) CreateUser(ctx context.Context, user *model.UserProf
 		AddressRepo: service.userAddressRepository,
 		StatRepo:    service.userStatRepository,
 		Cache:       &service.redisClient,
+		Tx:          service.tx,
 	}
 
 	return createCmd.Handle(ctx)

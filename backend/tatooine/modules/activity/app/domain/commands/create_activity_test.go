@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	tu2 "github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/adapters/postgresadapter/testutils"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/domain/commands"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/domain/commands/testutils"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/domain/model"
@@ -128,7 +129,7 @@ func TestCreateCommand_Handle(t *testing.T) {
 				ActivityFlowRepo:  mockActivityFlowRepo,
 				LocRepo:           mockLocationRepo,
 				Redis:             mockRedisClient,
-				Tx:                &testutils.MockTxnManager{},
+				Tx:                &tu2.MockTx{},
 			}
 
 			res, err := ccmd.Handle(ctx)
