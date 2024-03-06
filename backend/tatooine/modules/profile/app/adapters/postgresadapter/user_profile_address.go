@@ -1,18 +1,18 @@
-package repo
+package postgresadapter
 
 import (
 	"context"
 	"fmt"
 
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/model"
-	"github.com/omerbeden/event-mate/backend/tatooine/pkg/db/postgres"
+	"github.com/omerbeden/event-mate/backend/tatooine/pkg/db"
 )
 
 type userProfileAddressRepo struct {
-	pool postgres.PostgresExecutor
+	pool db.Executor
 }
 
-func NewUserProfileAddressRepo(pool postgres.PostgresExecutor) *userProfileAddressRepo {
+func NewUserProfileAddressRepo(pool db.Executor) *userProfileAddressRepo {
 	return &userProfileAddressRepo{
 		pool: pool,
 	}

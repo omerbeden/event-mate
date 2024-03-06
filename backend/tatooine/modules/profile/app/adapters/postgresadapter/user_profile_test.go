@@ -1,4 +1,4 @@
-package repo_test
+package postgresadapter_test
 
 import (
 	"context"
@@ -6,11 +6,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgconn"
-	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/adapters/repo"
-	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/adapters/repo/testutils"
+	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/adapters/postgresadapter"
+	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/adapters/postgresadapter/testutils"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/model"
+	"github.com/omerbeden/event-mate/backend/tatooine/pkg/db"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -26,7 +25,7 @@ func TestInsertUser(t *testing.T) {
 			name:    "should insert user successfully",
 			wantErr: false,
 			setupMock: func(md *testutils.MockDBExecuter) {
-				md.QueryRowFunc = func(ctx context.Context, sql string, args ...interface{}) pgx.Row {
+				md.QueryRowFunc = func(ctx context.Context, sql string, args ...interface{}) db.Row {
 					return &testutils.MockRow{
 						ScanFunc: func(dest ...any) error {
 							*dest[0].(*int64) = int64(1)
@@ -40,7 +39,7 @@ func TestInsertUser(t *testing.T) {
 			name:    "should return an error while inserting user",
 			wantErr: true,
 			setupMock: func(md *testutils.MockDBExecuter) {
-				md.QueryRowFunc = func(ctx context.Context, sql string, args ...interface{}) pgx.Row {
+				md.QueryRowFunc = func(ctx context.Context, sql string, args ...interface{}) db.Row {
 					return &testutils.MockRow{
 						ScanFunc: func(dest ...any) error {
 							return errors.New("database error")
@@ -58,7 +57,7 @@ func TestInsertUser(t *testing.T) {
 				tc.setupMock(mockDB)
 			}
 
-			userRepository := repo.NewUserProfileRepo(mockDB)
+			userRepository := postgresadapter.NewUserProfileRepo(mockDB)
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 			defer cancel()
 
@@ -127,7 +126,7 @@ func TestGetUsersByAddress(t *testing.T) {
 				City: "San Francisco",
 			},
 			setupMock: func(md *testutils.MockDBExecuter) {
-				md.QueryFunc = func(ctx context.Context, sql string, args ...any) (pgx.Rows, error) {
+				md.QueryFunc = func(ctx context.Context, sql string, args ...any) (db.Rows, error) {
 					return &testutils.MockRows{
 						Users:   users,
 						Current: 0,
@@ -143,7 +142,7 @@ func TestGetUsersByAddress(t *testing.T) {
 			},
 			wantErr: true,
 			setupMock: func(md *testutils.MockDBExecuter) {
-				md.QueryFunc = func(ctx context.Context, sql string, args ...any) (pgx.Rows, error) {
+				md.QueryFunc = func(ctx context.Context, sql string, args ...any) (db.Rows, error) {
 					return nil, errors.New("database error")
 				}
 			},
@@ -157,7 +156,7 @@ func TestGetUsersByAddress(t *testing.T) {
 				tc.setupMock(mockDB)
 			}
 
-			repository := repo.NewUserProfileRepo(mockDB)
+			repository := postgresadapter.NewUserProfileRepo(mockDB)
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 			defer cancel()
 
@@ -189,8 +188,8 @@ func TestUpdateProfileImage(t *testing.T) {
 			imageUrl:   "new image url.png",
 			externalId: "1",
 			setupMock: func(md *testutils.MockDBExecuter) {
-				md.ExecFunc = func(ctx context.Context, sql string, arguments ...any) (pgconn.CommandTag, error) {
-					return pgconn.NewCommandTag(""), nil
+				md.ExecFunc = func(ctx context.Context, sql string, arguments ...any) (db.CommandTag, error) {
+					return db.CommandTag{}, nil
 				}
 			},
 		},
@@ -200,8 +199,8 @@ func TestUpdateProfileImage(t *testing.T) {
 			imageUrl:   "new image url.png",
 			externalId: "1",
 			setupMock: func(md *testutils.MockDBExecuter) {
-				md.ExecFunc = func(ctx context.Context, sql string, arguments ...any) (pgconn.CommandTag, error) {
-					return pgconn.NewCommandTag(""), errors.New("database error")
+				md.ExecFunc = func(ctx context.Context, sql string, arguments ...any) (db.CommandTag, error) {
+					return db.CommandTag{}, errors.New("database error")
 				}
 			},
 		},
@@ -214,7 +213,7 @@ func TestUpdateProfileImage(t *testing.T) {
 				tc.setupMock(mockDB)
 			}
 
-			userRepository := repo.NewUserProfileRepo(mockDB)
+			userRepository := postgresadapter.NewUserProfileRepo(mockDB)
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 			defer cancel()
 
@@ -242,8 +241,8 @@ func TestDeleteUserById(t *testing.T) {
 			externalId: "1",
 			wantErr:    false,
 			setupMock: func(md *testutils.MockDBExecuter) {
-				md.ExecFunc = func(ctx context.Context, sql string, arguments ...any) (pgconn.CommandTag, error) {
-					return pgconn.NewCommandTag(""), nil
+				md.ExecFunc = func(ctx context.Context, sql string, arguments ...any) (db.CommandTag, error) {
+					return db.CommandTag{}, nil
 				}
 			},
 		},
@@ -252,8 +251,8 @@ func TestDeleteUserById(t *testing.T) {
 			externalId: "1",
 			wantErr:    true,
 			setupMock: func(md *testutils.MockDBExecuter) {
-				md.ExecFunc = func(ctx context.Context, sql string, arguments ...any) (pgconn.CommandTag, error) {
-					return pgconn.NewCommandTag(""), errors.New("database error")
+				md.ExecFunc = func(ctx context.Context, sql string, arguments ...any) (db.CommandTag, error) {
+					return db.CommandTag{}, errors.New("database error")
 				}
 			},
 		},
@@ -266,7 +265,7 @@ func TestDeleteUserById(t *testing.T) {
 				tc.setupMock(mockDB)
 			}
 
-			repository := repo.NewUserProfileRepo(mockDB)
+			repository := postgresadapter.NewUserProfileRepo(mockDB)
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 			defer cancel()
 

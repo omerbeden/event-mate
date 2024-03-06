@@ -1,4 +1,4 @@
-package repo
+package postgresadapter
 
 import (
 	"context"
@@ -8,16 +8,16 @@ import (
 
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/model"
 	customerrors "github.com/omerbeden/event-mate/backend/tatooine/pkg/customErrors"
-	"github.com/omerbeden/event-mate/backend/tatooine/pkg/db/postgres"
+	"github.com/omerbeden/event-mate/backend/tatooine/pkg/db"
 )
 
 type userProfileRepo struct {
-	pool postgres.PostgresExecutor
+	pool db.Executor
 }
 
 const errlogprefix = "repo:userProfile"
 
-func NewUserProfileRepo(pool postgres.PostgresExecutor) *userProfileRepo {
+func NewUserProfileRepo(pool db.Executor) *userProfileRepo {
 	return &userProfileRepo{
 		pool: pool,
 	}

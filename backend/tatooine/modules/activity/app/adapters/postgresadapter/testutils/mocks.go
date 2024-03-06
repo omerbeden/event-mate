@@ -5,10 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	pgx "github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgconn"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/domain/model"
+	"github.com/omerbeden/event-mate/backend/tatooine/pkg/db"
 )
 
 type MockRow struct {
@@ -35,12 +33,10 @@ func (m *MockRows) Close() {
 func (m *MockRows) Err() error {
 	panic("unimplemented")
 }
-func (m *MockRows) CommandTag() pgconn.CommandTag {
+func (m *MockRows) CommandTag() db.CommandTag {
 	panic("unimplemented")
 }
-func (m *MockRows) FieldDescriptions() []pgconn.FieldDescription {
-	panic("unimplemented")
-}
+
 func (m *MockRows) Next() bool {
 	if len(m.Activities) > 0 {
 		return m.Current < len(m.Activities)
@@ -81,65 +77,45 @@ func (m *MockRows) Scan(dest ...any) error {
 	m.Current++
 	return nil
 }
-func (m *MockRows) Values() ([]any, error) {
-	panic("unimplemented")
-}
-func (m *MockRows) RawValues() [][]byte {
-	panic("unimplemented")
-}
-func (m *MockRows) Conn() *pgx.Conn {
-	panic("unimplemented")
-}
 
 type MockDBExecuter struct {
-	QueryRowFunc func(ctx context.Context, sql string, args ...interface{}) pgx.Row
-	QueryFunc    func(ctx context.Context, sql string, args ...any) (pgx.Rows, error)
-	CopyFromFunc func(ctx context.Context, tableName pgx.Identifier, columnNames []string, rowSrc pgx.CopyFromSource) (int64, error)
-	ExecFunc     func(ctx context.Context, sql string, arguments ...any) (pgconn.CommandTag, error)
+	QueryRowFunc func(ctx context.Context, sql string, args ...interface{}) db.Row
+	QueryFunc    func(ctx context.Context, sql string, args ...any) (db.Rows, error)
+	CopyFromFunc func(ctx context.Context, tableName db.Identifier, columnNames []string, rowSrc db.CopyFromSource) (int64, error)
+	ExecFunc     func(ctx context.Context, sql string, arguments ...any) (db.CommandTag, error)
 }
 
-func (*MockDBExecuter) Begin(ctx context.Context) (pgx.Tx, error) {
+func (*MockDBExecuter) Begin(ctx context.Context) (db.Tx, error) {
 	panic("unimplemented")
 }
 
-func (*MockDBExecuter) BeginTx(ctx context.Context, txOptions pgx.TxOptions) (pgx.Tx, error) {
-	panic("unimplemented")
-}
-
-func (m *MockDBExecuter) Close() {
-	panic("unimplemented")
-}
-
-func (m *MockDBExecuter) Config() *pgxpool.Config {
-	panic("unimplemented")
-}
-
-func (m *MockDBExecuter) CopyFrom(ctx context.Context, tableName pgx.Identifier, columnNames []string, rowSrc pgx.CopyFromSource) (int64, error) {
+func (m *MockDBExecuter) CopyFrom(ctx context.Context, tableName db.Identifier, columnNames []string, rowSrc db.CopyFromSource) (int64, error) {
 	if m.CopyFromFunc != nil {
 		return m.CopyFromFunc(ctx, tableName, columnNames, rowSrc)
 	}
 	return 0, fmt.Errorf("CopyFrom not set")
 }
 
-func (m *MockDBExecuter) Exec(ctx context.Context, sql string, arguments ...any) (pgconn.CommandTag, error) {
+func (m *MockDBExecuter) Exec(ctx context.Context, sql string, arguments ...any) (db.CommandTag, error) {
 	if m.ExecFunc != nil {
 		return m.ExecFunc(ctx, sql, arguments)
 	}
-	return pgconn.NewCommandTag(""), fmt.Errorf("CopyFrom not set")
+	return db.CommandTag{}, fmt.Errorf("CopyFrom not set")
 }
 
 func (*MockDBExecuter) Ping(ctx context.Context) error {
 	panic("unimplemented")
 }
 
-func (m *MockDBExecuter) Query(ctx context.Context, sql string, args ...any) (pgx.Rows, error) {
+func (m *MockDBExecuter) Query(ctx context.Context, sql string, args ...any) (db.Rows, error) {
 	if m.QueryFunc != nil {
 		return m.QueryFunc(ctx, sql, args...)
 	}
+
 	return nil, fmt.Errorf("QueryFunc not set")
 }
 
-func (m *MockDBExecuter) QueryRow(ctx context.Context, sql string, args ...any) pgx.Row {
+func (m *MockDBExecuter) QueryRow(ctx context.Context, sql string, args ...any) db.Row {
 	if m.QueryRowFunc != nil {
 		return m.QueryRowFunc(ctx, sql, args...)
 	}

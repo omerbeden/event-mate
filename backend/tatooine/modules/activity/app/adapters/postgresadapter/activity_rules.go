@@ -1,18 +1,18 @@
-package repo
+package postgresadapter
 
 import (
 	"context"
 	"fmt"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/omerbeden/event-mate/backend/tatooine/pkg/db/postgres"
+	"github.com/omerbeden/event-mate/backend/tatooine/pkg/db"
 )
 
 type activityRulesRepository struct {
-	pool postgres.PostgresExecutor
+	pool db.Executor
 }
 
-func NewActivityRulesRepo(pool postgres.PostgresExecutor) *activityRulesRepository {
+func NewActivityRulesRepo(pool db.Executor) *activityRulesRepository {
 	return &activityRulesRepository{
 		pool: pool,
 	}
@@ -26,7 +26,7 @@ func (r *activityRulesRepository) CreateActivityRules(ctx context.Context, aciti
 	}
 
 	copyCount, err := r.pool.CopyFrom(ctx,
-		pgx.Identifier{"activity_rules"},
+		db.Identifier{"activity_rules"},
 		[]string{"activity_id", "description"},
 		pgx.CopyFromRows(ruleRows))
 

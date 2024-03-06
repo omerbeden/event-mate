@@ -1,18 +1,18 @@
-package repo
+package postgresadapter
 
 import (
 	"context"
 	"fmt"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/omerbeden/event-mate/backend/tatooine/pkg/db/postgres"
+	"github.com/omerbeden/event-mate/backend/tatooine/pkg/db"
 )
 
 type activityFLowRepository struct {
-	pool postgres.PostgresExecutor
+	pool db.Executor
 }
 
-func NewActivityFlowRepo(pool postgres.PostgresExecutor) *activityFLowRepository {
+func NewActivityFlowRepo(pool db.Executor) *activityFLowRepository {
 	return &activityFLowRepository{
 		pool: pool,
 	}
@@ -26,7 +26,7 @@ func (r *activityFLowRepository) CreateActivityFlow(ctx context.Context, acitivt
 	}
 
 	copyCount, err := r.pool.CopyFrom(ctx,
-		pgx.Identifier{"activity_flows"},
+		db.Identifier{"activity_flows"},
 		[]string{"activity_id", "description"},
 		pgx.CopyFromRows(flowRows))
 

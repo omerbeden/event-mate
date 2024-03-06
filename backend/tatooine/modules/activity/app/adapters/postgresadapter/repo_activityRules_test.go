@@ -1,4 +1,4 @@
-package repo_test
+package postgresadapter_test
 
 import (
 	"context"
@@ -7,10 +7,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/jackc/pgx/v5"
-	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/adapters/repo"
-	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/adapters/repo/testutils"
+	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/adapters/postgresadapter"
+	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/adapters/postgresadapter/testutils"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/domain/model"
+	"github.com/omerbeden/event-mate/backend/tatooine/pkg/db"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -30,7 +30,7 @@ func TestCreateActivityRules(t *testing.T) {
 			rules:       []string{"rule1", "rule2"},
 			expectError: false,
 			setupMock: func(md *testutils.MockDBExecuter) {
-				md.CopyFromFunc = func(ctx context.Context, tableName pgx.Identifier, columnNames []string, rowSrc pgx.CopyFromSource) (int64, error) {
+				md.CopyFromFunc = func(ctx context.Context, tableName db.Identifier, columnNames []string, rowSrc db.CopyFromSource) (int64, error) {
 					return 2, nil
 				}
 			},
@@ -42,7 +42,7 @@ func TestCreateActivityRules(t *testing.T) {
 			rules:       []string{"rule1", "rule2"},
 			expectError: true,
 			setupMock: func(md *testutils.MockDBExecuter) {
-				md.CopyFromFunc = func(ctx context.Context, tableName pgx.Identifier, columnNames []string, rowSrc pgx.CopyFromSource) (int64, error) {
+				md.CopyFromFunc = func(ctx context.Context, tableName db.Identifier, columnNames []string, rowSrc db.CopyFromSource) (int64, error) {
 					return 0, errors.New("database error")
 				}
 			},
@@ -51,7 +51,7 @@ func TestCreateActivityRules(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(fmt.Sprintf("%s,%d", tc.name, tc.id), func(t *testing.T) {
 			mockDB := new(testutils.MockDBExecuter)
-			repo := repo.NewActivityRulesRepo(mockDB)
+			repo := postgresadapter.NewActivityRulesRepo(mockDB)
 
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 			defer cancel()
@@ -89,7 +89,7 @@ func TestGetActivityRules(t *testing.T) {
 			expected:    rules,
 			expectError: false,
 			setupMock: func(md *testutils.MockDBExecuter) {
-				md.QueryFunc = func(ctx context.Context, sql string, args ...any) (pgx.Rows, error) {
+				md.QueryFunc = func(ctx context.Context, sql string, args ...any) (db.Rows, error) {
 					return &testutils.MockRows{
 						Activities: []model.Activity{},
 						Rules:      rules,
@@ -105,7 +105,7 @@ func TestGetActivityRules(t *testing.T) {
 			expected:    rules,
 			expectError: true,
 			setupMock: func(md *testutils.MockDBExecuter) {
-				md.QueryFunc = func(ctx context.Context, sql string, args ...any) (pgx.Rows, error) {
+				md.QueryFunc = func(ctx context.Context, sql string, args ...any) (db.Rows, error) {
 					return nil, errors.New("database error")
 				}
 			},
@@ -114,7 +114,7 @@ func TestGetActivityRules(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(fmt.Sprintf("%s,%d", tc.name, tc.id), func(t *testing.T) {
 			mockDB := new(testutils.MockDBExecuter)
-			repo := repo.NewActivityRulesRepo(mockDB)
+			repo := postgresadapter.NewActivityRulesRepo(mockDB)
 
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 			defer cancel()

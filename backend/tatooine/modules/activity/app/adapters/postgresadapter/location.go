@@ -1,20 +1,20 @@
-package repo
+package postgresadapter
 
 import (
 	"context"
 	"fmt"
 
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/domain/model"
-	"github.com/omerbeden/event-mate/backend/tatooine/pkg/db/postgres"
+	"github.com/omerbeden/event-mate/backend/tatooine/pkg/db"
 )
 
 const errLogPrefix = "repo:location"
 
 type LocationRepo struct {
-	pool postgres.PostgresExecutor
+	pool db.Executor
 }
 
-func NewLocationRepo(pool postgres.PostgresExecutor) *LocationRepo {
+func NewLocationRepo(pool db.Executor) *LocationRepo {
 	return &LocationRepo{
 		pool: pool,
 	}

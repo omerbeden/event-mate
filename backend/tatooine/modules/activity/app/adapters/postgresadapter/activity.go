@@ -1,4 +1,4 @@
-package repo
+package postgresadapter
 
 import (
 	"context"
@@ -6,20 +6,17 @@ import (
 
 	"github.com/jackc/pgx/v5"
 
-	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/domain/model"
-	"github.com/omerbeden/event-mate/backend/tatooine/pkg/db/postgres"
+	"github.com/omerbeden/event-mate/backend/tatooine/pkg/db"
 )
 
 const errlogprefix = "repo:activity"
 
 type activityRepository struct {
-	pool postgres.PostgresExecutor
+	pool db.Executor
 }
 
-var _ postgres.PostgresExecutor = (*pgxpool.Pool)(nil)
-
-func NewActivityRepo(pool postgres.PostgresExecutor) *activityRepository {
+func NewActivityRepo(pool db.Executor) *activityRepository {
 	return &activityRepository{
 		pool: pool,
 	}
@@ -60,7 +57,7 @@ func (r *activityRepository) AddParticipants(ctx context.Context, activityId int
 	}
 
 	copyCount, err := r.pool.CopyFrom(ctx,
-		pgx.Identifier{"participants"},
+		db.Identifier{"participants"},
 		[]string{"activity_id", "user_id"},
 		pgx.CopyFromRows(linkedParticipants),
 	)

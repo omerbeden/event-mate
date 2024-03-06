@@ -11,9 +11,9 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/omerbeden/event-mate/backend/tatooine/cmd/api/routes"
-	activityRepo "github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/adapters/repo"
+	activityRepoAdapter "github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/adapters/postgresadapter"
 	activityServiceEntryPoints "github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/entrypoints"
-	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/adapters/repo"
+	profileRepoAdapter "github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/adapters/postgresadapter"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/entrypoints"
 	"github.com/omerbeden/event-mate/backend/tatooine/pkg/cache"
 	"github.com/omerbeden/event-mate/backend/tatooine/pkg/db/postgres"
@@ -36,16 +36,16 @@ func main() {
 	}
 
 	redisClient := cache.NewRedisClient(redisOption)
-	activityRepository := activityRepo.NewActivityRepo(dbPool)
-	activityRulesRepository := activityRepo.NewActivityRulesRepo(dbPool)
-	activityFlowRepository := activityRepo.NewActivityFlowRepo(dbPool)
-	locationRepository := activityRepo.NewLocationRepo(dbPool)
+	activityRepository := activityRepoAdapter.NewActivityRepo(activityRepoAdapter.NewPgxAdapter(dbPool))
+	activityRulesRepository := activityRepoAdapter.NewActivityRulesRepo(activityRepoAdapter.NewPgxAdapter(dbPool))
+	activityFlowRepository := activityRepoAdapter.NewActivityFlowRepo(activityRepoAdapter.NewPgxAdapter(dbPool))
+	locationRepository := activityRepoAdapter.NewLocationRepo(activityRepoAdapter.NewPgxAdapter(dbPool))
 
 	activityService := activityServiceEntryPoints.NewService(activityRepository, activityRulesRepository, activityFlowRepository, locationRepository, *redisClient)
 
-	userRepository := repo.NewUserProfileRepo(dbPool)
-	userAddressRepo := repo.NewUserProfileAddressRepo(dbPool)
-	userStatRepo := repo.NewUserProfileStatRepo(dbPool)
+	userRepository := profileRepoAdapter.NewUserProfileRepo(profileRepoAdapter.NewPgxAdapter(dbPool))
+	userAddressRepo := profileRepoAdapter.NewUserProfileAddressRepo(profileRepoAdapter.NewPgxAdapter(dbPool))
+	userStatRepo := profileRepoAdapter.NewUserProfileStatRepo(profileRepoAdapter.NewPgxAdapter(dbPool))
 	userService := entrypoints.NewService(userRepository, userStatRepo, userAddressRepo, *redisClient)
 
 	app := fiber.New()

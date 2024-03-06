@@ -1,4 +1,4 @@
-package repo_test
+package postgresadapter_test
 
 import (
 	"context"
@@ -7,10 +7,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/jackc/pgx/v5"
-	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/adapters/repo"
-	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/adapters/repo/testutils"
+	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/adapters/postgresadapter"
+	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/adapters/postgresadapter/testutils"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/domain/model"
+	"github.com/omerbeden/event-mate/backend/tatooine/pkg/db"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -31,7 +31,7 @@ func TestCreateActivityFlow(t *testing.T) {
 			flow:        flow,
 			expectError: false,
 			setupMock: func(md *testutils.MockDBExecuter) {
-				md.CopyFromFunc = func(ctx context.Context, tableName pgx.Identifier, columnNames []string, rowSrc pgx.CopyFromSource) (int64, error) {
+				md.CopyFromFunc = func(ctx context.Context, tableName db.Identifier, columnNames []string, rowSrc db.CopyFromSource) (int64, error) {
 					return 2, nil
 				}
 			},
@@ -43,7 +43,7 @@ func TestCreateActivityFlow(t *testing.T) {
 			flow:        flow,
 			expectError: true,
 			setupMock: func(md *testutils.MockDBExecuter) {
-				md.CopyFromFunc = func(ctx context.Context, tableName pgx.Identifier, columnNames []string, rowSrc pgx.CopyFromSource) (int64, error) {
+				md.CopyFromFunc = func(ctx context.Context, tableName db.Identifier, columnNames []string, rowSrc db.CopyFromSource) (int64, error) {
 					return 0, errors.New("database error")
 				}
 			},
@@ -52,7 +52,7 @@ func TestCreateActivityFlow(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(fmt.Sprintf("%s,%d", tc.name, tc.id), func(t *testing.T) {
 			mockDB := new(testutils.MockDBExecuter)
-			repo := repo.NewActivityFlowRepo(mockDB)
+			repo := postgresadapter.NewActivityFlowRepo(mockDB)
 
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 			defer cancel()
@@ -90,7 +90,7 @@ func TestGetActivityFlow(t *testing.T) {
 			expected:    flow,
 			expectError: false,
 			setupMock: func(md *testutils.MockDBExecuter) {
-				md.QueryFunc = func(ctx context.Context, sql string, args ...any) (pgx.Rows, error) {
+				md.QueryFunc = func(ctx context.Context, sql string, args ...any) (db.Rows, error) {
 					return &testutils.MockRows{
 						Activities: []model.Activity{},
 						Rules:      []string{},
@@ -107,7 +107,7 @@ func TestGetActivityFlow(t *testing.T) {
 			expected:    flow,
 			expectError: true,
 			setupMock: func(md *testutils.MockDBExecuter) {
-				md.QueryFunc = func(ctx context.Context, sql string, args ...any) (pgx.Rows, error) {
+				md.QueryFunc = func(ctx context.Context, sql string, args ...any) (db.Rows, error) {
 					return nil, errors.New("database error")
 				}
 			},
@@ -116,7 +116,7 @@ func TestGetActivityFlow(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(fmt.Sprintf("%s,%d", tc.name, tc.id), func(t *testing.T) {
 			mockDB := new(testutils.MockDBExecuter)
-			repo := repo.NewActivityFlowRepo(mockDB)
+			repo := postgresadapter.NewActivityFlowRepo(mockDB)
 
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 			defer cancel()

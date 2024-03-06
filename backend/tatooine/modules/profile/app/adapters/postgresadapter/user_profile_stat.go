@@ -1,4 +1,4 @@
-package repo
+package postgresadapter
 
 import (
 	"context"
@@ -8,14 +8,14 @@ import (
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/model"
 	customerrors "github.com/omerbeden/event-mate/backend/tatooine/pkg/customErrors"
-	"github.com/omerbeden/event-mate/backend/tatooine/pkg/db/postgres"
+	"github.com/omerbeden/event-mate/backend/tatooine/pkg/db"
 )
 
 type userProfileStatRepo struct {
-	pool postgres.PostgresExecutor
+	pool db.Executor
 }
 
-func NewUserProfileStatRepo(pool postgres.PostgresExecutor) *userProfileStatRepo {
+func NewUserProfileStatRepo(pool db.Executor) *userProfileStatRepo {
 	return &userProfileStatRepo{
 		pool: pool,
 	}

@@ -1,4 +1,4 @@
-package repo_test
+package postgresadapter_test
 
 import (
 	"context"
@@ -6,10 +6,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/jackc/pgx/v5/pgconn"
-	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/adapters/repo"
-	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/adapters/repo/testutils"
+	repo "github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/adapters/postgresadapter"
+	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/adapters/postgresadapter/testutils"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/model"
+	"github.com/omerbeden/event-mate/backend/tatooine/pkg/db"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -28,8 +28,8 @@ func TestUserProfileAddressRepo_Insert(t *testing.T) {
 				ProfileId: 1,
 			},
 			setupMock: func(md *testutils.MockDBExecuter) {
-				md.ExecFunc = func(ctx context.Context, sql string, arguments ...any) (pgconn.CommandTag, error) {
-					return pgconn.NewCommandTag(""), nil
+				md.ExecFunc = func(ctx context.Context, sql string, arguments ...any) (db.CommandTag, error) {
+					return db.CommandTag{}, nil
 				}
 			},
 		},
@@ -41,8 +41,8 @@ func TestUserProfileAddressRepo_Insert(t *testing.T) {
 				ProfileId: 1,
 			},
 			setupMock: func(md *testutils.MockDBExecuter) {
-				md.ExecFunc = func(ctx context.Context, sql string, arguments ...any) (pgconn.CommandTag, error) {
-					return pgconn.NewCommandTag(""), errors.New("database error")
+				md.ExecFunc = func(ctx context.Context, sql string, arguments ...any) (db.CommandTag, error) {
+					return db.CommandTag{}, errors.New("database error")
 				}
 			},
 		},
