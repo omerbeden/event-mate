@@ -35,7 +35,7 @@ func TestCreateUserProfile(t *testing.T) {
 		ExpirationTime: 0,
 	})
 
-	pgxAdapter := postgresadapter.NewPgxAdapter(pool)
+	pgxAdapter := postgres.NewPgxAdapter(pool)
 
 	service := entrypoints.NewService(
 		postgresadapter.NewUserProfileRepo(pgxAdapter),
@@ -80,7 +80,7 @@ func TestCreateUserProfileWithoutRedis(t *testing.T) {
 		ExpirationTime: 0,
 	})
 
-	pgxAdapter := postgresadapter.NewPgxAdapter(pool)
+	pgxAdapter := postgres.NewPgxAdapter(pool)
 	service := entrypoints.NewService(
 		postgresadapter.NewUserProfileRepo(pgxAdapter),
 		postgresadapter.NewUserProfileStatRepo(pgxAdapter),
@@ -125,7 +125,7 @@ func TestUpdateUserProfileImage(t *testing.T) {
 		ExpirationTime: 0,
 	})
 
-	pgxAdapter := postgresadapter.NewPgxAdapter(pool)
+	pgxAdapter := postgres.NewPgxAdapter(pool)
 	service := entrypoints.NewService(
 		postgresadapter.NewUserProfileRepo(pgxAdapter),
 		postgresadapter.NewUserProfileStatRepo(pgxAdapter),
@@ -152,7 +152,7 @@ func TestUpdateUserProfileImageWithoutRedis(t *testing.T) {
 		ExpirationTime: 0,
 	})
 
-	pgxAdapter := postgresadapter.NewPgxAdapter(pool)
+	pgxAdapter := postgres.NewPgxAdapter(pool)
 
 	service := entrypoints.NewService(
 		postgresadapter.NewUserProfileRepo(pgxAdapter),
@@ -181,7 +181,7 @@ func TestGetAttandedActivities(t *testing.T) {
 		},
 		ExpirationTime: 0,
 	})
-	pgxAdapter := postgresadapter.NewPgxAdapter(pool)
+	pgxAdapter := postgres.NewPgxAdapter(pool)
 	service := entrypoints.NewService(
 		postgresadapter.NewUserProfileRepo(pgxAdapter),
 		postgresadapter.NewUserProfileStatRepo(pgxAdapter),
@@ -213,7 +213,7 @@ func TestGetUserProfile(t *testing.T) {
 		},
 		ExpirationTime: 0,
 	})
-	pgxAdapter := postgresadapter.NewPgxAdapter(pool)
+	pgxAdapter := postgres.NewPgxAdapter(pool)
 
 	service := entrypoints.NewService(
 		postgresadapter.NewUserProfileRepo(pgxAdapter),
@@ -252,7 +252,7 @@ func TestEvaluateUser(t *testing.T) {
 		Points:     3.5,
 		Comment:    "test comment",
 	}
-	pgxAdapter := postgresadapter.NewPgxAdapter(pool)
+	pgxAdapter := postgres.NewPgxAdapter(pool)
 
 	service := entrypoints.NewService(
 		postgresadapter.NewUserProfileRepo(pgxAdapter),
@@ -283,7 +283,7 @@ func TestDeleteUser(t *testing.T) {
 		},
 		ExpirationTime: 0,
 	})
-	pgxAdapter := postgresadapter.NewPgxAdapter(pool)
+	pgxAdapter := postgres.NewPgxAdapter(pool)
 
 	service := entrypoints.NewService(
 		postgresadapter.NewUserProfileRepo(pgxAdapter),

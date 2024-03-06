@@ -23,12 +23,13 @@ func TestCreateActivity(t *testing.T) {
 	pool := postgres.NewConn(&dbConfig)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
-	activityService := entrypoints.ActivityService{
 
-		ActivityRepository:      postgresadapter.NewActivityRepo(postgresadapter.NewPgxAdapter(pool)),
-		LocationReposiroy:       postgresadapter.NewLocationRepo(postgresadapter.NewPgxAdapter(pool)),
-		ActivityRulesRepository: postgresadapter.NewActivityRulesRepo(postgresadapter.NewPgxAdapter(pool)),
-		ActivityFlowRepository:  postgresadapter.NewActivityFlowRepo(postgresadapter.NewPgxAdapter(pool)),
+	pgxAdapter := postgres.NewPgxAdapter(pool)
+	activityService := entrypoints.ActivityService{
+		ActivityRepository:      postgresadapter.NewActivityRepo(pgxAdapter),
+		LocationReposiroy:       postgresadapter.NewLocationRepo(pgxAdapter),
+		ActivityRulesRepository: postgresadapter.NewActivityRulesRepo(pgxAdapter),
+		ActivityFlowRepository:  postgresadapter.NewActivityFlowRepo(pgxAdapter),
 		RedisClient: *cache.NewRedisClient(cache.RedisOption{
 			Options: &redis.Options{
 				Addr:     "Localhost:6379",
@@ -63,10 +64,12 @@ func TestGetActivitiesByLocation(t *testing.T) {
 	pool := postgres.NewConn(&dbConfig)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
-	activityService := entrypoints.ActivityService{
 
-		ActivityRepository: postgresadapter.NewActivityRepo(postgresadapter.NewPgxAdapter(pool)),
-		LocationReposiroy:  postgresadapter.NewLocationRepo(postgresadapter.NewPgxAdapter(pool)),
+	pgxAdapter := postgres.NewPgxAdapter(pool)
+
+	activityService := entrypoints.ActivityService{
+		ActivityRepository: postgresadapter.NewActivityRepo(pgxAdapter),
+		LocationReposiroy:  postgresadapter.NewLocationRepo(pgxAdapter),
 		RedisClient: *cache.NewRedisClient(cache.RedisOption{
 			Options: &redis.Options{
 				Addr:     "Localhost:6379",
@@ -94,10 +97,12 @@ func TestAddParticipant(t *testing.T) {
 	pool := postgres.NewConn(&dbConfig)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
-	activityService := entrypoints.ActivityService{
 
-		ActivityRepository: postgresadapter.NewActivityRepo(postgresadapter.NewPgxAdapter(pool)),
-		LocationReposiroy:  postgresadapter.NewLocationRepo(postgresadapter.NewPgxAdapter(pool)),
+	pgxAdapter := postgres.NewPgxAdapter(pool)
+
+	activityService := entrypoints.ActivityService{
+		ActivityRepository: postgresadapter.NewActivityRepo(pgxAdapter),
+		LocationReposiroy:  postgresadapter.NewLocationRepo(pgxAdapter),
 		RedisClient: *cache.NewRedisClient(cache.RedisOption{
 			Options: &redis.Options{
 				Addr:     "Localhost:6379",
@@ -125,10 +130,12 @@ func TestGetParticipants(t *testing.T) {
 	pool := postgres.NewConn(&dbConfig)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
-	activityService := entrypoints.ActivityService{
 
-		ActivityRepository: postgresadapter.NewActivityRepo(postgresadapter.NewPgxAdapter(pool)),
-		LocationReposiroy:  postgresadapter.NewLocationRepo(postgresadapter.NewPgxAdapter(pool)),
+	pgxAdapter := postgres.NewPgxAdapter(pool)
+
+	activityService := entrypoints.ActivityService{
+		ActivityRepository: postgresadapter.NewActivityRepo(pgxAdapter),
+		LocationReposiroy:  postgresadapter.NewLocationRepo(pgxAdapter),
 		RedisClient: *cache.NewRedisClient(cache.RedisOption{
 			Options: &redis.Options{
 				Addr:     "Localhost:6379",
@@ -155,12 +162,14 @@ func TestGetActivityFromDBWhenRedisDown(t *testing.T) {
 	pool := postgres.NewConn(&dbConfig)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
-	activityService := entrypoints.ActivityService{
 
-		ActivityRepository:      postgresadapter.NewActivityRepo(postgresadapter.NewPgxAdapter(pool)),
-		LocationReposiroy:       postgresadapter.NewLocationRepo(postgresadapter.NewPgxAdapter(pool)),
-		ActivityRulesRepository: postgresadapter.NewActivityRulesRepo(postgresadapter.NewPgxAdapter(pool)),
-		ActivityFlowRepository:  postgresadapter.NewActivityFlowRepo(postgresadapter.NewPgxAdapter(pool)),
+	pgxAdapter := postgres.NewPgxAdapter(pool)
+
+	activityService := entrypoints.ActivityService{
+		ActivityRepository:      postgresadapter.NewActivityRepo(pgxAdapter),
+		LocationReposiroy:       postgresadapter.NewLocationRepo(pgxAdapter),
+		ActivityRulesRepository: postgresadapter.NewActivityRulesRepo(pgxAdapter),
+		ActivityFlowRepository:  postgresadapter.NewActivityFlowRepo(pgxAdapter),
 		RedisClient: *cache.NewRedisClient(cache.RedisOption{
 			Options:        &redis.Options{},
 			ExpirationTime: 0,
@@ -183,10 +192,11 @@ func TestGetActivityByIDReturnErrorWhenActivityIdNotFound(t *testing.T) {
 	pool := postgres.NewConn(&dbConfig)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
-	activityService := entrypoints.ActivityService{
 
-		ActivityRepository: postgresadapter.NewActivityRepo(postgresadapter.NewPgxAdapter(pool)),
-		LocationReposiroy:  postgresadapter.NewLocationRepo(postgresadapter.NewPgxAdapter(pool)),
+	pgxAdapter := postgres.NewPgxAdapter(pool)
+	activityService := entrypoints.ActivityService{
+		ActivityRepository: postgresadapter.NewActivityRepo(pgxAdapter),
+		LocationReposiroy:  postgresadapter.NewLocationRepo(pgxAdapter),
 		RedisClient: *cache.NewRedisClient(cache.RedisOption{
 			Options: &redis.Options{
 				Addr:     "Localhost:6379",
@@ -211,12 +221,14 @@ func TestGetActivityByLocationFromDBWhenRedisDown(t *testing.T) {
 	pool := postgres.NewConn(&dbConfig)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
-	activityService := entrypoints.ActivityService{
 
-		ActivityRepository:      postgresadapter.NewActivityRepo(postgresadapter.NewPgxAdapter(pool)),
-		LocationReposiroy:       postgresadapter.NewLocationRepo(postgresadapter.NewPgxAdapter(pool)),
-		ActivityRulesRepository: postgresadapter.NewActivityRulesRepo(postgresadapter.NewPgxAdapter(pool)),
-		ActivityFlowRepository:  postgresadapter.NewActivityFlowRepo(postgresadapter.NewPgxAdapter(pool)),
+	pgxAdapter := postgres.NewPgxAdapter(pool)
+
+	activityService := entrypoints.ActivityService{
+		ActivityRepository:      postgresadapter.NewActivityRepo(pgxAdapter),
+		LocationReposiroy:       postgresadapter.NewLocationRepo(pgxAdapter),
+		ActivityRulesRepository: postgresadapter.NewActivityRulesRepo(pgxAdapter),
+		ActivityFlowRepository:  postgresadapter.NewActivityFlowRepo(pgxAdapter),
 		RedisClient: *cache.NewRedisClient(cache.RedisOption{
 			Options:        &redis.Options{},
 			ExpirationTime: 0,
@@ -241,12 +253,14 @@ func TestGetActivityByLocationReturnErrorWhenCityNotFound(t *testing.T) {
 	pool := postgres.NewConn(&dbConfig)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
-	activityService := entrypoints.ActivityService{
 
-		ActivityRepository:      postgresadapter.NewActivityRepo(postgresadapter.NewPgxAdapter(pool)),
-		LocationReposiroy:       postgresadapter.NewLocationRepo(postgresadapter.NewPgxAdapter(pool)),
-		ActivityRulesRepository: postgresadapter.NewActivityRulesRepo(postgresadapter.NewPgxAdapter(pool)),
-		ActivityFlowRepository:  postgresadapter.NewActivityFlowRepo(postgresadapter.NewPgxAdapter(pool)),
+	pgxAdapter := postgres.NewPgxAdapter(pool)
+
+	activityService := entrypoints.ActivityService{
+		ActivityRepository:      postgresadapter.NewActivityRepo(pgxAdapter),
+		LocationReposiroy:       postgresadapter.NewLocationRepo(pgxAdapter),
+		ActivityRulesRepository: postgresadapter.NewActivityRulesRepo(pgxAdapter),
+		ActivityFlowRepository:  postgresadapter.NewActivityFlowRepo(pgxAdapter),
 		RedisClient: *cache.NewRedisClient(cache.RedisOption{
 			Options: &redis.Options{
 				Addr:     "Localhost:6379",
