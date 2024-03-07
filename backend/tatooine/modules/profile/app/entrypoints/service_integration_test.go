@@ -76,7 +76,11 @@ func TestCreateUserProfileWithoutRedis(t *testing.T) {
 	defer cancel()
 
 	redis := cache.NewRedisClient(cache.RedisOption{
-		Options:        &redis.Options{},
+		Options: &redis.Options{
+			Addr:     "unknown:6379",
+			Password: "",
+			DB:       0,
+		},
 		ExpirationTime: 0,
 	})
 
@@ -90,8 +94,9 @@ func TestCreateUserProfileWithoutRedis(t *testing.T) {
 		Name:               "omer",
 		LastName:           "beden",
 		About:              "backend developer",
-		ExternalId:         "redis",
-		UserName:           "omerbeden3",
+		ExternalId:         "redis3",
+		UserName:           "omerbeden13",
+		Email:              "test@test1.com",
 		AttandedActivities: []model.Activity{},
 		Adress:             model.UserProfileAdress{City: "Sakarya"},
 		Stat: model.UserProfileStat{
@@ -132,7 +137,7 @@ func TestUpdateUserProfileImage(t *testing.T) {
 		postgresadapter.NewUserProfileAddressRepo(pgxAdapter),
 		*redis, pgxAdapter)
 
-	err := service.UpdateProfileImage(ctx, "1b", "new profile image9.png")
+	err := service.UpdateProfileImage(ctx, "1a", "new profile image10.png")
 
 	assert.NoError(t, err)
 }
@@ -148,7 +153,11 @@ func TestUpdateUserProfileImageWithoutRedis(t *testing.T) {
 	defer cancel()
 
 	redis := cache.NewRedisClient(cache.RedisOption{
-		Options:        &redis.Options{},
+		Options: &redis.Options{
+			Addr:     "unknown:6379",
+			Password: "",
+			DB:       0,
+		},
 		ExpirationTime: 0,
 	})
 
