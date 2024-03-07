@@ -9,6 +9,7 @@ DB_NAME := test
 DB_PORT := 5432
 DB_USER := postgres
 DB_CONTAINER_NAME := dev-postgres
+REDIS_CONTAINER_NAME := dev-redis
 
 # Migration configurations
 MIGRATIONS_PATH := /Users/omerbeden/golang_workspace/event-mate/backend/tatooine/infra/databasemigrations
@@ -26,6 +27,8 @@ help:
 	@echo "  db-up                Start the PostgreSQL container"
 	@echo "  db-down              Stop and remove the PostgreSQL container"
 	@echo "  migrate-up           Run database migrations"
+	@echo "  redis-up 			  Start Redis container"
+	@echo "  redis-down 		  Stop and remove the Redis container"
 	@echo "  integration-test-setup Prepare environment for integration testing (starts db and runs migrations)"
 
 # Create Docker network if it doesn't exist
@@ -57,6 +60,15 @@ migrate-up:
 
 migrate-down:	
 	migrate -path $(MIGRATIONS_PATH) -database $(DATABASE_URL) -verbose down
+
+
+#Run redis
+redis-up:
+	@docker run --rm -it -d --name $(REDIS_CONTAINER_NAME) -p 6379:6379 redis 
+
+#Stop redis
+redis-down:
+	@docker stop $(REDIS_CONTAINER_NAME) || true
 
 # Target to run before integration tests
 integration-test-setup: db-up migrate-up
