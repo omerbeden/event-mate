@@ -6,6 +6,6 @@ CREATE TABLE IF NOT EXISTS user_points (
     comment TEXT,
     given_on DATE DEFAULT NOW(),
     UNIQUE(giver_id, receiver_id),
-    FOREIGN KEY (giver_id) REFERENCES user_profiles(external_id),
-    FOREIGN KEY (receiver_id) REFERENCES user_profiles(external_id)
+    FOREIGN KEY (giver_id) REFERENCES user_profiles(external_id) ON DELETE CASCADE,
+    FOREIGN KEY (receiver_id) REFERENCES user_profiles(external_id) ON DELETE CASCADE
 );

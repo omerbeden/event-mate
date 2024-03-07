@@ -3,7 +3,8 @@ CREATE TABLE IF NOT EXISTS activities(
     title VARCHAR(20),
 	category VARCHAR(20),
 	created_by INT ,
-	quota INT
+	quota INT,
+	CONSTRAINT fk_activities_user_profiles FOREIGN KEY (created_by) REFERENCES user_profiles(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS activity_locations(
@@ -24,7 +25,6 @@ CREATE TABLE IF NOT EXISTS user_profiles(
 	external_id VARCHAR UNIQUE,
 	user_name VARCHAR(20) UNIQUE,
 	email VARCHAR(255) UNIQUE NOT NULL
-
 );
 
 CREATE TABLE IF NOT EXISTS user_profile_addresses(
@@ -35,8 +35,8 @@ CREATE TABLE IF NOT EXISTS user_profile_addresses(
 
 CREATE TABLE IF NOT EXISTS user_profile_stats(
 	profile_id  INT PRIMARY KEY REFERENCES user_profiles(id) ON DELETE CASCADE,
-	point REAL,
-	attanded_activities INT
+	average_point REAL DEFAULT 0 ,
+	attanded_activities INT DEFAULT 0
 );
 
 
@@ -44,7 +44,7 @@ CREATE TABLE IF NOT EXISTS participants (
 	activity_id INT REFERENCES activities(id) ON DELETE CASCADE,
 	user_id INT REFERENCES user_profiles(id)ON DELETE CASCADE,
 	
-	CONSTRAINT participants_pk PRIMARY KEY(activity_id,user_id)
+	CONSTRAINT participants_pk PRIMARY KEY(activity_id,user_id) ON DELETE CASCADE
 );
 
 
@@ -61,3 +61,19 @@ CREATE TABLE IF NOT EXISTS activity_flows(
 	description TEXT NOT NULL,
 	FOREIGN KEY (activity_id) REFERENCES activities(id) ON DELETE CASCADE
 );
+
+CREATE OR REPLACE FUNCTION insert_default_user_stats()
+RETURNS TRIGGER AS $$
+BEGIN
+    INSERT INTO user_profile_stats (profile_id, average_point, attanded_activities)
+    VALUES (NEW.id, 0, 0);
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE TRIGGER trigger_insert_default_user_stats
+AFTER INSERT ON user_profiles
+FOR EACH ROW
+EXECUTE FUNCTION insert_default_user_stats();

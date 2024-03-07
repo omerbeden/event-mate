@@ -122,7 +122,7 @@ func TestAddParticipant(t *testing.T) {
 	)
 
 	participant := model.User{
-		ID: 4,
+		ID: 2,
 	}
 	activityId := int64(1)
 

@@ -42,16 +42,11 @@ func (cmd *CreateProfileCommand) Handle(ctx context.Context) error {
 	}
 
 	userProfile.Adress.ProfileId = userProfile.Id
+	userProfile.Stat.ProfileId = userProfile.Id
 
 	err = cmd.AddressRepo.Insert(ctx, tx, cmd.Profile.Adress)
 	if err != nil {
 		return fmt.Errorf("error while inserting user profile address %w", err)
-	}
-
-	userProfile.Stat.ProfileId = userProfile.Id
-	err = cmd.StatRepo.Insert(ctx, tx, cmd.Profile.Stat)
-	if err != nil {
-		return fmt.Errorf("error while inserting user profile stat %w", err)
 	}
 
 	if err = tx.Commit(ctx); err != nil {

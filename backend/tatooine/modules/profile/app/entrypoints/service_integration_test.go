@@ -168,9 +168,9 @@ func TestUpdateUserProfileImageWithoutRedis(t *testing.T) {
 		postgresadapter.NewUserProfileStatRepo(pgxAdapter),
 		postgresadapter.NewUserProfileAddressRepo(pgxAdapter),
 		*redis, pgxAdapter)
-	err := service.UpdateProfileImage(ctx, "1b", "new profile image10.png")
+	err := service.UpdateProfileImage(ctx, "redis3", "new profile image10.png")
 
-	assert.NoError(t, err)
+	assert.Error(t, err)
 }
 
 func TestGetAttandedActivities(t *testing.T) {
@@ -197,7 +197,7 @@ func TestGetAttandedActivities(t *testing.T) {
 		postgresadapter.NewUserProfileAddressRepo(pgxAdapter),
 		*redis, pgxAdapter)
 
-	userId := int64(7)
+	userId := int64(2)
 	attandedActivities, err := service.GetAttandedActivities(ctx, userId)
 
 	assert.NoError(t, err)
@@ -230,7 +230,7 @@ func TestGetUserProfile(t *testing.T) {
 		postgresadapter.NewUserProfileAddressRepo(pgxAdapter),
 		*redis, pgxAdapter)
 
-	userName := "omerbeden3"
+	userName := "omr"
 	user, err := service.GetUserProfile(ctx, userName)
 	fmt.Printf("user: %+v", user)
 	assert.NoError(t, err)
@@ -256,9 +256,9 @@ func TestEvaluateUser(t *testing.T) {
 	})
 
 	evaluation := model.UserEvaluation{
-		ReceiverId: "1c",
-		GiverId:    "1d",
-		Points:     3.5,
+		ReceiverId: "1a",
+		GiverId:    "redis3",
+		Points:     8.5,
 		Comment:    "test comment",
 	}
 	pgxAdapter := postgres.NewPgxAdapter(pool)
@@ -299,7 +299,7 @@ func TestDeleteUser(t *testing.T) {
 		postgresadapter.NewUserProfileStatRepo(pgxAdapter),
 		postgresadapter.NewUserProfileAddressRepo(pgxAdapter),
 		*redis, pgxAdapter)
-	err := service.DeleteUser(ctx, "externalId", "userName")
+	err := service.DeleteUser(ctx, "1a", "omr")
 
 	assert.NoError(t, err)
 

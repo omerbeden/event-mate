@@ -21,6 +21,5 @@ type UserProfileAddressRepository interface {
 	Insert(ctx context.Context, tx db.Tx, address model.UserProfileAdress) error
 }
 type UserProfileStatRepository interface {
-	Insert(ctx context.Context, tx db.Tx, stat model.UserProfileStat) error
 	EvaluateUser(ctx context.Context, eval model.UserEvaluation) error
 }

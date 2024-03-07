@@ -131,7 +131,7 @@ func (r *userProfileRepo) GetCurrentUserProfile(ctx context.Context, externalId 
 	q := `SELECT up.id, up.name, up.last_name, up.about, up.profile_image_url, up.external_id, up.user_name,email,
     upa.city,
     ups.attanded_activities, 
-	(SELECT ROUND(AVG(points),1) FROM user_points WHERE receiver_id = up.external_id) as point
+	ups.average_point as point
 	FROM user_profiles up
 	JOIN user_profile_stats ups ON ups.profile_id = up.id
 	JOIN user_profile_addresses upa ON upa.profile_id = up.id

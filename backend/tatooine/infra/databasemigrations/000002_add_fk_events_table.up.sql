@@ -1,1 +1,0 @@
-ALTER TABLE activities ADD CONSTRAINT fk_activities_user_profiles FOREIGN KEY (created_by) REFERENCES user_profiles(id);

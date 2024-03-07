@@ -21,25 +21,23 @@ func NewUserProfileStatRepo(pool db.Executor) *userProfileStatRepo {
 	}
 }
 
-func (r *userProfileStatRepo) Insert(ctx context.Context, tx db.Tx, stat model.UserProfileStat) error {
-	q := fmt.Sprintf(
-		`INSERT INTO user_profile_stats
-		 (profile_id, point, attanded_activities)
-		 Values(%d,%f,%d)`, stat.ProfileId, stat.Point, stat.AttandedActivities)
-	_, err := tx.Exec(ctx, q)
-	if err != nil {
-		return fmt.Errorf("could not insert profile stats %w", err)
-	}
-
-	return nil
-}
-
 func (r *userProfileStatRepo) EvaluateUser(ctx context.Context, eval model.UserEvaluation) error {
 
-	q := `INSERT INTO user_points(giver_id,receiver_id,points,comment) 
+	tx, err := r.pool.Begin(ctx)
+
+	defer func() {
+		if err != nil {
+			tx.Rollback(ctx)
+		}
+	}()
+
+	if err != nil {
+		return fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	iq := `INSERT INTO user_points(giver_id,receiver_id,points,comment) 
 		VALUES ($1,$2,$3,$4);`
 
-	_, err := r.pool.Exec(ctx, q, eval.GiverId, eval.ReceiverId, eval.Points, eval.Comment)
+	_, err = tx.Exec(ctx, iq, eval.GiverId, eval.ReceiverId, eval.Points, eval.Comment)
 
 	if err != nil {
 		var pgErr *pgconn.PgError
@@ -49,6 +47,36 @@ func (r *userProfileStatRepo) EvaluateUser(ctx context.Context, eval model.UserE
 			}
 		}
 		return fmt.Errorf("could not evaluate user %s , %w", eval.ReceiverId, err)
+	}
+
+	uq := `WITH average_points AS (
+				SELECT
+					up.id AS profile_id,
+					ROUND(AVG(points),1) AS mean_point
+				FROM
+					user_points upoints
+				JOIN
+					user_profiles up ON up.external_id = upoints.receiver_id
+				GROUP BY
+					up.id
+			)
+			UPDATE
+				user_profile_stats ups
+			SET
+			average_point = ap.mean_point
+			FROM
+				average_points ap
+			WHERE
+				ups.profile_id = ap.profile_id;`
+
+	_, err = tx.Exec(ctx, uq)
+	if err != nil {
+		return fmt.Errorf("failed to calculate average point")
+	}
+
+	err = tx.Commit(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to commit transaction: %w", err)
 	}
 
 	return nil
