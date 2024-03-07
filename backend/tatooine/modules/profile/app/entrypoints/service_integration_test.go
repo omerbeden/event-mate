@@ -48,9 +48,9 @@ func TestCreateUserProfile(t *testing.T) {
 		Name:               "omer",
 		LastName:           "beden",
 		About:              "pc",
-		ExternalId:         "1a",
-		UserName:           "omr",
-		Email:              "test",
+		ExternalId:         "1b",
+		UserName:           "omrr",
+		Email:              "test2",
 		AttandedActivities: []model.Activity{},
 		Adress:             model.UserProfileAdress{City: "Sakarya"},
 		Stat: model.UserProfileStat{

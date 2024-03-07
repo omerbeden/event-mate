@@ -7,6 +7,7 @@ import (
 	"github.com/jackc/pgx/v5"
 
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/domain/model"
+	customerrors "github.com/omerbeden/event-mate/backend/tatooine/pkg/customErrors"
 	"github.com/omerbeden/event-mate/backend/tatooine/pkg/db"
 )
 
@@ -97,6 +98,9 @@ func (r *activityRepository) GetParticipants(ctx context.Context, acitivityId in
 	var participants []model.User
 	rows, err := r.pool.Query(ctx, q, acitivityId)
 	if err != nil {
+		if err == pgx.ErrNoRows {
+			return nil, customerrors.ErrActivityDoesNotHaveParticipants
+		}
 		return nil, fmt.Errorf("%s could not get participants , acitivityId: %d  %w", errlogprefix, acitivityId, err)
 	}
 	for rows.Next() {

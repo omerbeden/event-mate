@@ -3,12 +3,14 @@ package commands
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/adapters/cacheadapter"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/domain/model"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/domain/ports/repositories"
 	"github.com/omerbeden/event-mate/backend/tatooine/pkg/cache"
+	customerrors "github.com/omerbeden/event-mate/backend/tatooine/pkg/customErrors"
 )
 
 const ERR_PREFIX_GET_PARTICIPANTS = "commands:getparticipants"
@@ -23,7 +25,15 @@ func (command *GetParticipantsCommand) Handle(ctx context.Context) ([]model.User
 	redisResult, err := command.getFromRedis(ctx)
 	if err != nil {
 		fmt.Printf("%s redis error returning from db", ERR_PREFIX_GET_PARTICIPANTS)
-		return command.ActivityRepository.GetParticipants(ctx, command.ActivityId)
+		participants, err := command.ActivityRepository.GetParticipants(ctx, command.ActivityId)
+		if err != nil {
+			if errors.As(err, &customerrors.ErrActivityDoesNotHaveParticipants) {
+				return nil, nil
+			} else {
+				return nil, err
+			}
+		}
+		return participants, nil
 	}
 
 	return redisResult, nil

@@ -43,13 +43,23 @@ func TestCreateActivity(t *testing.T) {
 	)
 
 	activity := model.Activity{
-		Title:    "Test Title2",
-		Category: "Test Category2",
+		Title:    "running",
+		Category: "sport",
+		StartAt:  time.Now(),
+		EndAt:    time.Now().Add(time.Hour * 2),
+		Content:  "Test Content2",
+		Quota:    3,
+		Flow:     []string{"meet", "ice breaker", "running"},
+		Rules:    []string{"no dogs", "no cigarete", "no talking while running"},
 		CreatedBy: model.User{
-			ID: 1,
+			ID: 2,
 		},
 		Location: model.Location{
-			City: "Sakarya",
+			City:        "Sakarya",
+			District:    "Hendek",
+			Description: "in front of the gas station",
+			Latitude:    41.000000,
+			Longitude:   28.000000,
 		},
 	}
 
@@ -122,9 +132,9 @@ func TestAddParticipant(t *testing.T) {
 	)
 
 	participant := model.User{
-		ID: 2,
+		ID: 3,
 	}
-	activityId := int64(1)
+	activityId := int64(2)
 
 	err := activityService.AddParticipant(ctx, participant, activityId)
 	assert.NoError(t, err)
@@ -157,7 +167,7 @@ func TestGetParticipants(t *testing.T) {
 		pgxAdapter,
 	)
 
-	activityID := int64(1)
+	activityID := int64(2)
 
 	res, err := activityService.GetParticipants(ctx, activityID)
 
