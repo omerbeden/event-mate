@@ -15,6 +15,7 @@ import (
 	activityServiceEntryPoints "github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/entrypoints"
 	profileRepoAdapter "github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/adapters/postgresadapter"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/entrypoints"
+	ve "github.com/omerbeden/event-mate/backend/tatooine/modules/validation/app/entrypoints"
 	"github.com/omerbeden/event-mate/backend/tatooine/pkg/cache"
 	"github.com/omerbeden/event-mate/backend/tatooine/pkg/db/postgres"
 )
@@ -50,10 +51,12 @@ func main() {
 	userStatRepo := profileRepoAdapter.NewUserProfileStatRepo(pgxAdapter)
 	userService := entrypoints.NewService(userRepository, userStatRepo, userAddressRepo, *redisClient, pgxAdapter)
 
+	validationService := ve.ValidationService{}
 	app := fiber.New()
 	api := app.Group("/api")
 	routes.ActivityRouter(api, *activityService)
 	routes.ProfileRouter(api, *userService)
+	routes.ValidationRouter(api, validationService)
 
 	go func() {
 		if err := app.Listen(applicationPort); err != nil {
