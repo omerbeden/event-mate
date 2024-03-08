@@ -27,7 +27,7 @@ func (command *GetParticipantsCommand) Handle(ctx context.Context) ([]model.User
 		fmt.Printf("%s redis error returning from db", ERR_PREFIX_GET_PARTICIPANTS)
 		participants, err := command.ActivityRepository.GetParticipants(ctx, command.ActivityId)
 		if err != nil {
-			if errors.As(err, &customerrors.ErrActivityDoesNotHaveParticipants) {
+			if errors.Is(err, customerrors.ErrActivityDoesNotHaveParticipants) {
 				return nil, nil
 			} else {
 				return nil, err
