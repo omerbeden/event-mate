@@ -10,6 +10,7 @@ import (
 	"github.com/omerbeden/event-mate/backend/tatooine/cmd/api/presenter"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/domain/model"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/entrypoints"
+	customerrors "github.com/omerbeden/event-mate/backend/tatooine/pkg/customErrors"
 )
 
 func CreateActivity(service entrypoints.ActivityService) fiber.Handler {
@@ -135,7 +136,7 @@ func GetActivitiesByLocation(service entrypoints.ActivityService) fiber.Handler 
 
 		res, err := service.GetActivitiesByLocation(ctx, loc)
 
-		if err != nil {
+		if err != nil && err != customerrors.ErrActivityDoesNotHaveParticipants {
 			return c.Status(fiber.StatusInternalServerError).JSON(presenter.BaseResponse{
 				APIVersion: presenter.APIVersion,
 				Data:       nil,
