@@ -14,6 +14,7 @@ import (
 	"github.com/omerbeden/event-mate/backend/tatooine/pkg/cache"
 	"github.com/omerbeden/event-mate/backend/tatooine/pkg/db/postgres"
 	"github.com/stretchr/testify/assert"
+	"go.uber.org/zap"
 )
 
 func TestCreateUserProfile(t *testing.T) {
@@ -43,6 +44,7 @@ func TestCreateUserProfile(t *testing.T) {
 		postgresadapter.NewUserProfileAddressRepo(pgxAdapter),
 		*redis,
 		pgxAdapter,
+		zap.NewNop().Sugar(),
 	)
 	user := &model.UserProfile{
 		Name:               "omer",
@@ -89,7 +91,8 @@ func TestCreateUserProfileWithoutRedis(t *testing.T) {
 		postgresadapter.NewUserProfileRepo(pgxAdapter),
 		postgresadapter.NewUserProfileStatRepo(pgxAdapter),
 		postgresadapter.NewUserProfileAddressRepo(pgxAdapter),
-		*redis, pgxAdapter)
+		*redis, pgxAdapter, zap.NewNop().Sugar(),
+	)
 	user := &model.UserProfile{
 		Name:               "omer",
 		LastName:           "beden",
@@ -135,7 +138,7 @@ func TestUpdateUserProfileImage(t *testing.T) {
 		postgresadapter.NewUserProfileRepo(pgxAdapter),
 		postgresadapter.NewUserProfileStatRepo(pgxAdapter),
 		postgresadapter.NewUserProfileAddressRepo(pgxAdapter),
-		*redis, pgxAdapter)
+		*redis, pgxAdapter, zap.NewNop().Sugar())
 
 	err := service.UpdateProfileImage(ctx, "1a", "new profile image10.png")
 
@@ -167,7 +170,7 @@ func TestUpdateUserProfileImageWithoutRedis(t *testing.T) {
 		postgresadapter.NewUserProfileRepo(pgxAdapter),
 		postgresadapter.NewUserProfileStatRepo(pgxAdapter),
 		postgresadapter.NewUserProfileAddressRepo(pgxAdapter),
-		*redis, pgxAdapter)
+		*redis, pgxAdapter, zap.NewNop().Sugar())
 	err := service.UpdateProfileImage(ctx, "redis3", "new profile image10.png")
 
 	assert.Error(t, err)
@@ -195,7 +198,7 @@ func TestGetAttandedActivities(t *testing.T) {
 		postgresadapter.NewUserProfileRepo(pgxAdapter),
 		postgresadapter.NewUserProfileStatRepo(pgxAdapter),
 		postgresadapter.NewUserProfileAddressRepo(pgxAdapter),
-		*redis, pgxAdapter)
+		*redis, pgxAdapter, zap.NewNop().Sugar())
 
 	userId := int64(2)
 	attandedActivities, err := service.GetAttandedActivities(ctx, userId)
@@ -228,7 +231,7 @@ func TestGetUserProfile(t *testing.T) {
 		postgresadapter.NewUserProfileRepo(pgxAdapter),
 		postgresadapter.NewUserProfileStatRepo(pgxAdapter),
 		postgresadapter.NewUserProfileAddressRepo(pgxAdapter),
-		*redis, pgxAdapter)
+		*redis, pgxAdapter, zap.NewNop().Sugar())
 
 	userName := "omr"
 	user, err := service.GetUserProfile(ctx, userName)
@@ -267,7 +270,7 @@ func TestEvaluateUser(t *testing.T) {
 		postgresadapter.NewUserProfileRepo(pgxAdapter),
 		postgresadapter.NewUserProfileStatRepo(pgxAdapter),
 		postgresadapter.NewUserProfileAddressRepo(pgxAdapter),
-		*redis, pgxAdapter)
+		*redis, pgxAdapter, zap.NewNop().Sugar())
 
 	err := service.EvaluateUser(ctx, evaluation)
 
@@ -298,7 +301,7 @@ func TestDeleteUser(t *testing.T) {
 		postgresadapter.NewUserProfileRepo(pgxAdapter),
 		postgresadapter.NewUserProfileStatRepo(pgxAdapter),
 		postgresadapter.NewUserProfileAddressRepo(pgxAdapter),
-		*redis, pgxAdapter)
+		*redis, pgxAdapter, zap.NewNop().Sugar())
 	err := service.DeleteUser(ctx, "1a", "omr")
 
 	assert.NoError(t, err)

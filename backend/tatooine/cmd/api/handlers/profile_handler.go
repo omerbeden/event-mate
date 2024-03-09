@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -17,7 +16,7 @@ func CreateUserProfile(service entrypoints.UserService) fiber.Handler {
 		var requestBody model.UserProfile
 		err := c.BodyParser(&requestBody)
 		if err != nil {
-			fmt.Printf("err: %v\n", err)
+			service.Logger.Error(presenter.BODY_PARSER_ERR)
 			return c.Status(fiber.StatusBadRequest).JSON(presenter.BaseResponse{
 				APIVersion: presenter.APIVersion,
 				Data:       nil,
@@ -29,7 +28,7 @@ func CreateUserProfile(service entrypoints.UserService) fiber.Handler {
 
 		err = service.CreateUser(ctx, &requestBody)
 		if err != nil {
-			fmt.Printf("err: %v\n", err)
+			service.Logger.Error(err)
 
 			return c.Status(fiber.StatusInternalServerError).JSON(presenter.BaseResponse{
 				APIVersion: presenter.APIVersion,
@@ -55,6 +54,7 @@ func GetCurrentUserProfile(service entrypoints.UserService) fiber.Handler {
 		res, err := service.GetCurrentUserProfile(ctx, externalId)
 
 		if err != nil {
+			service.Logger.Error(err)
 			if err == customerrors.ERR_NOT_FOUND {
 				return c.Status(fiber.StatusNotFound).JSON(presenter.BaseResponse{
 					APIVersion: presenter.APIVersion,
@@ -91,6 +91,7 @@ func UpdateProfileImageUrl(service entrypoints.UserService) fiber.Handler {
 
 		err := service.UpdateProfileImage(ctx, externalId, request.ProfileImageUrl)
 		if err != nil {
+			service.Logger.Error(err)
 			if err == customerrors.ERR_NOT_FOUND {
 				return c.Status(fiber.StatusNotFound).JSON(presenter.BaseResponse{
 					APIVersion: presenter.APIVersion,
