@@ -6,8 +6,7 @@ import (
 
 type ValidationService struct{}
 
-func (service *ValidationService) ValidateIdentity() (string, error) {
-	cmd := commands.VeriffGenerateSessionCommand{}
+func (service *ValidationService) ValidateMernis(nationalId, name, lastname string, birthYear int) (bool, error) {
+	return commands.ValidateMernis(nationalId, name, lastname, birthYear)
 
-	return cmd.Handle()
 }
