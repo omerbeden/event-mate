@@ -49,8 +49,7 @@ func (mernis mernisAdapter) prepareSoapRequest() (*http.Request, error) {
 
 	req, err := http.NewRequest("POST", soapURL, bytes.NewBufferString(soapBody))
 	if err != nil {
-		fmt.Println("Error creating request:", err)
-		return nil, err
+		return nil, fmt.Errorf("mernis prepare request: %w", err)
 	}
 	req.Header.Set("Content-Type", "application/soap+xml; charset=utf-8")
 	return req, nil
@@ -66,21 +65,18 @@ func (mernis mernisAdapter) Validate() (bool, error) {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		fmt.Println("Error sending request:", err)
-		return false, err
+		return false, fmt.Errorf("mernis client do: %w", err)
 	}
 	defer resp.Body.Close()
 
 	bodyBytes, err := io.ReadAll(resp.Body)
 	if err != nil {
-		fmt.Println("Error reading response body:", err)
-		return false, err
+		return false, fmt.Errorf("mernis read body: %w", err)
 	}
 
 	envelope, err := parseSOAPResponse(bytes.NewReader(bodyBytes))
 	if err != nil {
-		fmt.Println("Error parsing SOAP response:", err)
-		return false, err
+		return false, fmt.Errorf("mernis parsing soap response: %w", err)
 	}
 
 	return envelope.Body.TCKimlikNoDogrulaResponse.Result, nil

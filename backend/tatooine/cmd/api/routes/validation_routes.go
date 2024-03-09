@@ -6,7 +6,7 @@ import (
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/validation/app/entrypoints"
 )
 
-func ValidationRouter(app fiber.Router, service entrypoints.ValidationService) {
+func ValidationRouter(app fiber.Router, service *entrypoints.ValidationService) {
 	app.Post("/validations/validateIdentity", handlers.ValidateIdentity(service))
 
 }

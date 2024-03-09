@@ -1,20 +1,18 @@
 package handlers
 
 import (
-	"fmt"
-
 	"github.com/gofiber/fiber/v2"
 	"github.com/omerbeden/event-mate/backend/tatooine/cmd/api/presenter"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/validation/app/entrypoints"
 )
 
-func ValidateIdentity(service entrypoints.ValidationService) fiber.Handler {
+func ValidateIdentity(service *entrypoints.ValidationService) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 
 		var requestBody presenter.MernisRequest
 		err := c.BodyParser(&requestBody)
 		if err != nil {
-			fmt.Printf("err: %v\n", err)
+			service.Logger.Infof("failed to parse body %s", err.Error())
 			return c.Status(fiber.StatusBadRequest).JSON(presenter.BaseResponse{
 				APIVersion: presenter.APIVersion,
 				Data:       nil,
@@ -24,8 +22,7 @@ func ValidateIdentity(service entrypoints.ValidationService) fiber.Handler {
 
 		result, err := service.ValidateMernis(requestBody.NationalId, requestBody.Name, requestBody.LastName, requestBody.BirthYear)
 		if err != nil {
-			fmt.Printf("err: %v\n", err)
-
+			service.Logger.Info(err)
 			return c.Status(fiber.StatusInternalServerError).JSON(presenter.BaseResponse{
 				APIVersion: presenter.APIVersion,
 				Data:       nil,

@@ -18,6 +18,7 @@ import (
 	ve "github.com/omerbeden/event-mate/backend/tatooine/modules/validation/app/entrypoints"
 	"github.com/omerbeden/event-mate/backend/tatooine/pkg/cache"
 	"github.com/omerbeden/event-mate/backend/tatooine/pkg/db/postgres"
+	"go.uber.org/zap"
 )
 
 const applicationPort = ":3000"
@@ -38,6 +39,8 @@ func main() {
 
 	redisClient := cache.NewRedisClient(redisOption)
 	pgxAdapter := postgres.NewPgxAdapter(dbPool)
+	logger, _ := zap.NewProduction(zap.AddCaller(), zap.AddStacktrace(zap.InfoLevel))
+	sugar := logger.Sugar()
 
 	activityRepository := activityRepoAdapter.NewActivityRepo(pgxAdapter)
 	activityRulesRepository := activityRepoAdapter.NewActivityRulesRepo(pgxAdapter)
@@ -50,8 +53,8 @@ func main() {
 	userAddressRepo := profileRepoAdapter.NewUserProfileAddressRepo(pgxAdapter)
 	userStatRepo := profileRepoAdapter.NewUserProfileStatRepo(pgxAdapter)
 	userService := entrypoints.NewService(userRepository, userStatRepo, userAddressRepo, *redisClient, pgxAdapter)
+	validationService := ve.NewValidationService(sugar)
 
-	validationService := ve.ValidationService{}
 	app := fiber.New()
 	api := app.Group("/api")
 	routes.ActivityRouter(api, *activityService)
@@ -75,6 +78,7 @@ func main() {
 
 	redisClient.Close()
 	dbPool.Close()
+	logger.Sync()
 
 	fmt.Println("Fiber was successful shutdown.")
 
