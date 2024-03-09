@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"context"
-	"fmt"
 	"strconv"
 	"time"
 
@@ -18,7 +17,7 @@ func CreateActivity(service entrypoints.ActivityService) fiber.Handler {
 		var requestBody model.Activity
 		err := c.BodyParser(&requestBody)
 		if err != nil {
-			fmt.Printf("err: %v\n", err)
+			service.Logger.Error(presenter.BODY_PARSER_ERR)
 			return c.Status(fiber.StatusBadRequest).JSON(presenter.BaseResponse{
 				APIVersion: presenter.APIVersion,
 				Data:       nil,
@@ -31,7 +30,7 @@ func CreateActivity(service entrypoints.ActivityService) fiber.Handler {
 
 		res, err := service.CreateActivity(ctx, requestBody)
 		if err != nil {
-			fmt.Printf("err: %v\n", err)
+			service.Logger.Error(err)
 
 			return c.Status(fiber.StatusInternalServerError).JSON(presenter.BaseResponse{
 				APIVersion: presenter.APIVersion,
@@ -52,6 +51,7 @@ func AddParticipant(service entrypoints.ActivityService) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		activityId, err := c.ParamsInt("activityId")
 		if err != nil {
+			service.Logger.Error(presenter.PARAM_PARSER_ERR)
 			return c.Status(fiber.StatusBadRequest).JSON(presenter.BaseResponse{
 				APIVersion: presenter.APIVersion,
 				Data:       nil,
@@ -62,6 +62,7 @@ func AddParticipant(service entrypoints.ActivityService) fiber.Handler {
 		var requestBody model.User
 		err = c.BodyParser(&requestBody)
 		if err != nil {
+			service.Logger.Error(presenter.BODY_PARSER_ERR)
 			return c.Status(fiber.StatusBadRequest).JSON(presenter.BaseResponse{
 				APIVersion: presenter.APIVersion,
 				Data:       nil,
@@ -73,7 +74,7 @@ func AddParticipant(service entrypoints.ActivityService) fiber.Handler {
 		defer cancel()
 
 		if err := service.AddParticipant(ctx, requestBody, int64(activityId)); err != nil { // unnecessary int64 id , can be use int instead
-			fmt.Printf("err: %v\n", err)
+			service.Logger.Error(err)
 			return c.Status(fiber.StatusInternalServerError).JSON(presenter.BaseResponse{
 				APIVersion: presenter.APIVersion,
 				Data:       nil,
@@ -89,6 +90,7 @@ func GetParticipants(service entrypoints.ActivityService) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		activityId, err := c.ParamsInt("activityId")
 		if err != nil {
+			service.Logger.Error(presenter.PARAM_PARSER_ERR)
 			return c.Status(fiber.StatusBadRequest).JSON(presenter.BaseResponse{
 				APIVersion: presenter.APIVersion,
 				Data:       nil,
@@ -101,6 +103,7 @@ func GetParticipants(service entrypoints.ActivityService) fiber.Handler {
 
 		res, err := service.GetParticipants(ctx, int64(activityId))
 		if err != nil {
+			service.Logger.Error(err)
 			return c.Status(fiber.StatusInternalServerError).JSON(presenter.BaseResponse{
 				APIVersion: presenter.APIVersion,
 				Data:       nil,
@@ -120,6 +123,7 @@ func GetActivitiesByLocation(service entrypoints.ActivityService) fiber.Handler 
 	return func(c *fiber.Ctx) error {
 		city := c.Query("city")
 		if city == "" {
+			service.Logger.Error(presenter.PARAM_PARSER_ERR)
 			return c.Status(fiber.StatusBadRequest).JSON(presenter.BaseResponse{
 				APIVersion: presenter.APIVersion,
 				Data:       nil,
@@ -137,6 +141,7 @@ func GetActivitiesByLocation(service entrypoints.ActivityService) fiber.Handler 
 		res, err := service.GetActivitiesByLocation(ctx, loc)
 
 		if err != nil && err != customerrors.ErrActivityDoesNotHaveParticipants {
+			service.Logger.Error(err)
 			return c.Status(fiber.StatusInternalServerError).JSON(presenter.BaseResponse{
 				APIVersion: presenter.APIVersion,
 				Data:       nil,
@@ -160,6 +165,7 @@ func GetActivityById(service entrypoints.ActivityService) fiber.Handler {
 		aI, err := strconv.Atoi(activityId)
 
 		if err != nil {
+			service.Logger.Error(presenter.PARAM_PARSER_ERR)
 			return c.Status(fiber.StatusBadRequest).JSON(presenter.BaseResponse{
 				APIVersion: presenter.APIVersion,
 				Data:       nil,
@@ -173,6 +179,7 @@ func GetActivityById(service entrypoints.ActivityService) fiber.Handler {
 		res, err := service.GetActivityById(ctx, int64(aI))
 
 		if err != nil {
+			service.Logger.Error(err)
 			return c.Status(fiber.StatusInternalServerError).JSON(presenter.BaseResponse{
 				APIVersion: presenter.APIVersion,
 				Data:       nil,
