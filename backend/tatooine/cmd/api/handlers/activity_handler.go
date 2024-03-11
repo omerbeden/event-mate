@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"context"
-	"fmt"
 	"strconv"
 	"time"
 
@@ -14,6 +13,19 @@ import (
 	customerrors "github.com/omerbeden/event-mate/backend/tatooine/pkg/customErrors"
 	"go.uber.org/zap"
 )
+
+func getRequestId(c *fiber.Ctx) (string, error) {
+	requestid, ok := c.Locals("requestid").(string)
+
+	if !ok {
+		return "", c.Status(fiber.StatusInternalServerError).JSON(presenter.BaseResponse{
+			APIVersion: presenter.APIVersion,
+			Data:       "reqeust id ",
+			Error:      presenter.UNKNOW_ERR,
+		})
+	}
+	return requestid, nil
+}
 
 func CreateActivity(service entrypoints.ActivityService) fiber.Handler {
 	return func(c *fiber.Ctx) error {
@@ -31,16 +43,10 @@ func CreateActivity(service entrypoints.ActivityService) fiber.Handler {
 		ctx, cancel := context.WithTimeout(c.Context(), time.Second*5)
 		defer cancel()
 
-		requestid, ok := c.Locals("requestid").(string)
-
-		if !ok {
-			return c.Status(fiber.StatusInternalServerError).JSON(presenter.BaseResponse{
-				APIVersion: presenter.APIVersion,
-				Data:       "reqeust id ",
-				Error:      presenter.UNKNOW_ERR,
-			})
+		requestid, err := getRequestId(c)
+		if err != nil {
+			return err
 		}
-		fmt.Println(requestid)
 
 		newLogger := service.Logger.With(zap.String("requestid", requestid))
 		ctx = context.WithValue(ctx, pkg.LoggerKey, newLogger)
@@ -90,6 +96,14 @@ func AddParticipant(service entrypoints.ActivityService) fiber.Handler {
 		ctx, cancel := context.WithTimeout(c.Context(), time.Second*5)
 		defer cancel()
 
+		requestid, err := getRequestId(c)
+		if err != nil {
+			return err
+		}
+
+		newLogger := service.Logger.With(zap.String("requestid", requestid))
+		ctx = context.WithValue(ctx, pkg.LoggerKey, newLogger)
+
 		if err := service.AddParticipant(ctx, requestBody, int64(activityId)); err != nil { // unnecessary int64 id , can be use int instead
 			service.Logger.Error(err)
 			return c.Status(fiber.StatusInternalServerError).JSON(presenter.BaseResponse{
@@ -118,6 +132,13 @@ func GetParticipants(service entrypoints.ActivityService) fiber.Handler {
 		ctx, cancel := context.WithTimeout(c.Context(), time.Second*5)
 		defer cancel()
 
+		requestid, err := getRequestId(c)
+		if err != nil {
+			return err
+		}
+
+		newLogger := service.Logger.With(zap.String("requestid", requestid))
+		ctx = context.WithValue(ctx, pkg.LoggerKey, newLogger)
 		res, err := service.GetParticipants(ctx, int64(activityId))
 		if err != nil {
 			service.Logger.Error(err)
@@ -154,6 +175,14 @@ func GetActivitiesByLocation(service entrypoints.ActivityService) fiber.Handler 
 
 		ctx, cancel := context.WithTimeout(c.Context(), time.Second*5)
 		defer cancel()
+
+		requestid, err := getRequestId(c)
+		if err != nil {
+			return err
+		}
+
+		newLogger := service.Logger.With(zap.String("requestid", requestid))
+		ctx = context.WithValue(ctx, pkg.LoggerKey, newLogger)
 
 		res, err := service.GetActivitiesByLocation(ctx, loc)
 
@@ -192,6 +221,14 @@ func GetActivityById(service entrypoints.ActivityService) fiber.Handler {
 
 		ctx, cancel := context.WithTimeout(c.Context(), time.Second*5)
 		defer cancel()
+
+		requestid, err := getRequestId(c)
+		if err != nil {
+			return err
+		}
+
+		newLogger := service.Logger.With(zap.String("requestid", requestid))
+		ctx = context.WithValue(ctx, pkg.LoggerKey, newLogger)
 
 		res, err := service.GetActivityById(ctx, int64(aI))
 

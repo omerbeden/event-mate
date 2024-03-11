@@ -9,8 +9,10 @@ import (
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/adapters/cacheadapter"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/domain/model"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/domain/ports/repositories"
+	"github.com/omerbeden/event-mate/backend/tatooine/pkg"
 	"github.com/omerbeden/event-mate/backend/tatooine/pkg/cache"
 	customerrors "github.com/omerbeden/event-mate/backend/tatooine/pkg/customErrors"
+	"go.uber.org/zap"
 )
 
 const ERR_PREFIX_GET_PARTICIPANTS = "commands:getparticipants"
@@ -22,9 +24,14 @@ type GetParticipantsCommand struct {
 }
 
 func (command *GetParticipantsCommand) Handle(ctx context.Context) ([]model.User, error) {
+	logger, ok := ctx.Value(pkg.LoggerKey).(*zap.SugaredLogger)
+	if !ok {
+		return nil, fmt.Errorf("failed to get logger for GetParticipantsCommand")
+	}
+
 	redisResult, err := command.getFromRedis(ctx)
 	if err != nil {
-		fmt.Printf("%s redis error returning from db", ERR_PREFIX_GET_PARTICIPANTS)
+		logger.Infof("%s redis error returning from db", ERR_PREFIX_GET_PARTICIPANTS)
 		participants, err := command.ActivityRepository.GetParticipants(ctx, command.ActivityId)
 		if err != nil {
 			if errors.Is(err, customerrors.ErrActivityDoesNotHaveParticipants) {
@@ -58,6 +65,5 @@ func (command *GetParticipantsCommand) getFromRedis(ctx context.Context) ([]mode
 		participants = append(participants, participant)
 	}
 
-	fmt.Println(participants)
 	return participants, nil
 }

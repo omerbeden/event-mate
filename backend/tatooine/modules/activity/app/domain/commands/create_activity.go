@@ -85,6 +85,7 @@ func (cmd *CreateCommand) Handle(ctx context.Context) (bool, error) {
 	var wg sync.WaitGroup
 	wg.Add(1)
 	go func() {
+		ctx := context.Background()
 		defer wg.Done()
 		err := cmd.addCityToRedis(ctx, activity.Location.City, jsonActivity)
 		if err != nil {

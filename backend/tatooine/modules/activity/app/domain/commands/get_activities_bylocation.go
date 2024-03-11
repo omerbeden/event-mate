@@ -8,7 +8,9 @@ import (
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/adapters/cacheadapter"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/domain/model"
 	repo "github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/domain/ports/repositories"
+	"github.com/omerbeden/event-mate/backend/tatooine/pkg"
 	"github.com/omerbeden/event-mate/backend/tatooine/pkg/cache"
+	"go.uber.org/zap"
 )
 
 type GetByLocationCommand struct {
@@ -18,11 +20,16 @@ type GetByLocationCommand struct {
 }
 
 func (gc *GetByLocationCommand) Handle(ctx context.Context) ([]model.Activity, error) {
+	logger, ok := ctx.Value(pkg.LoggerKey).(*zap.SugaredLogger)
+	if !ok {
+		return nil, fmt.Errorf("failed to get logger for GetByLocationCommand")
+	}
+
 	cityKey := fmt.Sprintf("%s:%s", cacheadapter.CITY_CACHE_KEY, gc.Location.City)
 
 	activities, redisErr := gc.Redis.GetMembers(ctx, cityKey)
 	if redisErr != nil {
-		fmt.Printf("redis error %s \n returning from db", redisErr.Error()) // log error
+		logger.Infof("redis error %s \n returning from db", redisErr.Error())
 		return gc.Repo.GetByLocation(ctx, &gc.Location)
 	}
 
@@ -32,7 +39,7 @@ func (gc *GetByLocationCommand) Handle(ctx context.Context) ([]model.Activity, e
 		var activityObject = model.Activity{}
 		err := json.Unmarshal([]byte(activity), &activityObject)
 		if err != nil {
-			fmt.Printf("parsing erorr returning from db %s", err.Error())
+			logger.Infof("parsing erorr returning from db %s", err.Error())
 			return gc.Repo.GetByLocation(ctx, &gc.Location)
 		}
 
@@ -42,7 +49,6 @@ func (gc *GetByLocationCommand) Handle(ctx context.Context) ([]model.Activity, e
 	}
 
 	if activitiesResult != nil {
-		fmt.Printf("returning activities from redis, l: %d\n", len(activities))
 		return activitiesResult, nil
 	}
 

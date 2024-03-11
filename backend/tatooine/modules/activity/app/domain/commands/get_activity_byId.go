@@ -9,7 +9,9 @@ import (
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/adapters/cacheadapter"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/domain/model"
 	repo "github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/domain/ports/repositories"
+	"github.com/omerbeden/event-mate/backend/tatooine/pkg"
 	"github.com/omerbeden/event-mate/backend/tatooine/pkg/cache"
+	"go.uber.org/zap"
 )
 
 type GetByIDCommand struct {
@@ -21,25 +23,29 @@ type GetByIDCommand struct {
 }
 
 func (gc *GetByIDCommand) Handle(ctx context.Context) (*model.Activity, error) {
+	logger, ok := ctx.Value(pkg.LoggerKey).(*zap.SugaredLogger)
+	if !ok {
+		return nil, fmt.Errorf("failed to get logger for GetByIDCommand")
+	}
 
 	activityId := strconv.FormatInt(gc.ActivityId, 10)
 	activityKey := fmt.Sprintf("%s:%s", cacheadapter.ACTIVITY_CACHE_KEY, activityId)
 
 	result, redisErr := gc.Redis.Get(ctx, activityKey)
 	if redisErr != nil {
-		fmt.Printf("redis error %s \n returning from db", redisErr.Error()) // log error
+		logger.Info("redis error %s \n returning from db", redisErr.Error())
 		return gc.getActivityFromDb(ctx)
 	}
 
 	activity := model.Activity{}
 	err := json.Unmarshal([]byte(result.(string)), &activity)
 	if err != nil {
-		fmt.Printf("parsing erorr returning from db %s", err.Error())
+		logger.Infof("parsing erorr returning from db %s", err.Error())
 		return gc.getActivityFromDb(ctx)
 	}
 
 	if result != nil {
-		fmt.Printf("returning from redis %+v\n", activity)
+		logger.Infof("returning from redis %+v\n", activity)
 		return &activity, err
 	}
 
