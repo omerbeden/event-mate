@@ -8,7 +8,9 @@ import (
 	"github.com/omerbeden/event-mate/backend/tatooine/cmd/api/presenter"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/model"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/entrypoints"
+	"github.com/omerbeden/event-mate/backend/tatooine/pkg"
 	customerrors "github.com/omerbeden/event-mate/backend/tatooine/pkg/customErrors"
+	"go.uber.org/zap"
 )
 
 func CreateUserProfile(service entrypoints.UserService) fiber.Handler {
@@ -25,6 +27,14 @@ func CreateUserProfile(service entrypoints.UserService) fiber.Handler {
 		}
 		ctx, cancel := context.WithTimeout(c.Context(), time.Second*5)
 		defer cancel()
+
+		requestid, err := getRequestId(c)
+		if err != nil {
+			return err
+		}
+
+		newLogger := service.Logger.With(zap.String("requestid", requestid))
+		ctx = context.WithValue(ctx, pkg.LoggerKey, newLogger)
 
 		err = service.CreateUser(ctx, &requestBody)
 		if err != nil {
@@ -51,6 +61,15 @@ func GetCurrentUserProfile(service entrypoints.UserService) fiber.Handler {
 
 		ctx, cancel := context.WithTimeout(c.Context(), time.Second*5)
 		defer cancel()
+
+		requestid, err := getRequestId(c)
+		if err != nil {
+			return err
+		}
+
+		newLogger := service.Logger.With(zap.String("requestid", requestid))
+		ctx = context.WithValue(ctx, pkg.LoggerKey, newLogger)
+
 		res, err := service.GetCurrentUserProfile(ctx, externalId)
 
 		if err != nil {
@@ -89,7 +108,15 @@ func UpdateProfileImageUrl(service entrypoints.UserService) fiber.Handler {
 		defer cancel()
 		externalId := c.Params("externalId")
 
-		err := service.UpdateProfileImage(ctx, externalId, request.ProfileImageUrl)
+		requestid, err := getRequestId(c)
+		if err != nil {
+			return err
+		}
+
+		newLogger := service.Logger.With(zap.String("requestid", requestid))
+		ctx = context.WithValue(ctx, pkg.LoggerKey, newLogger)
+
+		err = service.UpdateProfileImage(ctx, externalId, request.ProfileImageUrl)
 		if err != nil {
 			service.Logger.Error(err)
 			if err == customerrors.ERR_NOT_FOUND {

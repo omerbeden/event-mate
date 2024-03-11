@@ -2,7 +2,6 @@ package entrypoints
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/commands"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/model"
@@ -96,8 +95,6 @@ func (service *UserService) GetCurrentUserProfile(ctx context.Context, externalI
 		return nil, err
 	}
 
-	fmt.Printf("profile: %+v\n", user)
-
 	// user.AttandedActivities, err = service.GetAttandedActivities(user.Id)
 	// if err != nil {
 	// 	return nil, err
@@ -117,8 +114,6 @@ func (service *UserService) GetUserProfile(ctx context.Context, userName string)
 	if err != nil {
 		return nil, err
 	}
-
-	fmt.Printf("profile: %+v\n", user)
 
 	// user.AttandedActivities, err = service.GetAttandedActivities(user.Id)
 	// if err != nil {

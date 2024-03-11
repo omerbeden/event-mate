@@ -8,8 +8,10 @@ import (
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/adapters/cachedapter"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/model"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/ports/repositories"
+	"github.com/omerbeden/event-mate/backend/tatooine/pkg"
 	"github.com/omerbeden/event-mate/backend/tatooine/pkg/cache"
 	"github.com/omerbeden/event-mate/backend/tatooine/pkg/db"
+	"go.uber.org/zap"
 )
 
 var errLogPrefixCreateCommand = "profile:createCommand"
@@ -24,6 +26,10 @@ type CreateProfileCommand struct {
 }
 
 func (cmd *CreateProfileCommand) Handle(ctx context.Context) error {
+	logger, ok := ctx.Value(pkg.LoggerKey).(*zap.SugaredLogger)
+	if !ok {
+		return fmt.Errorf("failed to get logger for CreateCommand")
+	}
 
 	tx, err := cmd.Tx.Begin(ctx)
 	if err != nil {
@@ -55,7 +61,7 @@ func (cmd *CreateProfileCommand) Handle(ctx context.Context) error {
 
 	cacheResult := cmd.addUserProfileToCache(ctx, userProfile)
 	if cacheResult != nil {
-		fmt.Printf("error while inserting user profile to cache %s", cacheResult.Error())
+		logger.Info("error while inserting user profile to cache %s", cacheResult.Error())
 	}
 
 	return nil
