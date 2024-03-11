@@ -1,3 +1,15 @@
+CREATE TABLE IF NOT EXISTS user_profiles(
+	id  SERIAL PRIMARY KEY ,
+	name VARCHAR(20),
+	last_name VARCHAR(20),
+	about VARCHAR(100),
+	profile_image_url TEXT,
+	external_id VARCHAR UNIQUE,
+	user_name VARCHAR(20) UNIQUE,
+	email VARCHAR(255) UNIQUE NOT NULL
+);
+
+
 CREATE TABLE IF NOT EXISTS activities(
     id SERIAL PRIMARY KEY ,
     title VARCHAR(20),
@@ -16,16 +28,7 @@ CREATE TABLE IF NOT EXISTS activity_locations(
 	longitude REAL NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS user_profiles(
-	id  SERIAL PRIMARY KEY ,
-	name VARCHAR(20),
-	last_name VARCHAR(20),
-	about VARCHAR(100),
-	profile_image_url TEXT,
-	external_id VARCHAR UNIQUE,
-	user_name VARCHAR(20) UNIQUE,
-	email VARCHAR(255) UNIQUE NOT NULL
-);
+
 
 CREATE TABLE IF NOT EXISTS user_profile_addresses(
 	profile_id  INT PRIMARY KEY REFERENCES user_profiles(id) ON DELETE CASCADE ,
@@ -41,10 +44,12 @@ CREATE TABLE IF NOT EXISTS user_profile_stats(
 
 
 CREATE TABLE IF NOT EXISTS participants (
-	activity_id INT REFERENCES activities(id) ON DELETE CASCADE,
-	user_id INT REFERENCES user_profiles(id)ON DELETE CASCADE,
+	activity_id INT REFERENCES activities(id),
+	user_id INT REFERENCES user_profiles(id),
 	
-	CONSTRAINT participants_pk PRIMARY KEY(activity_id,user_id) ON DELETE CASCADE
+	CONSTRAINT participants_pk PRIMARY KEY(activity_id,user_id),
+	FOREIGN KEY (activity_id) REFERENCES activities(id) ON DELETE CASCADE,
+	FOREIGN KEY (user_id) REFERENCES user_profiles(id) ON DELETE CASCADE
 );
 
 
