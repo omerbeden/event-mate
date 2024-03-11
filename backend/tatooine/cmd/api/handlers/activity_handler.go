@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	"time"
 
@@ -9,7 +10,9 @@ import (
 	"github.com/omerbeden/event-mate/backend/tatooine/cmd/api/presenter"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/domain/model"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/entrypoints"
+	"github.com/omerbeden/event-mate/backend/tatooine/pkg"
 	customerrors "github.com/omerbeden/event-mate/backend/tatooine/pkg/customErrors"
+	"go.uber.org/zap"
 )
 
 func CreateActivity(service entrypoints.ActivityService) fiber.Handler {
@@ -27,6 +30,20 @@ func CreateActivity(service entrypoints.ActivityService) fiber.Handler {
 
 		ctx, cancel := context.WithTimeout(c.Context(), time.Second*5)
 		defer cancel()
+
+		requestid, ok := c.Locals("requestid").(string)
+
+		if !ok {
+			return c.Status(fiber.StatusInternalServerError).JSON(presenter.BaseResponse{
+				APIVersion: presenter.APIVersion,
+				Data:       "reqeust id ",
+				Error:      presenter.UNKNOW_ERR,
+			})
+		}
+		fmt.Println(requestid)
+
+		newLogger := service.Logger.With(zap.String("requestid", requestid))
+		ctx = context.WithValue(ctx, pkg.LoggerKey, newLogger)
 
 		res, err := service.CreateActivity(ctx, requestBody)
 		if err != nil {

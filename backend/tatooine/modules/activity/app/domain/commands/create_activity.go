@@ -9,8 +9,10 @@ import (
 
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/adapters/cacheadapter"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/domain/model"
+	"github.com/omerbeden/event-mate/backend/tatooine/pkg"
 	"github.com/omerbeden/event-mate/backend/tatooine/pkg/cache"
 	"github.com/omerbeden/event-mate/backend/tatooine/pkg/db"
+	"go.uber.org/zap"
 
 	repo "github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/domain/ports/repositories"
 )
@@ -27,6 +29,10 @@ type CreateCommand struct {
 
 func (cmd *CreateCommand) Handle(ctx context.Context) (bool, error) {
 
+	logger, ok := ctx.Value(pkg.LoggerKey).(*zap.SugaredLogger)
+	if !ok {
+		return false, fmt.Errorf("failed to get logger for CreateCommand")
+	}
 	tx, err := cmd.Tx.Begin(ctx)
 	if err != nil {
 		return false, fmt.Errorf("failed to begin transaction: %w", err)
@@ -38,9 +44,9 @@ func (cmd *CreateCommand) Handle(ctx context.Context) (bool, error) {
 		}
 	}()
 
-	activity, errCreate := cmd.ActivityRepo.Create(ctx, tx, cmd.Activity)
-	if errCreate != nil {
-		return false, errCreate
+	activity, err := cmd.ActivityRepo.Create(ctx, tx, cmd.Activity)
+	if err != nil {
+		return false, err
 	}
 
 	err = cmd.ActivityRulesRepo.CreateActivityRules(ctx, tx, activity.ID, cmd.Activity.Rules)
@@ -53,9 +59,9 @@ func (cmd *CreateCommand) Handle(ctx context.Context) (bool, error) {
 		return false, err
 	}
 
-	_, errLoc := cmd.LocRepo.Create(ctx, tx, &activity.Location)
-	if errLoc != nil {
-		return false, errLoc
+	_, err = cmd.LocRepo.Create(ctx, tx, &activity.Location)
+	if err != nil {
+		return false, err
 	}
 
 	err = tx.Commit(ctx)
@@ -73,14 +79,17 @@ func (cmd *CreateCommand) Handle(ctx context.Context) (bool, error) {
 
 	err = cmd.Redis.Set(ctx, activityKey, jsonActivity)
 	if err != nil {
-		fmt.Printf("activity could not inserted to Redis %s\n", activityId)
+		logger.Infof("activity could not inserted to Redis %s\n", activityId)
 	}
 
 	var wg sync.WaitGroup
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		cmd.addCityToRedis(ctx, activity.Location.City, jsonActivity)
+		err := cmd.addCityToRedis(ctx, activity.Location.City, jsonActivity)
+		if err != nil {
+			logger.Info("failed to add city to Redis %s\n", activity)
+		}
 	}()
 
 	wg.Wait()
@@ -90,6 +99,5 @@ func (cmd *CreateCommand) Handle(ctx context.Context) (bool, error) {
 
 func (ccmd *CreateCommand) addCityToRedis(ctx context.Context, city string, valueJson []byte) error {
 	cityKey := fmt.Sprintf("%s:%s", cacheadapter.CITY_CACHE_KEY, city)
-
 	return ccmd.Redis.AddMember(ctx, cityKey, valueJson)
 }

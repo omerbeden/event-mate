@@ -9,6 +9,8 @@ import (
 
 	"github.com/go-redis/redis/v8"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/requestid"
+
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/omerbeden/event-mate/backend/tatooine/cmd/api/routes"
 	activityRepoAdapter "github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/adapters/postgresadapter"
@@ -56,6 +58,7 @@ func main() {
 	validationService := ve.NewValidationService(sugar)
 
 	app := fiber.New()
+	app.Use(requestid.New())
 	api := app.Group("/api")
 	routes.ActivityRouter(api, *activityService)
 	routes.ProfileRouter(api, *userService)
