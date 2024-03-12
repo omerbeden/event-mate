@@ -96,6 +96,7 @@ func (m *MockTx) Exec(ctx context.Context, sql string, arguments ...any) (comman
 	if m.ExecFunc != nil {
 		m.ExecFunc(ctx, sql, arguments...)
 	}
+	fmt.Println("tx exec not set")
 	return db.CommandTag{}, nil
 }
 func (m *MockTx) Query(ctx context.Context, sql string, args ...any) (db.Rows, error) {

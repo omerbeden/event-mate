@@ -34,12 +34,13 @@ func (r *userProfileStatRepo) EvaluateUser(ctx context.Context, eval model.UserE
 	if err != nil {
 		return fmt.Errorf("failed to begin transaction: %w", err)
 	}
-	iq := `INSERT INTO user_points(giver_id,receiver_id,points,comment) 
+	iq := `INSERT INTO user_points(giver_id,receiver_id,points,comment,related_activity_id) 
 		VALUES ($1,$2,$3,$4);`
 
-	_, err = tx.Exec(ctx, iq, eval.GiverId, eval.ReceiverId, eval.Points, eval.Comment)
-
+	_, err = tx.Exec(ctx, iq, eval.GiverId, eval.ReceiverId, eval.Points, eval.Comment, eval.RelatedActivityId)
+	fmt.Println(err)
 	if err != nil {
+		fmt.Print("error ocurred ")
 		var pgErr *pgconn.PgError
 		if errors.As(err, &pgErr) {
 			if pgErr.Code == "23505" {
