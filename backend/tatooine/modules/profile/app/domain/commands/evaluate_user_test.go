@@ -77,12 +77,14 @@ func TestEvaluateUser_Handle(t *testing.T) {
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 			defer cancel()
 
-			err := cmd.Handle(ctx)
+			res, err := cmd.Handle(ctx)
 
 			if tc.wantErr {
 				assert.Error(t, err)
+				assert.Nil(t, res)
 			} else {
 				assert.NoError(t, err)
+				assert.NotNil(t, res)
 			}
 
 		})

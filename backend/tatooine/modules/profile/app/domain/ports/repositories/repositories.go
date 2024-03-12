@@ -23,3 +23,8 @@ type UserProfileAddressRepository interface {
 type UserProfileStatRepository interface {
 	EvaluateUser(ctx context.Context, eval model.UserEvaluation) error
 }
+
+type ProfileBadgeRepository interface {
+	Insert(ctx context.Context, badge *model.ProfileBadge) error
+	GetBadges(ctx context.Context, profileId int64) ([]model.ProfileBadge, error)
+}

@@ -20,31 +20,36 @@ type EvaluateUserCommand struct {
 	Evaluation model.UserEvaluation
 }
 
-func (cmd *EvaluateUserCommand) Handle(ctx context.Context) error {
+func (cmd *EvaluateUserCommand) Handle(ctx context.Context) (*model.UserProfile, error) {
 	err := cmd.StatRepo.EvaluateUser(ctx, cmd.Evaluation)
 	if err != nil {
 		if errors.Is(err, customerrors.ErrDublicateKey) {
-			return customerrors.ErrAlreadyEvaluated
+			return nil, customerrors.ErrAlreadyEvaluated
 		}
-		return err
+		return nil, err
 	}
 
-	updatedUser, err := cmd.UserRepo.GetCurrentUserProfile(ctx, cmd.Evaluation.ReceiverId)
+	user, err := cmd.UserRepo.GetCurrentUserProfile(ctx, cmd.Evaluation.ReceiverId)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return cmd.updateCache(ctx, updatedUser)
+	err = cmd.updateCache(ctx, user)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
 }
 
-func (cmd *EvaluateUserCommand) updateCache(ctx context.Context, updatedUser *model.UserProfile) error {
-	jsonValue, err := json.Marshal(updatedUser)
+func (cmd *EvaluateUserCommand) updateCache(ctx context.Context, user *model.UserProfile) error {
+	jsonValue, err := json.Marshal(user)
 	if err != nil {
 		return fmt.Errorf("parsing json error %w", err)
 	}
 
-	cacheKeyExternalId := fmt.Sprintf("%s:%s", cachedapter.USER_PROFILE_CACHE_KEY, updatedUser.ExternalId)
-	cacheKeyUserName := fmt.Sprintf("%s:%s", cachedapter.USER_PROFILE_CACHE_KEY, updatedUser.UserName)
+	cacheKeyExternalId := fmt.Sprintf("%s:%s", cachedapter.USER_PROFILE_CACHE_KEY, user.ExternalId)
+	cacheKeyUserName := fmt.Sprintf("%s:%s", cachedapter.USER_PROFILE_CACHE_KEY, user.UserName)
 
 	err = cmd.Cache.Set(ctx, cacheKeyExternalId, jsonValue)
 	if err != nil {

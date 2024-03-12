@@ -12,12 +12,13 @@ import (
 )
 
 type UserService struct {
-	userRepository        repositories.UserProfileRepository
-	userStatRepository    repositories.UserProfileStatRepository
-	userAddressRepository repositories.UserProfileAddressRepository
-	redisClient           cache.RedisClient
-	tx                    db.TransactionManager
-	Logger                *zap.SugaredLogger
+	userRepository         repositories.UserProfileRepository
+	userStatRepository     repositories.UserProfileStatRepository
+	userAddressRepository  repositories.UserProfileAddressRepository
+	profileBadgeRepository repositories.ProfileBadgeRepository
+	redisClient            cache.RedisClient
+	tx                     db.TransactionManager
+	Logger                 *zap.SugaredLogger
 }
 
 func NewService(
@@ -131,5 +132,42 @@ func (service *UserService) EvaluateUser(ctx context.Context, evaluation model.U
 		Evaluation: evaluation,
 	}
 
-	return cmd.Handle(ctx)
+	user, err := cmd.Handle(ctx)
+	if err != nil {
+		return err
+	}
+
+	badgeCommand := &commands.CreateBadgeCommand{
+		BadgeRepo: service.profileBadgeRepository,
+	}
+
+	badge := service.badgeDecision(user)
+
+	if badge != nil {
+		return badgeCommand.Handle(ctx)
+	}
+
+	return nil
+}
+func (service *UserService) badgeDecision(user *model.UserProfile) *model.ProfileBadge {
+
+	var badge *model.ProfileBadge
+
+	if user.Stat.AttandedActivities >= 5 {
+		_, ok := user.Badges[model.TrustworthyBadgeId]
+		if !ok {
+			badge = model.ActiveBadge()
+			badge.ProfileId = user.Id
+		}
+	}
+
+	if user.Stat.Point > 7 {
+		_, ok := user.Badges[model.ActiveBadgeId]
+		if !ok {
+			badge = model.TrustworthyBadge()
+			badge.ProfileId = user.Id
+		}
+	}
+
+	return badge
 }
