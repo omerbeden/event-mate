@@ -144,7 +144,7 @@ func (m *MockTx) Commit(ctx context.Context) error {
 }
 func (m *MockTx) Rollback(ctx context.Context) error {
 	if m.RollbackFunc != nil {
-		m.RollbackFunc(ctx)
+		return m.RollbackFunc(ctx)
 	}
 	return nil
 }

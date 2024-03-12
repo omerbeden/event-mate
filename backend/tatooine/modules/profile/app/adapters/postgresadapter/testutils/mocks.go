@@ -9,7 +9,6 @@ import (
 )
 
 type MockRow struct {
-	user     model.UserProfile
 	ScanFunc func(dest ...interface{}) error
 }
 
@@ -81,7 +80,7 @@ func (m *MockTx) Commit(ctx context.Context) error {
 }
 func (m *MockTx) Rollback(ctx context.Context) error {
 	if m.RollbackFunc != nil {
-		m.RollbackFunc(ctx)
+		return m.RollbackFunc(ctx)
 	}
 	return nil
 }
@@ -94,7 +93,7 @@ func (m *MockTx) CopyFrom(ctx context.Context, tableName db.Identifier, columnNa
 }
 func (m *MockTx) Exec(ctx context.Context, sql string, arguments ...any) (commandTag db.CommandTag, err error) {
 	if m.ExecFunc != nil {
-		m.ExecFunc(ctx, sql, arguments...)
+		return m.ExecFunc(ctx, sql, arguments...)
 	}
 	fmt.Println("tx exec not set")
 	return db.CommandTag{}, nil
