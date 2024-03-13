@@ -18,9 +18,9 @@ import (
 	profileRepoAdapter "github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/adapters/postgresadapter"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/entrypoints"
 	ve "github.com/omerbeden/event-mate/backend/tatooine/modules/validation/app/entrypoints"
+	"github.com/omerbeden/event-mate/backend/tatooine/pkg"
 	"github.com/omerbeden/event-mate/backend/tatooine/pkg/cache"
 	"github.com/omerbeden/event-mate/backend/tatooine/pkg/db/postgres"
-	"go.uber.org/zap"
 )
 
 const applicationPort = ":3000"
@@ -41,22 +41,21 @@ func main() {
 
 	redisClient := cache.NewRedisClient(redisOption)
 	pgxAdapter := postgres.NewPgxAdapter(dbPool)
-	logger, _ := zap.NewProduction(zap.AddCaller(), zap.AddStacktrace(zap.InfoLevel))
-	sugar := logger.Sugar()
+	sugaredLogger := pkg.Logger()
 
 	activityRepository := activityRepoAdapter.NewActivityRepo(pgxAdapter)
 	activityRulesRepository := activityRepoAdapter.NewActivityRulesRepo(pgxAdapter)
 	activityFlowRepository := activityRepoAdapter.NewActivityFlowRepo(pgxAdapter)
 	locationRepository := activityRepoAdapter.NewLocationRepo(pgxAdapter)
 
-	activityService := activityServiceEntryPoints.NewService(activityRepository, activityRulesRepository, activityFlowRepository, locationRepository, *redisClient, pgxAdapter, sugar)
+	activityService := activityServiceEntryPoints.NewService(activityRepository, activityRulesRepository, activityFlowRepository, locationRepository, *redisClient, pgxAdapter)
 
 	userRepository := profileRepoAdapter.NewUserProfileRepo(pgxAdapter)
 	userAddressRepo := profileRepoAdapter.NewUserProfileAddressRepo(pgxAdapter)
 	userStatRepo := profileRepoAdapter.NewUserProfileStatRepo(pgxAdapter)
 	userBadgeRepo := profileRepoAdapter.NewBadgeRepo(pgxAdapter)
-	userService := entrypoints.NewService(userRepository, userStatRepo, userAddressRepo, userBadgeRepo, *redisClient, pgxAdapter, sugar)
-	validationService := ve.NewValidationService(sugar)
+	userService := entrypoints.NewService(userRepository, userStatRepo, userAddressRepo, userBadgeRepo, *redisClient, pgxAdapter)
+	validationService := ve.NewValidationService(sugaredLogger)
 
 	app := fiber.New()
 	app.Use(requestid.New())
@@ -82,7 +81,7 @@ func main() {
 
 	redisClient.Close()
 	dbPool.Close()
-	logger.Sync()
+	sugaredLogger.Sync()
 
 	fmt.Println("Fiber was successful shutdown.")
 

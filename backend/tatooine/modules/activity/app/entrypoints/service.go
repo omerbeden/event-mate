@@ -8,7 +8,6 @@ import (
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/domain/ports/repositories"
 	"github.com/omerbeden/event-mate/backend/tatooine/pkg/cache"
 	"github.com/omerbeden/event-mate/backend/tatooine/pkg/db"
-	"go.uber.org/zap"
 )
 
 type ActivityService struct {
@@ -18,7 +17,6 @@ type ActivityService struct {
 	locationReposiroy       repositories.LocationRepository
 	redisClient             cache.RedisClient
 	tx                      db.TransactionManager
-	Logger                  *zap.SugaredLogger
 }
 
 func NewService(
@@ -28,7 +26,7 @@ func NewService(
 	locationRepository repositories.LocationRepository,
 	redisClient cache.RedisClient,
 	tx db.TransactionManager,
-	logger *zap.SugaredLogger,
+
 ) *ActivityService {
 	return &ActivityService{
 		activityRepository:      activityRepository,
@@ -37,7 +35,6 @@ func NewService(
 		locationReposiroy:       locationRepository,
 		redisClient:             redisClient,
 		tx:                      tx,
-		Logger:                  logger,
 	}
 }
 

@@ -15,10 +15,12 @@ import (
 
 func CreateUserProfile(service entrypoints.UserService) fiber.Handler {
 	return func(c *fiber.Ctx) error {
+		logger := pkg.Logger()
+
 		var requestBody model.UserProfile
 		err := c.BodyParser(&requestBody)
 		if err != nil {
-			service.Logger.Error(presenter.BODY_PARSER_ERR)
+			logger.Error(presenter.BODY_PARSER_ERR)
 			return c.Status(fiber.StatusBadRequest).JSON(presenter.BaseResponse{
 				APIVersion: presenter.APIVersion,
 				Data:       nil,
@@ -33,12 +35,12 @@ func CreateUserProfile(service entrypoints.UserService) fiber.Handler {
 			return err
 		}
 
-		newLogger := service.Logger.With(zap.String("requestid", requestid))
+		newLogger := logger.With(zap.String("requestid", requestid))
 		ctx = context.WithValue(ctx, pkg.LoggerKey, newLogger)
 
 		err = service.CreateUser(ctx, &requestBody)
 		if err != nil {
-			service.Logger.Error(err)
+			logger.Error(err)
 
 			return c.Status(fiber.StatusInternalServerError).JSON(presenter.BaseResponse{
 				APIVersion: presenter.APIVersion,
@@ -57,6 +59,7 @@ func CreateUserProfile(service entrypoints.UserService) fiber.Handler {
 
 func GetCurrentUserProfile(service entrypoints.UserService) fiber.Handler {
 	return func(c *fiber.Ctx) error {
+		logger := pkg.Logger()
 		externalId := c.Params("externalId")
 
 		ctx, cancel := context.WithTimeout(c.Context(), time.Second*5)
@@ -67,13 +70,13 @@ func GetCurrentUserProfile(service entrypoints.UserService) fiber.Handler {
 			return err
 		}
 
-		newLogger := service.Logger.With(zap.String("requestid", requestid))
+		newLogger := logger.With(zap.String("requestid", requestid))
 		ctx = context.WithValue(ctx, pkg.LoggerKey, newLogger)
 
 		res, err := service.GetCurrentUserProfile(ctx, externalId)
 
 		if err != nil {
-			service.Logger.Error(err)
+			logger.Error(err)
 			if err == customerrors.ERR_NOT_FOUND {
 				return c.Status(fiber.StatusNotFound).JSON(presenter.BaseResponse{
 					APIVersion: presenter.APIVersion,
@@ -99,6 +102,7 @@ func GetCurrentUserProfile(service entrypoints.UserService) fiber.Handler {
 
 func UpdateProfileImageUrl(service entrypoints.UserService) fiber.Handler {
 	return func(c *fiber.Ctx) error {
+		logger := pkg.Logger()
 		request := new(presenter.ProfileImageUpdateRequest)
 
 		if err := c.BodyParser(request); err != nil {
@@ -113,12 +117,12 @@ func UpdateProfileImageUrl(service entrypoints.UserService) fiber.Handler {
 			return err
 		}
 
-		newLogger := service.Logger.With(zap.String("requestid", requestid))
+		newLogger := logger.With(zap.String("requestid", requestid))
 		ctx = context.WithValue(ctx, pkg.LoggerKey, newLogger)
 
 		err = service.UpdateProfileImage(ctx, externalId, request.ProfileImageUrl)
 		if err != nil {
-			service.Logger.Error(err)
+			logger.Error(err)
 			if err == customerrors.ERR_NOT_FOUND {
 				return c.Status(fiber.StatusNotFound).JSON(presenter.BaseResponse{
 					APIVersion: presenter.APIVersion,

@@ -10,6 +10,7 @@ import (
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/adapters/postgresadapter"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/domain/model"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/entrypoints"
+	"github.com/omerbeden/event-mate/backend/tatooine/pkg"
 	"github.com/omerbeden/event-mate/backend/tatooine/pkg/cache"
 	"github.com/omerbeden/event-mate/backend/tatooine/pkg/db/postgres"
 	"github.com/stretchr/testify/assert"
@@ -22,8 +23,12 @@ func TestCreateActivity(t *testing.T) {
 		Config:           pgxpool.Config{MinConns: 5, MaxConns: 10},
 	}
 	pool := postgres.NewConn(&dbConfig)
+
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
+
+	logger := zap.NewNop().Sugar()
+	ctx = context.WithValue(ctx, pkg.LoggerKey, logger)
 
 	pgxAdapter := postgres.NewPgxAdapter(pool)
 
@@ -41,7 +46,6 @@ func TestCreateActivity(t *testing.T) {
 			ExpirationTime: 0,
 		}),
 		pgxAdapter,
-		zap.NewNop().Sugar(),
 	)
 
 	activity := model.Activity{
@@ -76,8 +80,12 @@ func TestGetActivitiesByLocation(t *testing.T) {
 		Config:           pgxpool.Config{MinConns: 5, MaxConns: 10},
 	}
 	pool := postgres.NewConn(&dbConfig)
+
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
+
+	logger := zap.NewNop().Sugar()
+	ctx = context.WithValue(ctx, pkg.LoggerKey, logger)
 
 	pgxAdapter := postgres.NewPgxAdapter(pool)
 
@@ -95,7 +103,6 @@ func TestGetActivitiesByLocation(t *testing.T) {
 			ExpirationTime: 0,
 		}),
 		pgxAdapter,
-		zap.NewNop().Sugar(),
 	)
 	loc := model.Location{
 		City: "Sakarya",
@@ -116,6 +123,9 @@ func TestAddParticipant(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
+	logger := zap.NewNop().Sugar()
+	ctx = context.WithValue(ctx, pkg.LoggerKey, logger)
+
 	pgxAdapter := postgres.NewPgxAdapter(pool)
 
 	activityService := entrypoints.NewService(
@@ -132,7 +142,6 @@ func TestAddParticipant(t *testing.T) {
 			ExpirationTime: 0,
 		}),
 		pgxAdapter,
-		zap.NewNop().Sugar(),
 	)
 
 	participant := model.User{
@@ -153,6 +162,9 @@ func TestGetParticipants(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
+	logger := zap.NewNop().Sugar()
+	ctx = context.WithValue(ctx, pkg.LoggerKey, logger)
+
 	pgxAdapter := postgres.NewPgxAdapter(pool)
 
 	activityService := entrypoints.NewService(
@@ -169,7 +181,6 @@ func TestGetParticipants(t *testing.T) {
 			ExpirationTime: 0,
 		}),
 		pgxAdapter,
-		zap.NewNop().Sugar(),
 	)
 
 	activityID := int64(2)
@@ -189,6 +200,9 @@ func TestGetActivityFromDBWhenRedisDown(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
+	logger := zap.NewNop().Sugar()
+	ctx = context.WithValue(ctx, pkg.LoggerKey, logger)
+
 	pgxAdapter := postgres.NewPgxAdapter(pool)
 
 	activityService := entrypoints.NewService(
@@ -205,7 +219,6 @@ func TestGetActivityFromDBWhenRedisDown(t *testing.T) {
 			ExpirationTime: 0,
 		}),
 		pgxAdapter,
-		zap.NewNop().Sugar(),
 	)
 
 	activityId := 2
@@ -225,6 +238,9 @@ func TestGetActivityByIDReturnErrorWhenActivityIdNotFound(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
+	logger := zap.NewNop().Sugar()
+	ctx = context.WithValue(ctx, pkg.LoggerKey, logger)
+
 	pgxAdapter := postgres.NewPgxAdapter(pool)
 	activityService := entrypoints.NewService(
 		postgresadapter.NewActivityRepo(pgxAdapter),
@@ -240,7 +256,6 @@ func TestGetActivityByIDReturnErrorWhenActivityIdNotFound(t *testing.T) {
 			ExpirationTime: 0,
 		}),
 		pgxAdapter,
-		zap.NewNop().Sugar(),
 	)
 	res, err := activityService.GetActivityById(ctx, 3)
 
@@ -257,6 +272,9 @@ func TestGetActivityByLocationFromDBWhenRedisDown(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
+	logger := zap.NewNop().Sugar()
+	ctx = context.WithValue(ctx, pkg.LoggerKey, logger)
+
 	pgxAdapter := postgres.NewPgxAdapter(pool)
 
 	activityService := entrypoints.NewService(
@@ -273,7 +291,6 @@ func TestGetActivityByLocationFromDBWhenRedisDown(t *testing.T) {
 			ExpirationTime: 0,
 		}),
 		pgxAdapter,
-		zap.NewNop().Sugar(),
 	)
 
 	loc := model.Location{
@@ -295,6 +312,9 @@ func TestGetActivityByLocationReturnErrorWhenCityNotFound(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
+	logger := zap.NewNop().Sugar()
+	ctx = context.WithValue(ctx, pkg.LoggerKey, logger)
+
 	pgxAdapter := postgres.NewPgxAdapter(pool)
 
 	activityService := entrypoints.NewService(
@@ -311,7 +331,6 @@ func TestGetActivityByLocationReturnErrorWhenCityNotFound(t *testing.T) {
 			ExpirationTime: 0,
 		}),
 		pgxAdapter,
-		zap.NewNop().Sugar(),
 	)
 
 	loc := model.Location{

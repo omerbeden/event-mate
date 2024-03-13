@@ -28,6 +28,9 @@ func TestCreateUserProfile(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
+	logger := zap.NewNop().Sugar()
+	ctx = context.WithValue(ctx, pkg.LoggerKey, logger)
+
 	redis := cache.NewRedisClient(cache.RedisOption{
 		Options: &redis.Options{
 			Addr:     "Localhost:6379",
@@ -46,7 +49,6 @@ func TestCreateUserProfile(t *testing.T) {
 		postgresadapter.NewBadgeRepo(pgxAdapter),
 		*redis,
 		pgxAdapter,
-		zap.NewNop().Sugar(),
 	)
 	user := &model.UserProfile{
 		Name:               "omer",
@@ -79,6 +81,9 @@ func TestCreateUserProfileWithoutRedis(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
+	logger := zap.NewNop().Sugar()
+	ctx = context.WithValue(ctx, pkg.LoggerKey, logger)
+
 	redis := cache.NewRedisClient(cache.RedisOption{
 		Options: &redis.Options{
 			Addr:     "unknown:6379",
@@ -94,7 +99,7 @@ func TestCreateUserProfileWithoutRedis(t *testing.T) {
 		postgresadapter.NewUserProfileStatRepo(pgxAdapter),
 		postgresadapter.NewUserProfileAddressRepo(pgxAdapter),
 		postgresadapter.NewBadgeRepo(pgxAdapter),
-		*redis, pgxAdapter, zap.NewNop().Sugar(),
+		*redis, pgxAdapter,
 	)
 	user := &model.UserProfile{
 		Name:               "omer",
@@ -126,6 +131,8 @@ func TestUpdateUserProfileImage(t *testing.T) {
 	pool := postgres.NewConn(&dbConfig)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
+	logger := zap.NewNop().Sugar()
+	ctx = context.WithValue(ctx, pkg.LoggerKey, logger)
 
 	redis := cache.NewRedisClient(cache.RedisOption{
 		Options: &redis.Options{
@@ -142,7 +149,7 @@ func TestUpdateUserProfileImage(t *testing.T) {
 		postgresadapter.NewUserProfileStatRepo(pgxAdapter),
 		postgresadapter.NewUserProfileAddressRepo(pgxAdapter),
 		postgresadapter.NewBadgeRepo(pgxAdapter),
-		*redis, pgxAdapter, zap.NewNop().Sugar())
+		*redis, pgxAdapter)
 
 	err := service.UpdateProfileImage(ctx, "1a", "new profile image10.png")
 
@@ -158,6 +165,9 @@ func TestUpdateUserProfileImageWithoutRedis(t *testing.T) {
 	pool := postgres.NewConn(&dbConfig)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
+
+	logger := zap.NewNop().Sugar()
+	ctx = context.WithValue(ctx, pkg.LoggerKey, logger)
 
 	redis := cache.NewRedisClient(cache.RedisOption{
 		Options: &redis.Options{
@@ -175,7 +185,7 @@ func TestUpdateUserProfileImageWithoutRedis(t *testing.T) {
 		postgresadapter.NewUserProfileStatRepo(pgxAdapter),
 		postgresadapter.NewUserProfileAddressRepo(pgxAdapter),
 		postgresadapter.NewBadgeRepo(pgxAdapter),
-		*redis, pgxAdapter, zap.NewNop().Sugar())
+		*redis, pgxAdapter)
 	err := service.UpdateProfileImage(ctx, "redis3", "new profile image10.png")
 
 	assert.Error(t, err)
@@ -190,6 +200,9 @@ func TestGetAttandedActivities(t *testing.T) {
 	pool := postgres.NewConn(&dbConfig)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
+	logger := zap.NewNop().Sugar()
+	ctx = context.WithValue(ctx, pkg.LoggerKey, logger)
+
 	redis := cache.NewRedisClient(cache.RedisOption{
 		Options: &redis.Options{
 			Addr:     "Localhost:6379",
@@ -204,7 +217,7 @@ func TestGetAttandedActivities(t *testing.T) {
 		postgresadapter.NewUserProfileStatRepo(pgxAdapter),
 		postgresadapter.NewUserProfileAddressRepo(pgxAdapter),
 		postgresadapter.NewBadgeRepo(pgxAdapter),
-		*redis, pgxAdapter, zap.NewNop().Sugar())
+		*redis, pgxAdapter)
 
 	userId := int64(2)
 	attandedActivities, err := service.GetAttandedActivities(ctx, userId)
@@ -223,6 +236,9 @@ func TestGetUserProfile(t *testing.T) {
 	pool := postgres.NewConn(&dbConfig)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
+	logger := zap.NewNop().Sugar()
+	ctx = context.WithValue(ctx, pkg.LoggerKey, logger)
+
 	redis := cache.NewRedisClient(cache.RedisOption{
 		Options: &redis.Options{
 			Addr:     "Localhost:6379",
@@ -238,7 +254,7 @@ func TestGetUserProfile(t *testing.T) {
 		postgresadapter.NewUserProfileStatRepo(pgxAdapter),
 		postgresadapter.NewUserProfileAddressRepo(pgxAdapter),
 		postgresadapter.NewBadgeRepo(pgxAdapter),
-		*redis, pgxAdapter, zap.NewNop().Sugar())
+		*redis, pgxAdapter)
 
 	userName := "onerbed"
 	user, err := service.GetUserProfile(ctx, userName)
@@ -283,7 +299,7 @@ func TestEvaluateUser(t *testing.T) {
 		postgresadapter.NewUserProfileStatRepo(pgxAdapter),
 		postgresadapter.NewUserProfileAddressRepo(pgxAdapter),
 		postgresadapter.NewBadgeRepo(pgxAdapter),
-		*redis, pgxAdapter, zap.NewNop().Sugar())
+		*redis, pgxAdapter)
 
 	err := service.EvaluateUser(ctx, evaluation)
 
@@ -300,6 +316,10 @@ func TestDeleteUser(t *testing.T) {
 	pool := postgres.NewConn(&dbConfig)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
+
+	logger := zap.NewNop().Sugar()
+	ctx = context.WithValue(ctx, pkg.LoggerKey, logger)
+
 	redis := cache.NewRedisClient(cache.RedisOption{
 		Options: &redis.Options{
 			Addr:     "Localhost:6379",
@@ -315,7 +335,7 @@ func TestDeleteUser(t *testing.T) {
 		postgresadapter.NewUserProfileStatRepo(pgxAdapter),
 		postgresadapter.NewUserProfileAddressRepo(pgxAdapter),
 		postgresadapter.NewBadgeRepo(pgxAdapter),
-		*redis, pgxAdapter, zap.NewNop().Sugar())
+		*redis, pgxAdapter)
 	err := service.DeleteUser(ctx, "1a", "omr")
 
 	assert.NoError(t, err)
