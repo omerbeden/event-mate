@@ -54,7 +54,8 @@ func main() {
 	userRepository := profileRepoAdapter.NewUserProfileRepo(pgxAdapter)
 	userAddressRepo := profileRepoAdapter.NewUserProfileAddressRepo(pgxAdapter)
 	userStatRepo := profileRepoAdapter.NewUserProfileStatRepo(pgxAdapter)
-	userService := entrypoints.NewService(userRepository, userStatRepo, userAddressRepo, *redisClient, pgxAdapter, sugar)
+	userBadgeRepo := profileRepoAdapter.NewBadgeRepo(pgxAdapter)
+	userService := entrypoints.NewService(userRepository, userStatRepo, userAddressRepo, userBadgeRepo, *redisClient, pgxAdapter, sugar)
 	validationService := ve.NewValidationService(sugar)
 
 	app := fiber.New()

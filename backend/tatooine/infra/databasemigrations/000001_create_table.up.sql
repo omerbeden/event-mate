@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS activities(
 	category VARCHAR(20),
 	created_by INT ,
 	quota INT,
+	gender_composition VARCHAR(10),
 	CONSTRAINT fk_activities_user_profiles FOREIGN KEY (created_by) REFERENCES user_profiles(id) ON DELETE CASCADE
 );
 

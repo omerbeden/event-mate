@@ -18,11 +18,11 @@ func NewBadgeRepo(pool db.Executor) *BadgeRepo {
 	}
 }
 
-func (r *BadgeRepo) Insert(ctx context.Context, badge model.ProfileBadge) error {
+func (r *BadgeRepo) Insert(ctx context.Context, badge *model.ProfileBadge) error {
 
-	q := `INSERT INTO profile_badges(profile_id,image_url,text) VALUES($1,$2,$3)`
+	q := `INSERT INTO profile_badges(profile_id,badge_id,image_url,text) VALUES($1,$2,$3,$4)`
 
-	_, err := r.pool.Exec(ctx, q, badge.ProfileId, badge.ImageUrl, badge.Text)
+	_, err := r.pool.Exec(ctx, q, badge.ProfileId, badge.BadgeId, badge.ImageUrl, badge.Text)
 	if err != nil {
 		return fmt.Errorf("could not insert badge %w", err)
 	}
@@ -30,7 +30,7 @@ func (r *BadgeRepo) Insert(ctx context.Context, badge model.ProfileBadge) error 
 	return nil
 }
 
-func (r *BadgeRepo) GetBadges(ctx context.Context, profileId int64) ([]model.ProfileBadge, error) {
+func (r *BadgeRepo) GetBadges(ctx context.Context, profileId int64) (map[int64]model.ProfileBadge, error) {
 
 	q := `SELECT badge_id,profile_id,image_url,text from profile_badges 
 	WHERE profile_id = $1`
@@ -40,14 +40,14 @@ func (r *BadgeRepo) GetBadges(ctx context.Context, profileId int64) ([]model.Pro
 		return nil, fmt.Errorf("could not get badges %w", err)
 	}
 
-	var badges []model.ProfileBadge
+	badges := make(map[int64]model.ProfileBadge)
 	for rows.Next() {
 		var badge model.ProfileBadge
 		err := rows.Scan(&badge.BadgeId, &badge.ProfileId, &badge.ImageUrl, &badge.Text)
 		if err != nil {
 			return nil, fmt.Errorf("could not get rows of  badges %w", err)
 		}
-		badges = append(badges, badge)
+		badges[badge.BadgeId] = badge
 	}
 
 	return badges, nil

@@ -9,8 +9,10 @@ import (
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/adapters/cachedapter"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/model"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/ports/repositories"
+	"github.com/omerbeden/event-mate/backend/tatooine/pkg"
 	"github.com/omerbeden/event-mate/backend/tatooine/pkg/cache"
 	customerrors "github.com/omerbeden/event-mate/backend/tatooine/pkg/customErrors"
+	"go.uber.org/zap"
 )
 
 type EvaluateUserCommand struct {
@@ -21,6 +23,11 @@ type EvaluateUserCommand struct {
 }
 
 func (cmd *EvaluateUserCommand) Handle(ctx context.Context) (*model.UserProfile, error) {
+	logger, ok := ctx.Value(pkg.LoggerKey).(*zap.SugaredLogger)
+	if !ok {
+		return nil, customerrors.ErrGetLogger
+	}
+
 	err := cmd.StatRepo.EvaluateUser(ctx, cmd.Evaluation)
 	if err != nil {
 		if errors.Is(err, customerrors.ErrDublicateKey) {
@@ -36,7 +43,7 @@ func (cmd *EvaluateUserCommand) Handle(ctx context.Context) (*model.UserProfile,
 
 	err = cmd.updateCache(ctx, user)
 	if err != nil {
-		return nil, err
+		logger.Infof("error whale updating cache %w", err)
 	}
 
 	return user, nil

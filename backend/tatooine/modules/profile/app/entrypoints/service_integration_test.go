@@ -11,6 +11,7 @@ import (
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/adapters/postgresadapter"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/model"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/entrypoints"
+	"github.com/omerbeden/event-mate/backend/tatooine/pkg"
 	"github.com/omerbeden/event-mate/backend/tatooine/pkg/cache"
 	"github.com/omerbeden/event-mate/backend/tatooine/pkg/db/postgres"
 	"github.com/stretchr/testify/assert"
@@ -42,6 +43,7 @@ func TestCreateUserProfile(t *testing.T) {
 		postgresadapter.NewUserProfileRepo(pgxAdapter),
 		postgresadapter.NewUserProfileStatRepo(pgxAdapter),
 		postgresadapter.NewUserProfileAddressRepo(pgxAdapter),
+		postgresadapter.NewBadgeRepo(pgxAdapter),
 		*redis,
 		pgxAdapter,
 		zap.NewNop().Sugar(),
@@ -91,6 +93,7 @@ func TestCreateUserProfileWithoutRedis(t *testing.T) {
 		postgresadapter.NewUserProfileRepo(pgxAdapter),
 		postgresadapter.NewUserProfileStatRepo(pgxAdapter),
 		postgresadapter.NewUserProfileAddressRepo(pgxAdapter),
+		postgresadapter.NewBadgeRepo(pgxAdapter),
 		*redis, pgxAdapter, zap.NewNop().Sugar(),
 	)
 	user := &model.UserProfile{
@@ -138,6 +141,7 @@ func TestUpdateUserProfileImage(t *testing.T) {
 		postgresadapter.NewUserProfileRepo(pgxAdapter),
 		postgresadapter.NewUserProfileStatRepo(pgxAdapter),
 		postgresadapter.NewUserProfileAddressRepo(pgxAdapter),
+		postgresadapter.NewBadgeRepo(pgxAdapter),
 		*redis, pgxAdapter, zap.NewNop().Sugar())
 
 	err := service.UpdateProfileImage(ctx, "1a", "new profile image10.png")
@@ -170,6 +174,7 @@ func TestUpdateUserProfileImageWithoutRedis(t *testing.T) {
 		postgresadapter.NewUserProfileRepo(pgxAdapter),
 		postgresadapter.NewUserProfileStatRepo(pgxAdapter),
 		postgresadapter.NewUserProfileAddressRepo(pgxAdapter),
+		postgresadapter.NewBadgeRepo(pgxAdapter),
 		*redis, pgxAdapter, zap.NewNop().Sugar())
 	err := service.UpdateProfileImage(ctx, "redis3", "new profile image10.png")
 
@@ -198,6 +203,7 @@ func TestGetAttandedActivities(t *testing.T) {
 		postgresadapter.NewUserProfileRepo(pgxAdapter),
 		postgresadapter.NewUserProfileStatRepo(pgxAdapter),
 		postgresadapter.NewUserProfileAddressRepo(pgxAdapter),
+		postgresadapter.NewBadgeRepo(pgxAdapter),
 		*redis, pgxAdapter, zap.NewNop().Sugar())
 
 	userId := int64(2)
@@ -231,9 +237,10 @@ func TestGetUserProfile(t *testing.T) {
 		postgresadapter.NewUserProfileRepo(pgxAdapter),
 		postgresadapter.NewUserProfileStatRepo(pgxAdapter),
 		postgresadapter.NewUserProfileAddressRepo(pgxAdapter),
+		postgresadapter.NewBadgeRepo(pgxAdapter),
 		*redis, pgxAdapter, zap.NewNop().Sugar())
 
-	userName := "omr"
+	userName := "onerbed"
 	user, err := service.GetUserProfile(ctx, userName)
 	fmt.Printf("user: %+v", user)
 	assert.NoError(t, err)
@@ -249,6 +256,10 @@ func TestEvaluateUser(t *testing.T) {
 	pool := postgres.NewConn(&dbConfig)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
+
+	logger := zap.NewNop().Sugar()
+	ctx = context.WithValue(ctx, pkg.LoggerKey, logger)
+
 	redis := cache.NewRedisClient(cache.RedisOption{
 		Options: &redis.Options{
 			Addr:     "Localhost:6379",
@@ -259,10 +270,11 @@ func TestEvaluateUser(t *testing.T) {
 	})
 
 	evaluation := model.UserEvaluation{
-		ReceiverId: "1a",
-		GiverId:    "redis3",
-		Points:     8.5,
-		Comment:    "test comment",
+		ReceiverId:        "e1",
+		GiverId:           "e7",
+		Points:            8.7,
+		Comment:           "test comment",
+		RelatedActivityId: 1,
 	}
 	pgxAdapter := postgres.NewPgxAdapter(pool)
 
@@ -270,6 +282,7 @@ func TestEvaluateUser(t *testing.T) {
 		postgresadapter.NewUserProfileRepo(pgxAdapter),
 		postgresadapter.NewUserProfileStatRepo(pgxAdapter),
 		postgresadapter.NewUserProfileAddressRepo(pgxAdapter),
+		postgresadapter.NewBadgeRepo(pgxAdapter),
 		*redis, pgxAdapter, zap.NewNop().Sugar())
 
 	err := service.EvaluateUser(ctx, evaluation)
@@ -301,6 +314,7 @@ func TestDeleteUser(t *testing.T) {
 		postgresadapter.NewUserProfileRepo(pgxAdapter),
 		postgresadapter.NewUserProfileStatRepo(pgxAdapter),
 		postgresadapter.NewUserProfileAddressRepo(pgxAdapter),
+		postgresadapter.NewBadgeRepo(pgxAdapter),
 		*redis, pgxAdapter, zap.NewNop().Sugar())
 	err := service.DeleteUser(ctx, "1a", "omr")
 

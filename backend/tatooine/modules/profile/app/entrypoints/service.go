@@ -25,17 +25,19 @@ func NewService(
 	userRepository repositories.UserProfileRepository,
 	userStatRepository repositories.UserProfileStatRepository,
 	userAddressRepository repositories.UserProfileAddressRepository,
+	profileBadgeRepository repositories.ProfileBadgeRepository,
 	redisClient cache.RedisClient,
 	tx db.TransactionManager,
 	logger *zap.SugaredLogger,
 ) *UserService {
 	return &UserService{
-		userRepository:        userRepository,
-		userStatRepository:    userStatRepository,
-		userAddressRepository: userAddressRepository,
-		redisClient:           redisClient,
-		tx:                    tx,
-		Logger:                logger,
+		userRepository:         userRepository,
+		userStatRepository:     userStatRepository,
+		userAddressRepository:  userAddressRepository,
+		profileBadgeRepository: profileBadgeRepository,
+		redisClient:            redisClient,
+		tx:                     tx,
+		Logger:                 logger,
 	}
 }
 
@@ -96,6 +98,12 @@ func (service *UserService) GetCurrentUserProfile(ctx context.Context, externalI
 		return nil, err
 	}
 
+	badges, err := service.profileBadgeRepository.GetBadges(ctx, user.Id)
+	if err != nil {
+		return nil, err
+	}
+	user.Badges = badges
+
 	// user.AttandedActivities, err = service.GetAttandedActivities(user.Id)
 	// if err != nil {
 	// 	return nil, err
@@ -137,14 +145,10 @@ func (service *UserService) EvaluateUser(ctx context.Context, evaluation model.U
 		return err
 	}
 
-	badgeCommand := &commands.CreateBadgeCommand{
-		BadgeRepo: service.profileBadgeRepository,
-	}
-
 	badge := service.badgeDecision(user)
 
 	if badge != nil {
-		return badgeCommand.Handle(ctx)
+		service.profileBadgeRepository.Insert(ctx, badge)
 	}
 
 	return nil
