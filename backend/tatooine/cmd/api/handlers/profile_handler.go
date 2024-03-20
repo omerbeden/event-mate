@@ -17,7 +17,7 @@ func CreateUserProfile(service entrypoints.UserService) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		logger := pkg.Logger()
 
-		var requestBody model.UserProfile
+		var requestBody model.CreateUserProfileRequest
 		err := c.BodyParser(&requestBody)
 		if err != nil {
 			logger.Error(presenter.BODY_PARSER_ERR)
@@ -51,7 +51,7 @@ func CreateUserProfile(service entrypoints.UserService) fiber.Handler {
 
 		return c.Status(fiber.StatusCreated).JSON(presenter.BaseResponse{
 			APIVersion: presenter.APIVersion,
-			Data:       "ok",
+			Data:       true,
 			Error:      "",
 		})
 	}

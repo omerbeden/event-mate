@@ -26,11 +26,11 @@ func NewUserProfileRepo(pool db.Executor) *userProfileRepo {
 func (r *userProfileRepo) Insert(ctx context.Context, tx db.Tx, user *model.UserProfile) (*model.UserProfile, error) {
 
 	q := `INSERT INTO user_profiles
-	 (name,last_name,profile_image_url,about,external_id,user_name,email)
-	 Values($1,$2,$3,$4,$5,$6,$7) RETURNING id`
+	 (name,last_name,profile_image_url,about,external_id,user_name,email,is_verified)
+	 Values($1,$2,$3,$4,$5,$6,$7,$8) RETURNING id`
 	var id int64
 
-	errQR := tx.QueryRow(ctx, q, user.Name, user.LastName, user.ProfileImageUrl, user.About, user.ExternalId, user.UserName, user.Email).Scan(&id)
+	errQR := tx.QueryRow(ctx, q, user.Name, user.LastName, user.ProfileImageUrl, user.About, user.ExternalId, user.UserName, user.Email, user.IsVerified).Scan(&id)
 	if errQR != nil {
 		return nil, fmt.Errorf("%s could not create %w", errlogprefix, errQR)
 	}

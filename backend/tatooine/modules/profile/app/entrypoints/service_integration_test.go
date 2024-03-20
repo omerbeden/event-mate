@@ -50,20 +50,16 @@ func TestCreateUserProfile(t *testing.T) {
 		*redis,
 		pgxAdapter,
 	)
-	user := &model.UserProfile{
-		Name:               "omer",
-		LastName:           "beden",
-		About:              "pc",
-		ExternalId:         "1b",
-		UserName:           "omrr",
-		Email:              "test2",
-		AttandedActivities: []model.Activity{},
-		Adress:             model.UserProfileAdress{City: "Sakarya"},
-		Stat: model.UserProfileStat{
-			AttandedActivities: 3,
-			Point:              5,
-		},
-		ProfileImageUrl: "profileImage.png",
+	user := &model.CreateUserProfileRequest{
+		Name:            "ome1r",
+		LastName:        "be1den",
+		About:           "p1c",
+		ExternalId:      "7",
+		UserName:        "omrr7",
+		Email:           "test7",
+		Adress:          model.UserProfileAdress{City: "Sakarya"},
+		ProfileImageUrl: "profileI1mage.png",
+		IsVerified:      true,
 	}
 
 	err := service.CreateUser(ctx, user)
@@ -101,19 +97,14 @@ func TestCreateUserProfileWithoutRedis(t *testing.T) {
 		postgresadapter.NewBadgeRepo(pgxAdapter),
 		*redis, pgxAdapter,
 	)
-	user := &model.UserProfile{
-		Name:               "omer",
-		LastName:           "beden",
-		About:              "backend developer",
-		ExternalId:         "redis3",
-		UserName:           "omerbeden13",
-		Email:              "test@test1.com",
-		AttandedActivities: []model.Activity{},
-		Adress:             model.UserProfileAdress{City: "Sakarya"},
-		Stat: model.UserProfileStat{
-			AttandedActivities: 3,
-			Point:              5,
-		},
+	user := &model.CreateUserProfileRequest{
+		Name:            "omer",
+		LastName:        "beden",
+		About:           "backend developer",
+		ExternalId:      "redis14",
+		UserName:        "omerbeden1",
+		Email:           "test14@test1.com",
+		Adress:          model.UserProfileAdress{City: "Sakarya"},
 		ProfileImageUrl: "profileImage.png",
 	}
 
@@ -286,11 +277,11 @@ func TestEvaluateUser(t *testing.T) {
 	})
 
 	evaluation := model.UserEvaluation{
-		ReceiverId:        "e1",
-		GiverId:           "e7",
+		ReceiverId:        "e2",
+		GiverId:           "16",
 		Points:            8.7,
 		Comment:           "test comment",
-		RelatedActivityId: 1,
+		RelatedActivityId: 2,
 	}
 	pgxAdapter := postgres.NewPgxAdapter(pool)
 

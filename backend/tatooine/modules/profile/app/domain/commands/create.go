@@ -20,7 +20,7 @@ type CreateProfileCommand struct {
 	Profile     model.UserProfile
 	UserRepo    repositories.UserProfileRepository
 	AddressRepo repositories.UserProfileAddressRepository
-	StatRepo    repositories.UserProfileStatRepository
+	BadgeRepo   repositories.ProfileBadgeRepository
 	Cache       cache.Cache
 	Tx          db.TransactionManager
 }
@@ -49,6 +49,11 @@ func (cmd *CreateProfileCommand) Handle(ctx context.Context) error {
 
 	userProfile.Adress.ProfileId = userProfile.Id
 	userProfile.Stat.ProfileId = userProfile.Id
+
+	if badge, ok := cmd.Profile.Badges[model.TrustworthyBadgeId]; ok {
+		badge.ProfileId = userProfile.Id
+		cmd.BadgeRepo.Insert(ctx, tx, badge)
+	}
 
 	err = cmd.AddressRepo.Insert(ctx, tx, cmd.Profile.Adress)
 	if err != nil {

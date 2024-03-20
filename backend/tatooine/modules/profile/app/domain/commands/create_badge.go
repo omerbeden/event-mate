@@ -13,5 +13,5 @@ type CreateBadgeCommand struct {
 }
 
 func (cmd *CreateBadgeCommand) Handle(ctx context.Context) error {
-	return cmd.BadgeRepo.Insert(ctx, cmd.Badge)
+	return cmd.BadgeRepo.Insert(ctx, nil, cmd.Badge)
 }

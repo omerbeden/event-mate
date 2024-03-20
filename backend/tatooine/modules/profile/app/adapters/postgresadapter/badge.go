@@ -18,13 +18,22 @@ func NewBadgeRepo(pool db.Executor) *BadgeRepo {
 	}
 }
 
-func (r *BadgeRepo) Insert(ctx context.Context, badge *model.ProfileBadge) error {
+func (r *BadgeRepo) Insert(ctx context.Context, tx db.Tx, badge *model.ProfileBadge) error {
 
 	q := `INSERT INTO profile_badges(profile_id,badge_id,image_url,text) VALUES($1,$2,$3,$4)`
 
-	_, err := r.pool.Exec(ctx, q, badge.ProfileId, badge.BadgeId, badge.ImageUrl, badge.Text)
-	if err != nil {
-		return fmt.Errorf("could not insert badge %w", err)
+	if tx != nil {
+		_, err := tx.Exec(ctx, q, badge.ProfileId, badge.BadgeId, badge.ImageUrl, badge.Text)
+
+		if err != nil {
+			return fmt.Errorf("could not insert badge %w", err)
+		}
+	} else {
+		_, err := r.pool.Exec(ctx, q, badge.ProfileId, badge.BadgeId, badge.ImageUrl, badge.Text)
+
+		if err != nil {
+			return fmt.Errorf("could not insert badge %w", err)
+		}
 	}
 
 	return nil

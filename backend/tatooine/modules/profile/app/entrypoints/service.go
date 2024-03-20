@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/commands"
+	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/mmap"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/model"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/ports/repositories"
 	"github.com/omerbeden/event-mate/backend/tatooine/pkg/cache"
@@ -38,12 +39,15 @@ func NewService(
 	}
 }
 
-func (service *UserService) CreateUser(ctx context.Context, user *model.UserProfile) error {
+func (service *UserService) CreateUser(ctx context.Context, request *model.CreateUserProfileRequest) error {
+
+	profile := mmap.CreateUserRequestToProfile(request)
+
 	createCmd := &commands.CreateProfileCommand{
-		Profile:     *user,
+		Profile:     *profile,
 		UserRepo:    service.userRepository,
 		AddressRepo: service.userAddressRepository,
-		StatRepo:    service.userStatRepository,
+		BadgeRepo:   service.profileBadgeRepository,
 		Cache:       &service.redisClient,
 		Tx:          service.tx,
 	}
@@ -95,11 +99,11 @@ func (service *UserService) GetCurrentUserProfile(ctx context.Context, externalI
 		return nil, err
 	}
 
-	badges, err := service.profileBadgeRepository.GetBadges(ctx, user.Id)
-	if err != nil {
-		return nil, err
-	}
-	user.Badges = badges
+	// badges, err := service.profileBadgeRepository.GetBadges(ctx, user.Id)
+	// if err != nil {
+	// 	return nil, err
+	// }
+	//user.Badges = badges
 
 	// user.AttandedActivities, err = service.GetAttandedActivities(user.Id)
 	// if err != nil {
@@ -145,7 +149,7 @@ func (service *UserService) EvaluateUser(ctx context.Context, evaluation model.U
 	badge := service.badgeDecision(user)
 
 	if badge != nil {
-		service.profileBadgeRepository.Insert(ctx, badge)
+		service.profileBadgeRepository.Insert(ctx, nil, badge)
 	}
 
 	return nil
@@ -157,7 +161,7 @@ func (service *UserService) badgeDecision(user *model.UserProfile) *model.Profil
 	if user.Stat.AttandedActivities >= 5 {
 		_, ok := user.Badges[model.TrustworthyBadgeId]
 		if !ok {
-			badge = model.ActiveBadge()
+			badge = model.TrustworthyBadge()
 			badge.ProfileId = user.Id
 		}
 	}
@@ -165,7 +169,7 @@ func (service *UserService) badgeDecision(user *model.UserProfile) *model.Profil
 	if user.Stat.Point > 7 {
 		_, ok := user.Badges[model.ActiveBadgeId]
 		if !ok {
-			badge = model.TrustworthyBadge()
+			badge = model.ActiveBadge()
 			badge.ProfileId = user.Id
 		}
 	}

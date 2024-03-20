@@ -64,7 +64,7 @@ func TestProfileBadge_Insert(t *testing.T) {
 
 			repo := postgresadapter.NewBadgeRepo(mockDB)
 
-			err := repo.Insert(ctx, &tc.badge)
+			err := repo.Insert(ctx, nil, &tc.badge)
 
 			if tc.wantErr {
 				assert.Error(t, err)

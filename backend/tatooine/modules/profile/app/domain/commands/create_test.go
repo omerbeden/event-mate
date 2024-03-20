@@ -117,9 +117,6 @@ func TestCreateProfileCommand_Handle(t *testing.T) {
 				Profile:    tc.profile,
 				InsertFunc: tc.ProfileInsertFunc,
 			}
-			statRepo := &testutils.MockStatRepository{
-				InsertFunc: tc.StatInsertFunc,
-			}
 			addressRepo := &testutils.MockAddressRepository{
 				InsertFunc: tc.AddressInsertFunc,
 			}
@@ -127,7 +124,6 @@ func TestCreateProfileCommand_Handle(t *testing.T) {
 			cmd := commands.CreateProfileCommand{
 				UserRepo:    userRepo,
 				AddressRepo: addressRepo,
-				StatRepo:    statRepo,
 				Cache:       mockRedisClient,
 				Profile:     tc.profile,
 				Tx:          &testutils.MockTxnManager{},
