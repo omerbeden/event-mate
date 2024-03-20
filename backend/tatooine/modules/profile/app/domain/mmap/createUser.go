@@ -7,7 +7,7 @@ func CreateUserRequestToProfile(from *model.CreateUserProfileRequest) *model.Use
 	badges := make(map[int64]*model.ProfileBadge)
 
 	if from.IsVerified {
-		badges[model.TrustworthyBadgeId] = model.TrustworthyBadge()
+		badges[model.VerifiedBadgeId] = model.VerifiedBadge()
 	}
 
 	return &model.UserProfile{

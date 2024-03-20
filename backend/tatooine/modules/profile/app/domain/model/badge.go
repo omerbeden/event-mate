@@ -11,8 +11,9 @@ type ProfileBadge struct {
 }
 
 const (
-	TrustworthyBadgeId = int64(1)
-	ActiveBadgeId      = int64(2)
+	VerifiedBadgeId    = int64(1)
+	TrustworthyBadgeId = int64(2)
+	ActiveBadgeId      = int64(3)
 )
 
 func TrustworthyBadge() *ProfileBadge {
@@ -28,5 +29,13 @@ func ActiveBadge() *ProfileBadge {
 		BadgeId:  2,
 		ImageUrl: "https://i.ibb.co/z6z4z4z/trust-badge.png",
 		Text:     "Active",
+	}
+}
+
+func VerifiedBadge() *ProfileBadge {
+	return &ProfileBadge{
+		BadgeId:  3,
+		ImageUrl: "https://i.ibb.co/z6z4z4z/trust-badge.png",
+		Text:     "Verified",
 	}
 }
