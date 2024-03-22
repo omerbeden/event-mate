@@ -74,7 +74,6 @@ func GetCurrentUserProfile(service entrypoints.UserService) fiber.Handler {
 		ctx = context.WithValue(ctx, pkg.LoggerKey, newLogger)
 
 		profile, err := service.GetCurrentUserProfile(ctx, externalId)
-		res := presenter.ProfileToGetUserResponse(*profile)
 
 		if err != nil {
 			logger.Error(err)
@@ -93,9 +92,11 @@ func GetCurrentUserProfile(service entrypoints.UserService) fiber.Handler {
 			})
 		}
 
+		result := presenter.ProfileToGetUserResponse(*profile)
+
 		return c.Status(fiber.StatusOK).JSON(presenter.BaseResponse{
 			APIVersion: presenter.APIVersion,
-			Data:       res,
+			Data:       result,
 			Error:      "",
 		})
 	}
@@ -147,7 +148,7 @@ func UpdateProfileImageUrl(service entrypoints.UserService) fiber.Handler {
 	}
 }
 
-func UpdateProfileVerificationUrl(service entrypoints.UserService) fiber.Handler {
+func UpdateProfileVerification(service entrypoints.UserService) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		logger := pkg.Logger()
 		request := new(presenter.ProfileVerificationUpdateRequest)
@@ -177,21 +178,21 @@ func UpdateProfileVerificationUrl(service entrypoints.UserService) fiber.Handler
 			if err == customerrors.ERR_NOT_FOUND {
 				return c.Status(fiber.StatusNotFound).JSON(presenter.BaseResponse{
 					APIVersion: presenter.APIVersion,
-					Data:       nil,
+					Data:       false,
 					Error:      customerrors.ERR_NOT_FOUND.Error(),
 				})
 			}
 
 			return c.Status(fiber.StatusInternalServerError).JSON(presenter.BaseResponse{
 				APIVersion: presenter.APIVersion,
-				Data:       nil,
+				Data:       false,
 				Error:      presenter.UNKNOW_ERR,
 			})
 		}
 
 		return c.Status(fiber.StatusOK).JSON(presenter.BaseResponse{
 			APIVersion: presenter.APIVersion,
-			Data:       "OK",
+			Data:       true,
 			Error:      "",
 		})
 	}

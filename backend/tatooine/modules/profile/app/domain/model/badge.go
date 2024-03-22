@@ -3,8 +3,8 @@ package model
 import "time"
 
 type ProfileBadge struct {
-	BadgeId   int64     `json:"badgeId"`
-	ProfileId int64     `json:"profileId"`
+	BadgeId   int64     `json:"-"`
+	ProfileId int64     `json:"-"`
 	ImageUrl  string    `json:"imageUrl"`
 	Text      string    `json:"text"`
 	GivenAt   time.Time `json:"givenOn"`

@@ -6,7 +6,7 @@ type ProfileImageUpdateRequest struct {
 	ProfileImageUrl string `json:"profileImageUrl"`
 }
 type ProfileVerificationUpdateRequest struct {
-	IsVerified bool `json:"IsVerified"`
+	IsVerified bool `json:"isVerified"`
 }
 
 type GetUserProfileResponse struct {
