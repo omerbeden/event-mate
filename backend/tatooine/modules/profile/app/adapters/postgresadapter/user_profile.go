@@ -128,7 +128,7 @@ func (r *userProfileRepo) GetAttandedActivities(ctx context.Context, userId int6
 
 func (r *userProfileRepo) GetCurrentUserProfile(ctx context.Context, externalId string) (*model.UserProfile, error) {
 
-	q := `SELECT up.id, up.name, up.last_name, up.about, up.profile_image_url, up.external_id, up.user_name,email,
+	q := `SELECT up.id, up.name, up.last_name, up.about, up.profile_image_url, up.external_id, up.user_name,email,up.is_verified,
     upa.city,
     ups.attanded_activities, 
 	ups.average_point as point
@@ -140,7 +140,7 @@ func (r *userProfileRepo) GetCurrentUserProfile(ctx context.Context, externalId 
 	`
 
 	var user model.UserProfile
-	err := r.pool.QueryRow(ctx, q, externalId).Scan(&user.Id, &user.Name, &user.LastName, &user.About, &user.ProfileImageUrl, &user.ExternalId, &user.UserName, &user.Email,
+	err := r.pool.QueryRow(ctx, q, externalId).Scan(&user.Id, &user.Name, &user.LastName, &user.About, &user.ProfileImageUrl, &user.ExternalId, &user.UserName, &user.Email, &user.IsVerified,
 		&user.Adress.City,
 		&user.Stat.AttandedActivities, &user.Stat.Point)
 	if err != nil {

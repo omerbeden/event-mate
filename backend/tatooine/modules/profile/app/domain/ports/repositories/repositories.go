@@ -26,5 +26,5 @@ type UserProfileStatRepository interface {
 
 type ProfileBadgeRepository interface {
 	Insert(ctx context.Context, tx db.Tx, badge *model.ProfileBadge) error
-	GetBadges(ctx context.Context, profileId int64) (map[int64]model.ProfileBadge, error)
+	GetBadges(ctx context.Context, profileId int64) (map[int64]*model.ProfileBadge, error)
 }

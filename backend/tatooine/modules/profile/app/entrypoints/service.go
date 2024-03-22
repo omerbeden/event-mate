@@ -99,11 +99,12 @@ func (service *UserService) GetCurrentUserProfile(ctx context.Context, externalI
 		return nil, err
 	}
 
-	// badges, err := service.profileBadgeRepository.GetBadges(ctx, user.Id)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	//user.Badges = badges
+	badges, err := service.profileBadgeRepository.GetBadges(ctx, user.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	user.Badges = badges
 
 	// user.AttandedActivities, err = service.GetAttandedActivities(user.Id)
 	// if err != nil {

@@ -39,7 +39,7 @@ func (r *BadgeRepo) Insert(ctx context.Context, tx db.Tx, badge *model.ProfileBa
 	return nil
 }
 
-func (r *BadgeRepo) GetBadges(ctx context.Context, profileId int64) (map[int64]model.ProfileBadge, error) {
+func (r *BadgeRepo) GetBadges(ctx context.Context, profileId int64) (map[int64]*model.ProfileBadge, error) {
 
 	q := `SELECT badge_id,profile_id,image_url,text from profile_badges 
 	WHERE profile_id = $1`
@@ -49,14 +49,14 @@ func (r *BadgeRepo) GetBadges(ctx context.Context, profileId int64) (map[int64]m
 		return nil, fmt.Errorf("could not get badges %w", err)
 	}
 
-	badges := make(map[int64]model.ProfileBadge)
+	badges := make(map[int64]*model.ProfileBadge)
 	for rows.Next() {
 		var badge model.ProfileBadge
 		err := rows.Scan(&badge.BadgeId, &badge.ProfileId, &badge.ImageUrl, &badge.Text)
 		if err != nil {
 			return nil, fmt.Errorf("could not get rows of  badges %w", err)
 		}
-		badges[badge.BadgeId] = badge
+		badges[badge.BadgeId] = &badge
 	}
 
 	return badges, nil

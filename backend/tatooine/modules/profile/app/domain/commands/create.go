@@ -50,7 +50,7 @@ func (cmd *CreateProfileCommand) Handle(ctx context.Context) error {
 	userProfile.Adress.ProfileId = userProfile.Id
 	userProfile.Stat.ProfileId = userProfile.Id
 
-	if badge, ok := cmd.Profile.Badges[model.TrustworthyBadgeId]; ok {
+	if badge, ok := cmd.Profile.Badges[model.VerifiedBadgeId]; ok {
 		badge.ProfileId = userProfile.Id
 		cmd.BadgeRepo.Insert(ctx, tx, badge)
 	}

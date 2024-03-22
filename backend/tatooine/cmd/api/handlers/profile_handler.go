@@ -73,7 +73,8 @@ func GetCurrentUserProfile(service entrypoints.UserService) fiber.Handler {
 		newLogger := logger.With(zap.String("requestid", requestid))
 		ctx = context.WithValue(ctx, pkg.LoggerKey, newLogger)
 
-		res, err := service.GetCurrentUserProfile(ctx, externalId)
+		profile, err := service.GetCurrentUserProfile(ctx, externalId)
+		res := presenter.ProfileToGetUserResponse(*profile)
 
 		if err != nil {
 			logger.Error(err)

@@ -16,9 +16,17 @@ const (
 	ActiveBadgeId      = int64(3)
 )
 
+func VerifiedBadge() *ProfileBadge {
+	return &ProfileBadge{
+		BadgeId:  VerifiedBadgeId,
+		ImageUrl: "https://i.ibb.co/z6z4z4z/trust-badge.png",
+		Text:     "Verified",
+	}
+}
+
 func TrustworthyBadge() *ProfileBadge {
 	return &ProfileBadge{
-		BadgeId:  1,
+		BadgeId:  TrustworthyBadgeId,
 		ImageUrl: "https://i.ibb.co/z6z4z4z/trust-badge.png",
 		Text:     "Trustworthy",
 	}
@@ -26,16 +34,8 @@ func TrustworthyBadge() *ProfileBadge {
 
 func ActiveBadge() *ProfileBadge {
 	return &ProfileBadge{
-		BadgeId:  2,
+		BadgeId:  ActiveBadgeId,
 		ImageUrl: "https://i.ibb.co/z6z4z4z/trust-badge.png",
 		Text:     "Active",
-	}
-}
-
-func VerifiedBadge() *ProfileBadge {
-	return &ProfileBadge{
-		BadgeId:  3,
-		ImageUrl: "https://i.ibb.co/z6z4z4z/trust-badge.png",
-		Text:     "Verified",
 	}
 }
