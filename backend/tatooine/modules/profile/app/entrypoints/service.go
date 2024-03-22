@@ -83,12 +83,22 @@ func (service *UserService) GetAttandedActivities(ctx context.Context, userId in
 func (service *UserService) UpdateProfileImage(ctx context.Context, externalId string, imageUrl string) error {
 	cmd := &commands.UpdateProfileImageCommand{
 		Repo:       service.userRepository,
-		Cache:      &service.redisClient,
 		ImageUrl:   imageUrl,
 		ExternalId: externalId,
 	}
 
-	return cmd.Handle(ctx)
+	err := cmd.Handle(ctx)
+	if err != nil {
+		return err
+	}
+
+	updatedUser, err := service.userRepository.GetCurrentUserProfile(ctx, externalId)
+	if err != nil {
+		return err
+	}
+
+	return updateCache(ctx, &service.redisClient, updatedUser)
+
 }
 
 func (service *UserService) GetCurrentUserProfile(ctx context.Context, externalId string) (*model.UserProfile, error) {

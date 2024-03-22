@@ -59,10 +59,8 @@ func TestUpdateProfileImage_Handle(t *testing.T) {
 					GetCurrentUserProfileFunc: tc.GetCurrentUserProfileFunc,
 					UpdateProfileImageFunc:    tc.UpdateProfileImageFunc,
 				},
-				Cache:      mockRedisClient,
 				ImageUrl:   tc.imageUrl,
 				ExternalId: tc.externalId,
-				Username:   tc.userName,
 			}
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 			defer cancel()
