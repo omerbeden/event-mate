@@ -188,3 +188,17 @@ func (r *userProfileRepo) GetUserProfile(ctx context.Context, username string) (
 
 	return &user, nil
 }
+
+func (r *userProfileRepo) UpdateVerification(ctx context.Context, externalId string, isVerified bool) error {
+
+	q := `UPDATE user_profiles 
+		SET is_verified = $1
+		WHERE external_id = $2`
+
+	_, err := r.pool.Exec(ctx, q, isVerified, externalId)
+	if err != nil {
+		return fmt.Errorf("%s could not update is_verified  %s , %w", errlogprefix, externalId, err)
+	}
+
+	return nil
+}

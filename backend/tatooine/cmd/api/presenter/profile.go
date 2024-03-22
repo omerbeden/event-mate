@@ -5,6 +5,9 @@ import "github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/dom
 type ProfileImageUpdateRequest struct {
 	ProfileImageUrl string `json:"profileImageUrl"`
 }
+type ProfileVerificationUpdateRequest struct {
+	IsVerified bool `json:"IsVerified"`
+}
 
 type GetUserProfileResponse struct {
 	Id                 int64                   `json:"-"`

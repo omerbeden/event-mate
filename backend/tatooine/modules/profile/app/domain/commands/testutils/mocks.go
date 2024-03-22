@@ -20,6 +20,15 @@ type MockUserRepository struct {
 	GetUsersByAddressFunc     func(context.Context, model.UserProfileAdress) ([]model.UserProfile, error)
 	InsertFunc                func(ctx context.Context, tx db.Tx, profile *model.UserProfile) (*model.UserProfile, error)
 	UpdateProfileImageFunc    func(ctx context.Context, externalId string, imageUrl string) error
+	UpdateVerificationFunc    func(ctx context.Context, externalId string, isVerified bool) error
+}
+
+func (m *MockUserRepository) UpdateVerification(ctx context.Context, externalId string, isVerified bool) error {
+	if m.UpdateVerificationFunc != nil {
+		return m.UpdateVerificationFunc(ctx, externalId, isVerified)
+	}
+
+	return nil
 }
 
 func (m *MockUserRepository) DeleteUser(ctx context.Context, externalId string) error {

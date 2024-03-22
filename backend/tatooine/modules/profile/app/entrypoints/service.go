@@ -2,7 +2,11 @@ package entrypoints
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
+	"fmt"
 
+	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/adapters/cachedapter"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/commands"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/mmap"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/model"
@@ -150,7 +154,17 @@ func (service *UserService) EvaluateUser(ctx context.Context, evaluation model.U
 	badge := service.badgeDecision(user)
 
 	if badge != nil {
-		service.profileBadgeRepository.Insert(ctx, nil, badge)
+
+		createBadgeCommand := &commands.CreateBadgeCommand{
+			BadgeRepo: service.profileBadgeRepository,
+			Badge:     badge,
+		}
+
+		err = createBadgeCommand.Handle(ctx)
+
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -176,4 +190,66 @@ func (service *UserService) badgeDecision(user *model.UserProfile) *model.Profil
 	}
 
 	return badge
+}
+
+func (service *UserService) UpdateVerification(ctx context.Context, isVerified bool, externalId string) error {
+
+	if isVerified {
+		cmd := &commands.UpdateVerificationCommand{
+			Repo:       service.userRepository,
+			IsVerified: isVerified,
+			ExternalId: externalId,
+		}
+
+		err := cmd.Handle(ctx)
+		if err != nil {
+			return err
+		}
+
+		updatedUser, err := service.userRepository.GetCurrentUserProfile(ctx, externalId)
+		if err != nil {
+			return err
+		}
+
+		badge := model.VerifiedBadge()
+		badge.ProfileId = updatedUser.Id
+
+		createBadgeCommand := &commands.CreateBadgeCommand{
+			BadgeRepo: service.profileBadgeRepository,
+			Badge:     badge,
+		}
+
+		err = createBadgeCommand.Handle(ctx)
+		if err != nil {
+			return err
+		}
+
+		return updateCache(ctx, &service.redisClient, updatedUser)
+
+	}
+
+	return errors.New("unverified account, verify account first")
+}
+
+func updateCache(ctx context.Context, cache cache.Cache, updatedUser *model.UserProfile) error {
+	cacheKeyExternalId := fmt.Sprintf("%s:%s", cachedapter.USER_PROFILE_CACHE_KEY, updatedUser.ExternalId)
+	cacheKeyUserName := fmt.Sprintf("%s:%s", cachedapter.USER_PROFILE_CACHE_KEY, updatedUser.UserName)
+
+	jsonValue, err := json.Marshal(updatedUser)
+	if err != nil {
+		return fmt.Errorf("parsing error while updating user profile on cache")
+	}
+
+	err = cache.Set(ctx, cacheKeyExternalId, jsonValue)
+	if err != nil {
+		return err
+	}
+
+	err = cache.Set(ctx, cacheKeyUserName, jsonValue)
+	if err != nil {
+		return err
+	}
+
+	return nil
+
 }

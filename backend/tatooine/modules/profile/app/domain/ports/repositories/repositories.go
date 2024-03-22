@@ -11,6 +11,7 @@ type UserProfileRepository interface {
 	GetUsersByAddress(ctx context.Context, address model.UserProfileAdress) ([]model.UserProfile, error)
 	Insert(ctx context.Context, tx db.Tx, profile *model.UserProfile) (*model.UserProfile, error)
 	UpdateProfileImage(ctx context.Context, externalId string, imageUrl string) error
+	UpdateVerification(ctx context.Context, externalId string, isVerified bool) error
 	DeleteUser(ctx context.Context, externalId string) error
 	GetAttandedActivities(ctx context.Context, activityId int64) ([]model.Activity, error)
 	GetCurrentUserProfile(ctx context.Context, externalId string) (*model.UserProfile, error)

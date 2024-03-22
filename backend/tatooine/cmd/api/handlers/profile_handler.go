@@ -146,3 +146,53 @@ func UpdateProfileImageUrl(service entrypoints.UserService) fiber.Handler {
 		})
 	}
 }
+
+func UpdateProfileVerificationUrl(service entrypoints.UserService) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		logger := pkg.Logger()
+		request := new(presenter.ProfileVerificationUpdateRequest)
+
+		if err := c.BodyParser(request); err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(presenter.BaseResponse{
+				APIVersion: presenter.APIVersion,
+				Data:       nil,
+				Error:      presenter.BODY_PARSER_ERR,
+			})
+		}
+		ctx, cancel := context.WithTimeout(c.Context(), time.Second*5)
+		defer cancel()
+
+		externalId := c.Params("externalId")
+		requestid, err := getRequestId(c)
+		if err != nil {
+			return err
+		}
+
+		newLogger := logger.With(zap.String("requestid", requestid))
+		ctx = context.WithValue(ctx, pkg.LoggerKey, newLogger)
+
+		err = service.UpdateVerification(ctx, request.IsVerified, externalId)
+		if err != nil {
+			logger.Error(err)
+			if err == customerrors.ERR_NOT_FOUND {
+				return c.Status(fiber.StatusNotFound).JSON(presenter.BaseResponse{
+					APIVersion: presenter.APIVersion,
+					Data:       nil,
+					Error:      customerrors.ERR_NOT_FOUND.Error(),
+				})
+			}
+
+			return c.Status(fiber.StatusInternalServerError).JSON(presenter.BaseResponse{
+				APIVersion: presenter.APIVersion,
+				Data:       nil,
+				Error:      presenter.UNKNOW_ERR,
+			})
+		}
+
+		return c.Status(fiber.StatusOK).JSON(presenter.BaseResponse{
+			APIVersion: presenter.APIVersion,
+			Data:       "OK",
+			Error:      "",
+		})
+	}
+}
