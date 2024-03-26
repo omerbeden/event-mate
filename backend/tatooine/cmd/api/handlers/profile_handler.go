@@ -153,24 +153,25 @@ func UpdateProfileVerification(service entrypoints.UserService) fiber.Handler {
 		logger := pkg.Logger()
 		request := new(presenter.ProfileVerificationUpdateRequest)
 
+		requestid, err := getRequestId(c)
+		if err != nil {
+			return err
+		}
+		newLogger := logger.With(zap.String("requestid", requestid))
+		ctx, cancel := context.WithTimeout(c.Context(), time.Second*5)
+		defer cancel()
+		ctx = context.WithValue(ctx, pkg.LoggerKey, newLogger)
+
 		if err := c.BodyParser(request); err != nil {
+			logger.Error(err)
 			return c.Status(fiber.StatusBadRequest).JSON(presenter.BaseResponse{
 				APIVersion: presenter.APIVersion,
 				Data:       nil,
 				Error:      presenter.BODY_PARSER_ERR,
 			})
 		}
-		ctx, cancel := context.WithTimeout(c.Context(), time.Second*5)
-		defer cancel()
 
 		externalId := c.Params("externalId")
-		requestid, err := getRequestId(c)
-		if err != nil {
-			return err
-		}
-
-		newLogger := logger.With(zap.String("requestid", requestid))
-		ctx = context.WithValue(ctx, pkg.LoggerKey, newLogger)
 
 		err = service.UpdateVerification(ctx, request.IsVerified, externalId)
 		if err != nil {

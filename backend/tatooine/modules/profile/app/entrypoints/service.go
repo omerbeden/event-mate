@@ -113,12 +113,14 @@ func (service *UserService) GetCurrentUserProfile(ctx context.Context, externalI
 		return nil, err
 	}
 
-	badges, err := service.profileBadgeRepository.GetBadges(ctx, user.Id)
-	if err != nil {
-		return nil, err
-	}
+	if user.Badges == nil {
+		badges, err := service.profileBadgeRepository.GetBadges(ctx, user.Id)
+		if err != nil {
+			return nil, err
+		}
 
-	user.Badges = badges
+		user.Badges = badges
+	}
 
 	// user.AttandedActivities, err = service.GetAttandedActivities(user.Id)
 	// if err != nil {
@@ -223,6 +225,12 @@ func (service *UserService) UpdateVerification(ctx context.Context, isVerified b
 
 		badge := model.VerifiedBadge()
 		badge.ProfileId = updatedUser.Id
+		_, ok := updatedUser.Badges[model.VerifiedBadgeId]
+		if !ok {
+			m := make(map[int64]*model.ProfileBadge)
+			m[model.VerifiedBadgeId] = badge
+			updatedUser.Badges = m
+		}
 
 		createBadgeCommand := &commands.CreateBadgeCommand{
 			BadgeRepo: service.profileBadgeRepository,
