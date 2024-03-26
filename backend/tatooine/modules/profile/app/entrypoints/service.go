@@ -204,6 +204,17 @@ func (service *UserService) badgeDecision(user *model.UserProfile) *model.Profil
 	return badge
 }
 
+func (service *UserService) GetProfileBadges(ctx context.Context, externalId string) (map[int64]*model.ProfileBadge, error) {
+	cmd := commands.GetProfileBadgesCommand{
+		BadgeRepo:   service.profileBadgeRepository,
+		ProfileRepo: service.userRepository,
+		ExternalId:  externalId,
+	}
+
+	return cmd.Handle(ctx)
+
+}
+
 func (service *UserService) UpdateVerification(ctx context.Context, isVerified bool, externalId string) error {
 
 	if isVerified {

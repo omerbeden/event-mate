@@ -21,6 +21,14 @@ type MockUserRepository struct {
 	InsertFunc                func(ctx context.Context, tx db.Tx, profile *model.UserProfile) (*model.UserProfile, error)
 	UpdateProfileImageFunc    func(ctx context.Context, externalId string, imageUrl string) error
 	UpdateVerificationFunc    func(ctx context.Context, externalId string, isVerified bool) error
+	GetIdFunc                 func(ctx context.Context, externalId string) (int64, error)
+}
+
+func (m *MockUserRepository) GetId(ctx context.Context, externalId string) (int64, error) {
+	if m.GetIdFunc != nil {
+		return m.GetIdFunc(ctx, externalId)
+	}
+	return 0, nil
 }
 
 func (m *MockUserRepository) UpdateVerification(ctx context.Context, externalId string, isVerified bool) error {

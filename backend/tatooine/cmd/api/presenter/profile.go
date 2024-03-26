@@ -27,11 +27,8 @@ type GetUserProfileResponse struct {
 
 func ProfileToGetUserResponse(profile model.UserProfile) *GetUserProfileResponse {
 
-	var badgesSlice []model.ProfileBadge
+	badgesSlice := ProfileBadgeMapToSlice(profile.Badges)
 
-	for _, value := range profile.Badges {
-		badgesSlice = append(badgesSlice, *value)
-	}
 	return &GetUserProfileResponse{
 		Id:                 profile.Id,
 		Name:               profile.Name,
@@ -47,4 +44,14 @@ func ProfileToGetUserResponse(profile model.UserProfile) *GetUserProfileResponse
 		Badges:             badgesSlice,
 		IsVerified:         profile.IsVerified,
 	}
+}
+
+func ProfileBadgeMapToSlice(badges map[int64]*model.ProfileBadge) []model.ProfileBadge {
+	var badgesSlice []model.ProfileBadge
+
+	for _, value := range badges {
+		badgesSlice = append(badgesSlice, *value)
+	}
+
+	return badgesSlice
 }

@@ -198,3 +198,40 @@ func UpdateProfileVerification(service entrypoints.UserService) fiber.Handler {
 		})
 	}
 }
+
+func GetProfileBadges(service entrypoints.UserService) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+
+		ctx, cancel := context.WithTimeout(c.Context(), time.Second*5)
+		defer cancel()
+
+		requestid, err := getRequestId(c)
+		if err != nil {
+			return err
+		}
+
+		newLogger := pkg.Logger().With(zap.String("requestid", requestid))
+		ctx = context.WithValue(ctx, pkg.LoggerKey, newLogger)
+
+		externalId := c.Params("externalId")
+
+		badges, err := service.GetProfileBadges(ctx, externalId)
+
+		if err != nil {
+			newLogger.Error(err)
+			return c.Status(fiber.StatusInternalServerError).JSON(presenter.BaseResponse{
+				APIVersion: presenter.APIVersion,
+				Data:       nil,
+				Error:      presenter.UNKNOW_ERR,
+			})
+		}
+
+		result := presenter.ProfileBadgeMapToSlice(badges)
+
+		return c.Status(fiber.StatusOK).JSON(presenter.BaseResponse{
+			APIVersion: presenter.APIVersion,
+			Data:       result,
+			Error:      "",
+		})
+	}
+}

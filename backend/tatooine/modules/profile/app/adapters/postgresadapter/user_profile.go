@@ -202,3 +202,16 @@ func (r *userProfileRepo) UpdateVerification(ctx context.Context, externalId str
 
 	return nil
 }
+
+func (r *userProfileRepo) GetId(ctx context.Context, externalId string) (int64, error) {
+	q := `SELECT id FROM user_profiles WHERE external_id = $1`
+
+	var id int64
+	err := r.pool.QueryRow(ctx, q, externalId).Scan(&id)
+	if err != nil {
+		return 0, fmt.Errorf("%s could not get id , externalId:%s , %w", errlogprefix, externalId, err)
+	}
+
+	return id, nil
+
+}
