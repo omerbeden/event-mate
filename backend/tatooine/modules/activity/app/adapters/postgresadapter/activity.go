@@ -75,21 +75,40 @@ func (r *activityRepository) AddParticipants(ctx context.Context, activityId int
 
 func (r *activityRepository) AddParticipant(ctx context.Context, activityId int64, user model.User) error {
 
+	tx, err := r.pool.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if err != nil {
+			tx.Rollback(ctx)
+		}
+	}()
+
 	q := `INSERT INTO participants(activity_id,user_id) VALUES($1,$2)`
 
-	_, err := r.pool.Exec(ctx, q, activityId, user.ID)
+	_, err = tx.Exec(ctx, q, activityId, user.ID)
 	if err != nil {
 		return fmt.Errorf("%s could not insert participant for activity %d , %w", errlogprefix, activityId, err)
 	}
 
-	return nil
+	q = `UPDATE activity 
+		SET participant_count= participant_count + 1 
+		WHERE id=$1`
+
+	_, err = tx.Exec(ctx, q, activityId, user.ID)
+	if err != nil {
+		return fmt.Errorf("%s could not update participant count %d , %w", errlogprefix, activityId, err)
+	}
+
+	return tx.Commit(ctx)
 
 }
 
 func (r *activityRepository) GetParticipants(ctx context.Context, acitivityId int64) ([]model.User, error) {
 
 	q := `SELECT u.id, u.name, u.last_name, 
-	COALESCE(stats.point, 0.0) AS point
+	COALESCE(stats.average_point, 0.0) AS point
 	FROM user_profiles u
 	RIGHT JOIN participants p ON p.user_id = u.id
 	LEFT JOIN user_profile_stats stats ON stats.profile_id = u.id
@@ -138,10 +157,10 @@ func (r *activityRepository) GetByID(ctx context.Context, id int64) (*model.Acti
 }
 func (r *activityRepository) GetByLocation(ctx context.Context, loc *model.Location) ([]model.Activity, error) {
 
-	q := `SELECT a.id, a.title, a.category,a.start_at, a.end_at,a.content,a.quota,a.gender_composition,
-	u.id, u.name, u.last_name, u.profile_image_url, 
-	COALESCE(stats.point, 0.0)  as point
-	, l.city
+	q := `SELECT a.id, a.title, a.category,a.start_at,a.content,a.quota,a.gender_composition, a.participant_count,
+	u.id, u.name, u.last_name, u.user_name, u.profile_image_url,
+	COALESCE(stats.average_point, 0.0)  as point,
+	l.city
 	FROM activities a
 	LEFT JOIN user_profiles u ON a.created_by = u.id
 	LEFT JOIN user_profile_stats stats ON stats.profile_id = u.id
@@ -156,8 +175,9 @@ func (r *activityRepository) GetByLocation(ctx context.Context, loc *model.Locat
 
 	for rows.Next() {
 		var res model.Activity
-		err := rows.Scan(&res.ID, &res.Title, &res.Category, &res.StartAt, &res.EndAt, &res.Content, &res.Quota, &res.GenderComposition,
-			&res.CreatedBy.ID, &res.CreatedBy.Name, &res.CreatedBy.LastName, &res.CreatedBy.ProfileImageUrl, &res.CreatedBy.ProfilePoint,
+		err := rows.Scan(&res.ID, &res.Title, &res.Category, &res.StartAt, &res.Content, &res.Quota, &res.GenderComposition, &res.ParticipantCount,
+			&res.CreatedBy.ID, &res.CreatedBy.Name, &res.CreatedBy.LastName, &res.CreatedBy.Username, &res.CreatedBy.ProfileImageUrl,
+			&res.CreatedBy.ProfilePoint,
 			&res.Location.City)
 		if err != nil {
 			return nil, fmt.Errorf("err getting rows %w ", err)

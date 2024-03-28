@@ -108,17 +108,7 @@ func (service ActivityService) GetActivitiesByLocation(ctx context.Context, loc 
 
 	activities, err := getCommand.Handle(ctx)
 
-	for i := range activities {
-		activities[i].Participants, err = service.GetParticipants(ctx, activities[i].ID)
-		if err != nil {
-			return nil, err
-		}
-	}
-
 	if err != nil {
-		return nil, err
-	}
-	if activities == nil {
 		return nil, err
 	}
 

@@ -4,6 +4,9 @@ type User struct {
 	ID              int64   `json:"id"`
 	Name            string  `json:"name"`
 	LastName        string  `json:"lastName"`
-	ProfileImageUrl string  `json:"profileImage"`
-	ProfilePoint    float64 `json:"profilePoint"`
+	Username        string  `json:"username"`
+	ProfileImageUrl string  `json:"profileImageUrl"`
+	ProfilePoint    float64 `json:"points"`
+	ExternalId      string  `json:"externalId,omitempty"`
+	About           string  `json:"about,omitempty"`
 }

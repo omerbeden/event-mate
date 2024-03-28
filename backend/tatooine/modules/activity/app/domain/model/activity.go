@@ -8,23 +8,24 @@ type Activity struct {
 	Category          string            `json:"category"`
 	CreatedBy         User              `json:"createdBy"`
 	Location          Location          `json:"location"`
-	Participants      []User            `json:"participants"`
+	Participants      []User            `json:"participants,omitempty"`
 	StartAt           time.Time         `json:"startAt"`
-	EndAt             time.Time         `json:"endAt"`
+	EndAt             time.Time         `json:"endAt,omitempty"`
 	Content           string            `json:"content"`
-	Rules             []string          `json:"rules"`
-	Flow              []string          `json:"flow"`
+	Rules             []string          `json:"rules,omitempty"`
+	Flow              []string          `json:"flow,omitempty"`
 	Quota             int               `json:"quota"`
 	GenderComposition GenderComposition `json:"genderComposition"`
+	ParticipantCount  int               `json:"participantCount"`
 }
 
 type Location struct {
 	ActivityId  int64   `json:"-"`
 	City        string  `json:"city"`
 	District    string  `json:"district"`
-	Description string  `json:"description"`
-	Latitude    float32 `json:"latitude"`
-	Longitude   float32 `json:"longitude"`
+	Description string  `json:"description,omitempty"`
+	Latitude    float32 `json:"latitude,omitempty"`
+	Longitude   float32 `json:"longitude,omitempty"`
 }
 
 type GenderComposition string
