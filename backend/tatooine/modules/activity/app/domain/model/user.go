@@ -8,5 +8,4 @@ type User struct {
 	ProfileImageUrl string  `json:"profileImageUrl"`
 	ProfilePoint    float64 `json:"points"`
 	ExternalId      string  `json:"externalId,omitempty"`
-	About           string  `json:"about,omitempty"`
 }

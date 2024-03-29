@@ -29,12 +29,22 @@ func getRequestId(c *fiber.Ctx) (string, error) {
 
 func CreateActivity(service entrypoints.ActivityService) fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		logger := pkg.Logger()
-
-		var requestBody model.Activity
-		err := c.BodyParser(&requestBody)
+		requestid, err := getRequestId(c)
 		if err != nil {
-			logger.Error(presenter.BODY_PARSER_ERR)
+			return err
+		}
+
+		ctx, cancel := context.WithTimeout(c.Context(), time.Second*5)
+		defer cancel()
+
+		logger := pkg.Logger()
+		newLogger := logger.With(zap.String("requestid", requestid))
+		ctx = context.WithValue(ctx, pkg.LoggerKey, newLogger)
+
+		var requestBody presenter.CreateActivityRequest
+		err = c.BodyParser(&requestBody)
+		if err != nil {
+			newLogger.Error(err)
 			return c.Status(fiber.StatusBadRequest).JSON(presenter.BaseResponse{
 				APIVersion: presenter.APIVersion,
 				Data:       nil,
@@ -42,18 +52,8 @@ func CreateActivity(service entrypoints.ActivityService) fiber.Handler {
 			})
 		}
 
-		ctx, cancel := context.WithTimeout(c.Context(), time.Second*5)
-		defer cancel()
-
-		requestid, err := getRequestId(c)
-		if err != nil {
-			return err
-		}
-
-		newLogger := logger.With(zap.String("requestid", requestid))
-		ctx = context.WithValue(ctx, pkg.LoggerKey, newLogger)
-
-		res, err := service.CreateActivity(ctx, requestBody)
+		activity := toActivity(requestBody)
+		res, err := service.CreateActivity(ctx, activity)
 		if err != nil {
 			logger.Error(err)
 
@@ -69,6 +69,30 @@ func CreateActivity(service entrypoints.ActivityService) fiber.Handler {
 			Data:       res,
 			Error:      "",
 		})
+	}
+}
+func toActivity(request presenter.CreateActivityRequest) model.Activity {
+	return model.Activity{
+		Title:    request.Title,
+		Category: request.Category,
+		CreatedBy: model.User{
+			ID:         request.CreatedById,
+			ExternalId: request.CreatedByExternalId,
+		},
+		Location: model.Location{
+			City:        request.Location.Location.City,
+			District:    request.Location.Location.District,
+			Description: request.Location.Description,
+			Latitude:    request.Location.Latitude,
+			Longitude:   request.Location.Longitude,
+		},
+		StartAt:           time.Time{},
+		EndAt:             time.Time{},
+		Content:           request.Content,
+		Rules:             request.Rules,
+		Flow:              request.Flow,
+		Quota:             request.Quota,
+		GenderComposition: model.GenderComposition(request.GenderComposition),
 	}
 }
 
