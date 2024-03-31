@@ -1,7 +1,7 @@
 package model
 
 type UserProfile struct {
-	Id                 int64                   `json:"-"`
+	Id                 int64                   `json:"id"`
 	Name               string                  `json:"name"`
 	LastName           string                  `json:"lastName"`
 	About              string                  `json:"about"`
