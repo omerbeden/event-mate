@@ -165,7 +165,7 @@ func (r *userProfileRepo) GetUserProfile(ctx context.Context, username string) (
 	q := `SELECT up.id, up.name, up.last_name, up.about, up.profile_image_url,email,
     upa.city,
     ups.attanded_activities, 
-	(SELECT ROUND(AVG(points),1) FROM user_points WHERE receiver_id = up.external_id) as point
+	ups.average_point as point
 	FROM user_profiles up
 	JOIN user_profile_stats ups ON ups.profile_id = up.id
 	JOIN user_profile_addresses upa ON upa.profile_id = up.id
@@ -177,6 +177,34 @@ func (r *userProfileRepo) GetUserProfile(ctx context.Context, username string) (
 		&user.Stat.AttandedActivities, &user.Stat.Point)
 	if err != nil {
 		return nil, fmt.Errorf("%s could not get user profile for : %s %w", errlogprefix, username, err)
+
+	}
+
+	user.AttandedActivities, err = r.GetAttandedActivities(ctx, user.Id)
+	if err != nil {
+		return nil, fmt.Errorf("%s could not get attanded activities for profile: %d %w", errlogprefix, user.Id, err)
+
+	}
+
+	return &user, nil
+}
+
+func (r *userProfileRepo) GetUserProfileById(ctx context.Context, id int64) (*model.UserProfile, error) {
+
+	q := `SELECT up.id, up.name, up.last_name, up.about, up.profile_image_url,email,
+    upa.city,
+    ups.attanded_activities, 
+	ups.average_point as point	FROM user_profiles up
+	JOIN user_profile_stats ups ON ups.profile_id = up.id
+	JOIN user_profile_addresses upa ON upa.profile_id = up.id
+	WHERE up.id = $1;`
+
+	var user model.UserProfile
+	err := r.pool.QueryRow(ctx, q, id).Scan(&user.Id, &user.Name, &user.LastName, &user.About, &user.ProfileImageUrl, &user.Email,
+		&user.Adress.City,
+		&user.Stat.AttandedActivities, &user.Stat.Point)
+	if err != nil {
+		return nil, fmt.Errorf("%s could not get user profile for : %d %w", errlogprefix, id, err)
 
 	}
 

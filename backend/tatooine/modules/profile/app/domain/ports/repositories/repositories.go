@@ -16,6 +16,7 @@ type UserProfileRepository interface {
 	GetAttandedActivities(ctx context.Context, activityId int64) ([]model.Activity, error)
 	GetCurrentUserProfile(ctx context.Context, externalId string) (*model.UserProfile, error)
 	GetUserProfile(ctx context.Context, username string) (*model.UserProfile, error)
+	GetUserProfileById(ctx context.Context, id int64) (*model.UserProfile, error)
 	GetId(ctx context.Context, externalId string) (int64, error)
 }
 

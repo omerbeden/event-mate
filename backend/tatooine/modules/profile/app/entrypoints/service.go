@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strconv"
 
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/adapters/cachedapter"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/commands"
@@ -135,6 +136,33 @@ func (service *UserService) GetUserProfile(ctx context.Context, userName string)
 		Repo:     service.userRepository,
 		Cache:    &service.redisClient,
 		UserName: userName,
+	}
+
+	user, err := cmd.Handle(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// user.AttandedActivities, err = service.GetAttandedActivities(user.Id)
+	// if err != nil {
+	// 	return nil, err
+	// }
+
+	return user, nil
+}
+func (service *UserService) GetUserProfileById(ctx context.Context, id string) (*model.UserProfile, error) {
+
+	//id , string to int convs and unmasking
+
+	idInt, err := strconv.ParseInt(id, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+
+	cmd := &commands.GetUserProfileByIdCommand{
+		Repo:  service.userRepository,
+		Cache: &service.redisClient,
+		Id:    idInt,
 	}
 
 	user, err := cmd.Handle(ctx)

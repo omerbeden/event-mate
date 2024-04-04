@@ -24,6 +24,11 @@ type MockUserRepository struct {
 	GetIdFunc                 func(ctx context.Context, externalId string) (int64, error)
 }
 
+// GetUserProfileById implements repositories.UserProfileRepository.
+func (m *MockUserRepository) GetUserProfileById(ctx context.Context, id int64) (*model.UserProfile, error) {
+	panic("unimplemented")
+}
+
 func (m *MockUserRepository) GetId(ctx context.Context, externalId string) (int64, error) {
 	if m.GetIdFunc != nil {
 		return m.GetIdFunc(ctx, externalId)
