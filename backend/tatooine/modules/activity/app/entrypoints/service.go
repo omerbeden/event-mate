@@ -90,13 +90,19 @@ func (service ActivityService) GetActivityById(ctx context.Context, activityId i
 		Redis:             &service.redisClient,
 	}
 
-	commandResult, err := getCommand.Handle(ctx)
+	activity, err := getCommand.Handle(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	participants, err := service.GetParticipants(ctx, activity.ID)
+	activity.Participants = participants
 
 	if err != nil {
 		return nil, err
 	}
 
-	return commandResult, nil
+	return activity, nil
 }
 
 func (service ActivityService) GetActivitiesByLocation(ctx context.Context, loc model.Location) ([]model.Activity, error) {

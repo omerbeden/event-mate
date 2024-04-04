@@ -92,11 +92,11 @@ func (r *activityRepository) AddParticipant(ctx context.Context, activityId int6
 		return fmt.Errorf("%s could not insert participant for activity %d , %w", errlogprefix, activityId, err)
 	}
 
-	q = `UPDATE activity 
+	q = `UPDATE activities 
 		SET participant_count= participant_count + 1 
 		WHERE id=$1`
 
-	_, err = tx.Exec(ctx, q, activityId, user.ID)
+	_, err = tx.Exec(ctx, q, activityId)
 	if err != nil {
 		return fmt.Errorf("%s could not update participant count %d , %w", errlogprefix, activityId, err)
 	}
@@ -107,7 +107,7 @@ func (r *activityRepository) AddParticipant(ctx context.Context, activityId int6
 
 func (r *activityRepository) GetParticipants(ctx context.Context, acitivityId int64) ([]model.User, error) {
 
-	q := `SELECT u.id, u.name, u.last_name, 
+	q := `SELECT u.id, u.name, u.last_name, u.user_name,u.profile_image_url,
 	COALESCE(stats.average_point, 0.0) AS point
 	FROM user_profiles u
 	RIGHT JOIN participants p ON p.user_id = u.id
@@ -125,7 +125,7 @@ func (r *activityRepository) GetParticipants(ctx context.Context, acitivityId in
 	}
 	for rows.Next() {
 		var res model.User
-		err := rows.Scan(&res.ID, &res.Name, &res.LastName, &res.ProfilePoint)
+		err := rows.Scan(&res.ID, &res.Name, &res.LastName, &res.Username, &res.ProfileImageUrl, &res.ProfilePoint)
 		if err != nil {
 			return nil, fmt.Errorf("err getting rows %w ", err)
 		}

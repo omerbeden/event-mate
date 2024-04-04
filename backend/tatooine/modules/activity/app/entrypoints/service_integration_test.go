@@ -145,9 +145,9 @@ func TestAddParticipant(t *testing.T) {
 	)
 
 	participant := model.User{
-		ID: 3,
+		ID: 2,
 	}
-	activityId := int64(2)
+	activityId := int64(1)
 
 	err := activityService.AddParticipant(ctx, participant, activityId)
 	assert.NoError(t, err)
