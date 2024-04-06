@@ -80,7 +80,7 @@ func (ccmd *CreateProfileCommand) addUserProfileToCache(ctx context.Context, use
 	}
 
 	cacheKeyCurrentUser := fmt.Sprintf("%s:%s", cachedapter.USER_PROFILE_CACHE_KEY, userProfile.ExternalId)
-	cacheKeyUserName := fmt.Sprintf("%s:%s", cachedapter.USER_PROFILE_CACHE_KEY, userProfile.UserName)
+	cacheKeyUserName := fmt.Sprintf("%s:%s", cachedapter.USER_PROFILE_CACHE_KEY, userProfile.Header.UserName)
 
 	if err := ccmd.Cache.Set(ctx, cacheKeyCurrentUser, jsonValue); err != nil {
 		return err

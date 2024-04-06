@@ -42,9 +42,9 @@ func (m *MockRows) Scan(dest ...any) error {
 	if len(m.Users) > 0 {
 		user := m.Users[m.Current]
 		*dest[0].(*int64) = user.Id
-		*dest[1].(*string) = user.Name
-		*dest[2].(*string) = user.LastName
-		*dest[3].(*string) = user.ProfileImageUrl
+		*dest[1].(*string) = user.Header.Name
+		*dest[2].(*string) = user.Header.LastName
+		*dest[3].(*string) = user.Header.ProfileImageUrl
 		*dest[4].(*string) = user.Email
 		*dest[5].(*float32) = user.Stat.Point
 		*dest[6].(*string) = user.Adress.City

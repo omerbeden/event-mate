@@ -45,7 +45,6 @@ func (gc *GetByIDCommand) Handle(ctx context.Context) (*model.Activity, error) {
 	}
 
 	if result != nil {
-		logger.Infof("returning from redis %+v\n", activity)
 		return &activity, err
 	}
 

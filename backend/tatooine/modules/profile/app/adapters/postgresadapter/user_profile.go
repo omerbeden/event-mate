@@ -30,7 +30,7 @@ func (r *userProfileRepo) Insert(ctx context.Context, tx db.Tx, user *model.User
 	 Values($1,$2,$3,$4,$5,$6,$7,$8) RETURNING id`
 	var id int64
 
-	errQR := tx.QueryRow(ctx, q, user.Name, user.LastName, user.ProfileImageUrl, user.About, user.ExternalId, user.UserName, user.Email, user.IsVerified).Scan(&id)
+	errQR := tx.QueryRow(ctx, q, user.Header.Name, user.Header.LastName, user.Header.ProfileImageUrl, user.About, user.ExternalId, user.Header.UserName, user.Email, user.IsVerified).Scan(&id)
 	if errQR != nil {
 		return nil, fmt.Errorf("%s could not create %w", errlogprefix, errQR)
 	}
@@ -60,7 +60,7 @@ func (r *userProfileRepo) GetUsersByAddress(ctx context.Context, address model.U
 	var users []model.UserProfile
 	for rows.Next() {
 		var res model.UserProfile
-		err := rows.Scan(&res.Id, &res.Name, &res.LastName, &res.ProfileImageUrl, &res.Email,
+		err := rows.Scan(&res.Id, &res.Header.Name, &res.Header.LastName, &res.Header.ProfileImageUrl, &res.Email,
 			&res.Stat.Point,
 			&res.Adress.City)
 		if err != nil {
@@ -97,13 +97,15 @@ func (r *userProfileRepo) DeleteUser(ctx context.Context, externalId string) err
 
 func (r *userProfileRepo) GetAttandedActivities(ctx context.Context, userId int64) ([]model.Activity, error) {
 
-	q := `SELECT a.id , a.title, a.category, a.content , a.start_at,
+	q := `SELECT a.id , a.title, a.category, a.content , a.start_at, a.gender_composition,a.quota,a.participant_count,
+	p.name, p.last_name, p.user_name, p.profile_image_url, ups.average_point,
 	loc.city
 	FROM participants attended
 	JOIN user_profiles p ON p.id = attended.user_id
 	JOIN activities a ON a.id = attended.activity_id
 	JOIN activity_locations loc ON loc.activity_id = a.id
 	JOIN user_profiles created ON created.id = a.created_by
+	JOIN user_profile_stats ups ON ups.profile_id = p.id
 	WHERE attended.user_id = $1
 	`
 
@@ -115,7 +117,8 @@ func (r *userProfileRepo) GetAttandedActivities(ctx context.Context, userId int6
 	var activities []model.Activity
 	for rows.Next() {
 		var activity model.Activity
-		err := rows.Scan(&activity.ID, &activity.Title, &activity.Category, &activity.Content, &activity.StartAt,
+		err := rows.Scan(&activity.ID, &activity.Title, &activity.Category, &activity.Content, &activity.StartAt, &activity.GenderComposition, &activity.Quota, &activity.ParticipantCount,
+			&activity.CreatedBy.Name, &activity.CreatedBy.LastName, &activity.CreatedBy.UserName, &activity.CreatedBy.ProfileImageUrl, &activity.CreatedBy.Points,
 			&activity.Location.City)
 		if err != nil {
 			return nil, fmt.Errorf("%s error getting rows for user : %d %w", errlogprefix, userId, err)
@@ -140,7 +143,7 @@ func (r *userProfileRepo) GetCurrentUserProfile(ctx context.Context, externalId 
 	`
 
 	var user model.UserProfile
-	err := r.pool.QueryRow(ctx, q, externalId).Scan(&user.Id, &user.Name, &user.LastName, &user.About, &user.ProfileImageUrl, &user.ExternalId, &user.UserName, &user.Email, &user.IsVerified,
+	err := r.pool.QueryRow(ctx, q, externalId).Scan(&user.Id, &user.Header.Name, &user.Header.LastName, &user.About, &user.Header.ProfileImageUrl, &user.ExternalId, &user.Header.UserName, &user.Email, &user.IsVerified,
 		&user.Adress.City,
 		&user.Stat.AttandedActivities, &user.Stat.Point)
 	if err != nil {
@@ -172,7 +175,7 @@ func (r *userProfileRepo) GetUserProfile(ctx context.Context, username string) (
 	WHERE up.user_name = $1;`
 
 	var user model.UserProfile
-	err := r.pool.QueryRow(ctx, q, username).Scan(&user.Id, &user.Name, &user.LastName, &user.About, &user.ProfileImageUrl, &user.Email,
+	err := r.pool.QueryRow(ctx, q, username).Scan(&user.Id, &user.Header.Name, &user.Header.LastName, &user.About, &user.Header.ProfileImageUrl, &user.Email,
 		&user.Adress.City,
 		&user.Stat.AttandedActivities, &user.Stat.Point)
 	if err != nil {
@@ -191,7 +194,7 @@ func (r *userProfileRepo) GetUserProfile(ctx context.Context, username string) (
 
 func (r *userProfileRepo) GetUserProfileById(ctx context.Context, id int64) (*model.UserProfile, error) {
 
-	q := `SELECT up.id, up.name, up.last_name, up.about, up.profile_image_url,email,
+	q := `SELECT up.id, up.name, up.last_name, up.about, up.profile_image_url,email,up.external_id,up.user_name,
     upa.city,
     ups.attanded_activities, 
 	ups.average_point as point	FROM user_profiles up
@@ -200,7 +203,7 @@ func (r *userProfileRepo) GetUserProfileById(ctx context.Context, id int64) (*mo
 	WHERE up.id = $1;`
 
 	var user model.UserProfile
-	err := r.pool.QueryRow(ctx, q, id).Scan(&user.Id, &user.Name, &user.LastName, &user.About, &user.ProfileImageUrl, &user.Email,
+	err := r.pool.QueryRow(ctx, q, id).Scan(&user.Id, &user.Header.Name, &user.Header.LastName, &user.About, &user.Header.ProfileImageUrl, &user.Email, &user.ExternalId, &user.Header.UserName,
 		&user.Adress.City,
 		&user.Stat.AttandedActivities, &user.Stat.Point)
 	if err != nil {

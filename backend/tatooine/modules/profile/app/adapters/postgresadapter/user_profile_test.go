@@ -93,10 +93,13 @@ func TestGetUsersByAddress(t *testing.T) {
 				ProfileId: int64(1),
 				City:      "San Francisco",
 			},
-			About:           "about",
-			Name:            "name",
-			LastName:        "lastName",
-			ProfileImageUrl: "profileImageUrl",
+			About: "about",
+			Header: model.UserProfileHeader{
+				Name:            "name",
+				LastName:        "last name",
+				ProfileImageUrl: "profileImageUrl",
+			},
+
 			Stat: model.UserProfileStat{
 				AttandedActivities: 0,
 				Point:              0,
@@ -110,10 +113,12 @@ func TestGetUsersByAddress(t *testing.T) {
 				ProfileId: int64(2),
 				City:      "San Francisco",
 			},
-			About:           "about2",
-			Name:            "name2",
-			LastName:        "lastName2",
-			ProfileImageUrl: "profileImageUrl2",
+			About: "about2",
+			Header: model.UserProfileHeader{
+				Name:            "name",
+				LastName:        "last name",
+				ProfileImageUrl: "profileImageUrl",
+			},
 			Stat: model.UserProfileStat{
 				AttandedActivities: 0,
 				Point:              0,

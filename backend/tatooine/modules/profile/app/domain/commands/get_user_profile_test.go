@@ -27,8 +27,10 @@ func TestGetUserProfile_Handle(t *testing.T) {
 			profiles: []model.UserProfile{
 				{
 					ExternalId: "testuser",
-					Name:       "test",
-					LastName:   "user",
+					Header: model.UserProfileHeader{
+						Name:     "name",
+						LastName: "last name",
+					},
 				},
 			},
 		},
@@ -39,8 +41,10 @@ func TestGetUserProfile_Handle(t *testing.T) {
 			profiles: []model.UserProfile{
 				{
 					ExternalId: "testuser",
-					Name:       "test",
-					LastName:   "user",
+					Header: model.UserProfileHeader{
+						Name:     "name",
+						LastName: "last name",
+					},
 				},
 			},
 			GetUserProfileFunc: func(ctx context.Context, username string) (*model.UserProfile, error) {

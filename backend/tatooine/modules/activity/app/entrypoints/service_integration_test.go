@@ -145,7 +145,11 @@ func TestAddParticipant(t *testing.T) {
 	)
 
 	participant := model.User{
-		ID: 2,
+		ID:              2,
+		Name:            "ome1r",
+		LastName:        "be1den",
+		ProfileImageUrl: "https://lh3.googleusercontent.com/a/ACg8ocL3WjhfOizacrfFw12c3m2oBr708t9vWJZffSoySetuXGQw41Ej=s100",
+		ProfilePoint:    0,
 	}
 	activityId := int64(1)
 

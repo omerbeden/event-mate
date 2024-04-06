@@ -27,10 +27,12 @@ func TestCreateProfileCommand_Handle(t *testing.T) {
 			name:    "should insert user profile successfully",
 			wantErr: false,
 			profile: model.UserProfile{
-				Id:       1,
-				Name:     "name",
-				LastName: "last name",
-				About:    "about",
+				Id: 1,
+				Header: model.UserProfileHeader{
+					Name:     "name",
+					LastName: "last name",
+				},
+				About: "about",
 				Adress: model.UserProfileAdress{
 					ProfileId: 1,
 					City:      "San Francisco",
@@ -45,10 +47,12 @@ func TestCreateProfileCommand_Handle(t *testing.T) {
 			name:    "should return error when userepo.Insert  fails",
 			wantErr: true,
 			profile: model.UserProfile{
-				Id:       1,
-				Name:     "name",
-				LastName: "last name",
-				About:    "about",
+				Id: 1,
+				Header: model.UserProfileHeader{
+					Name:     "name",
+					LastName: "last name",
+				},
+				About: "about",
 				Adress: model.UserProfileAdress{
 					ProfileId: 1,
 					City:      "San Francisco",
@@ -66,10 +70,12 @@ func TestCreateProfileCommand_Handle(t *testing.T) {
 			name:    "should return error when addressRepo.Insert fails",
 			wantErr: true,
 			profile: model.UserProfile{
-				Id:       1,
-				Name:     "name",
-				LastName: "last name",
-				About:    "about",
+				Id: 1,
+				Header: model.UserProfileHeader{
+					Name:     "name",
+					LastName: "last name",
+				},
+				About: "about",
 				Adress: model.UserProfileAdress{
 					ProfileId: 1,
 					City:      "San Francisco",
@@ -87,10 +93,12 @@ func TestCreateProfileCommand_Handle(t *testing.T) {
 			name:    "should return error when statRepo.Insert fails",
 			wantErr: true,
 			profile: model.UserProfile{
-				Id:       1,
-				Name:     "name",
-				LastName: "last name",
-				About:    "about",
+				Id: 1,
+				Header: model.UserProfileHeader{
+					Name:     "name",
+					LastName: "last name",
+				},
+				About: "about",
 				Adress: model.UserProfileAdress{
 					ProfileId: 1,
 					City:      "San Francisco",

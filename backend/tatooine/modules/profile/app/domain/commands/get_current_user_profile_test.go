@@ -27,8 +27,10 @@ func TestGetCurrentUserProfile_Handle(t *testing.T) {
 			profiles: []model.UserProfile{
 				{
 					ExternalId: "testuser",
-					Name:       "test",
-					LastName:   "user",
+					Header: model.UserProfileHeader{
+						Name:     "name",
+						LastName: "last name",
+					},
 				},
 			},
 		},
@@ -39,8 +41,10 @@ func TestGetCurrentUserProfile_Handle(t *testing.T) {
 			profiles: []model.UserProfile{
 				{
 					ExternalId: "testuser",
-					Name:       "test",
-					LastName:   "user",
+					Header: model.UserProfileHeader{
+						Name:     "name",
+						LastName: "last name",
+					},
 				},
 			},
 			GetCurrentUserProfileFunc: func(ctx context.Context, s string) (*model.UserProfile, error) {

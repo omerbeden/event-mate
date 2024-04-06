@@ -56,7 +56,7 @@ func (cmd *EvaluateUserCommand) updateCache(ctx context.Context, user *model.Use
 	}
 
 	cacheKeyExternalId := fmt.Sprintf("%s:%s", cachedapter.USER_PROFILE_CACHE_KEY, user.ExternalId)
-	cacheKeyUserName := fmt.Sprintf("%s:%s", cachedapter.USER_PROFILE_CACHE_KEY, user.UserName)
+	cacheKeyUserName := fmt.Sprintf("%s:%s", cachedapter.USER_PROFILE_CACHE_KEY, user.Header.UserName)
 
 	err = cmd.Cache.Set(ctx, cacheKeyExternalId, jsonValue)
 	if err != nil {

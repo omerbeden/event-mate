@@ -27,25 +27,9 @@ func TestGetAttandedActivities_Handle(t *testing.T) {
 			attandedActivities: []model.Activity{
 				{
 					ID: int64(1),
-					Participants: []model.UserProfile{
-						{
-							Id: int64(1),
-						},
-						{
-							Id: int64(2),
-						},
-					},
 				},
 				{
 					ID: int64(2),
-					Participants: []model.UserProfile{
-						{
-							Id: int64(1),
-						},
-						{
-							Id: int64(3),
-						},
-					},
 				},
 			},
 		},

@@ -170,7 +170,7 @@ func (service *UserService) GetUserProfileById(ctx context.Context, id string) (
 		return nil, err
 	}
 
-	// user.AttandedActivities, err = service.GetAttandedActivities(user.Id)
+	// user.AttandedActivities, err = service.GetAttandedActivities(ctx, user.Id)
 	// if err != nil {
 	// 	return nil, err
 	// }
@@ -290,7 +290,7 @@ func (service *UserService) UpdateVerification(ctx context.Context, isVerified b
 
 func updateCache(ctx context.Context, cache cache.Cache, updatedUser *model.UserProfile) error {
 	cacheKeyExternalId := fmt.Sprintf("%s:%s", cachedapter.USER_PROFILE_CACHE_KEY, updatedUser.ExternalId)
-	cacheKeyUserName := fmt.Sprintf("%s:%s", cachedapter.USER_PROFILE_CACHE_KEY, updatedUser.UserName)
+	cacheKeyUserName := fmt.Sprintf("%s:%s", cachedapter.USER_PROFILE_CACHE_KEY, updatedUser.Header.UserName)
 
 	jsonValue, err := json.Marshal(updatedUser)
 	if err != nil {

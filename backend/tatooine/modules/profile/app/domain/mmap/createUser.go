@@ -11,15 +11,18 @@ func CreateUserRequestToProfile(from *model.CreateUserProfileRequest) *model.Use
 	}
 
 	return &model.UserProfile{
-		Name:            from.Name,
-		LastName:        from.LastName,
-		About:           from.About,
-		Adress:          from.Adress,
-		ProfileImageUrl: from.ProfileImageUrl,
-		ExternalId:      from.ExternalId,
-		UserName:        from.UserName,
-		Email:           from.Email,
-		Badges:          badges,
-		IsVerified:      from.IsVerified,
+		Header: model.UserProfileHeader{
+			UserName:        from.UserName,
+			Name:            from.Name,
+			LastName:        from.LastName,
+			ProfileImageUrl: from.ProfileImageUrl,
+			Points:          0,
+		},
+		About:      from.About,
+		Adress:     from.Adress,
+		ExternalId: from.ExternalId,
+		Email:      from.Email,
+		Badges:     badges,
+		IsVerified: from.IsVerified,
 	}
 }
