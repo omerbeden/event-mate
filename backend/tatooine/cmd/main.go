@@ -1,17 +1,20 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
 	"os/signal"
 	"syscall"
 
+	firebase "firebase.google.com/go"
 	"github.com/go-redis/redis/v8"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/requestid"
 
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/omerbeden/event-mate/backend/tatooine/cmd/api/middleware/auth"
 	"github.com/omerbeden/event-mate/backend/tatooine/cmd/api/routes"
 	activityRepoAdapter "github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/adapters/postgresadapter"
 	activityServiceEntryPoints "github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/entrypoints"
@@ -55,10 +58,16 @@ func main() {
 	userStatRepo := profileRepoAdapter.NewUserProfileStatRepo(pgxAdapter)
 	userBadgeRepo := profileRepoAdapter.NewBadgeRepo(pgxAdapter)
 	userService := entrypoints.NewService(userRepository, userStatRepo, userAddressRepo, userBadgeRepo, *redisClient, pgxAdapter)
-	validationService := ve.NewValidationService(sugaredLogger)
+	firebaseApp, err := firebase.NewApp(context.Background(), nil)
+	if err != nil {
+		log.Fatalf("error initializing app: %v\n", err)
+	}
+
+	validationService := ve.NewValidationService(sugaredLogger, firebaseApp)
 
 	app := fiber.New()
 	app.Use(requestid.New())
+	app.Use(auth.New())
 	api := app.Group("/api")
 	routes.ActivityRouter(api, *activityService)
 	routes.ProfileRouter(api, *userService)
