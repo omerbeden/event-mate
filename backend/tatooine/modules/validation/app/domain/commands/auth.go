@@ -2,10 +2,11 @@ package commands
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"log"
 
 	firebase "firebase.google.com/go"
+	"github.com/omerbeden/event-mate/backend/tatooine/modules/validation/app/domain/derrors"
 )
 
 type authCommand struct {
@@ -29,9 +30,8 @@ func (cmd authCommand) Handle(ctx context.Context) (string, error) {
 
 	token, err := client.VerifyIDToken(ctx, cmd.idToken)
 	if err != nil {
-		return "", fmt.Errorf("error verifying ID token: %w", err)
+		return "", errors.Join(derrors.ErrFirebaseAuth, fmt.Errorf("error verifying ID token: %w", err))
 	}
 
-	log.Printf("Verified ID token: %v\n", token)
-	return "", nil
+	return token.UID, nil
 }

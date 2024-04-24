@@ -58,6 +58,7 @@ func main() {
 	userStatRepo := profileRepoAdapter.NewUserProfileStatRepo(pgxAdapter)
 	userBadgeRepo := profileRepoAdapter.NewBadgeRepo(pgxAdapter)
 	userService := entrypoints.NewService(userRepository, userStatRepo, userAddressRepo, userBadgeRepo, *redisClient, pgxAdapter)
+
 	firebaseApp, err := firebase.NewApp(context.Background(), nil)
 	if err != nil {
 		log.Fatalf("error initializing app: %v\n", err)
@@ -67,7 +68,7 @@ func main() {
 
 	app := fiber.New()
 	app.Use(requestid.New())
-	app.Use(auth.New())
+	app.Use(auth.New(firebaseApp))
 	api := app.Group("/api")
 	routes.ActivityRouter(api, *activityService)
 	routes.ProfileRouter(api, *userService)
