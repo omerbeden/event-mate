@@ -259,7 +259,7 @@ func GetActivityById(service entrypoints.ActivityService) fiber.Handler {
 		newLogger := logger.With(zap.String("requestid", requestid))
 		ctx = context.WithValue(ctx, pkg.LoggerKey, newLogger)
 
-		res, err := service.GetActivityById(ctx, int64(aI))
+		res, err := service.GetActivityDetail(ctx, int64(aI))
 
 		if err != nil {
 			logger.Error(err)

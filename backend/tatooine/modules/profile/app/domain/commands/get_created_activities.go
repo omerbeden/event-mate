@@ -31,7 +31,7 @@ func (cmd GetCreatedActivitiesCommand) Handle(ctx context.Context) ([]model.Acti
 }
 
 func (cmd GetCreatedActivitiesCommand) getFromCache(ctx context.Context) ([]model.Activity, error) {
-	cacheKey := fmt.Sprintf("%s:%d", cache.CREATED_ACTIVITIES_CACHE_KEY, cmd.UserId)
+	cacheKey := fmt.Sprintf("%s:%d:%s", cache.USER_PROFILE_CACHE_KEY, cmd.UserId, cache.CREATED_ACTIVITIES_CACHE_KEY)
 
 	createdActivitiesStr, err := cmd.Cache.GetMembers(ctx, cacheKey)
 	if err != nil {

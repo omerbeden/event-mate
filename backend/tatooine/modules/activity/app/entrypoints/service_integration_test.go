@@ -227,7 +227,7 @@ func TestGetActivityFromDBWhenRedisDown(t *testing.T) {
 
 	activityId := 2
 
-	res, err := activityService.GetActivityById(ctx, int64(activityId))
+	res, err := activityService.GetActivityDetail(ctx, int64(activityId))
 
 	assert.NoError(t, err)
 	assert.NotNil(t, res)
@@ -261,7 +261,7 @@ func TestGetActivityByIDReturnErrorWhenActivityIdNotFound(t *testing.T) {
 		}),
 		pgxAdapter,
 	)
-	res, err := activityService.GetActivityById(ctx, 3)
+	res, err := activityService.GetActivityDetail(ctx, 3)
 
 	assert.Error(t, err)
 	assert.Nil(t, res)

@@ -19,7 +19,7 @@ type GetByLocationCommand struct {
 	Redis    cache.Cache
 }
 
-func (gc *GetByLocationCommand) Handle(ctx context.Context) ([]model.Activity, error) {
+func (gc *GetByLocationCommand) Handle(ctx context.Context) ([]model.GetActivityCommandResult, error) {
 	logger, ok := ctx.Value(pkg.LoggerKey).(*zap.SugaredLogger)
 	if !ok {
 		return nil, fmt.Errorf("failed to get logger for GetByLocationCommand")
@@ -33,10 +33,10 @@ func (gc *GetByLocationCommand) Handle(ctx context.Context) ([]model.Activity, e
 		return gc.Repo.GetByLocation(ctx, &gc.Location)
 	}
 
-	var activitiesResult []model.Activity
+	var activitiesResult []model.GetActivityCommandResult
 	for _, activity := range activities {
 
-		var activityObject = model.Activity{}
+		var activityObject = model.GetActivityCommandResult{}
 		err := json.Unmarshal([]byte(activity), &activityObject)
 		if err != nil {
 			logger.Infof("parsing erorr returning from db %s", err.Error())

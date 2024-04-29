@@ -10,7 +10,7 @@ import (
 type ActivityRepository interface {
 	Create(ctx context.Context, tx db.Tx, activity model.Activity) (*model.Activity, error)
 	GetByID(ctx context.Context, activityId int64) (*model.Activity, error)
-	GetByLocation(ctx context.Context, location *model.Location) ([]model.Activity, error)
+	GetByLocation(ctx context.Context, location *model.Location) ([]model.GetActivityCommandResult, error)
 	UpdateByID(ctx context.Context, activityId int64, activity model.Activity) (bool, error)
 	DeleteByID(ctx context.Context, activityId int64) (bool, error)
 	AddParticipants(ctx context.Context, activityId int64, participants []model.User) error

@@ -22,7 +22,7 @@ type GetByIDCommand struct {
 	Redis             cache.Cache
 }
 
-func (gc *GetByIDCommand) Handle(ctx context.Context) (*model.Activity, error) {
+func (gc *GetByIDCommand) Handle(ctx context.Context) (*model.ActivityDetail, error) {
 	logger, ok := ctx.Value(pkg.LoggerKey).(*zap.SugaredLogger)
 	if !ok {
 		return nil, fmt.Errorf("failed to get logger for GetByIDCommand")
@@ -37,7 +37,7 @@ func (gc *GetByIDCommand) Handle(ctx context.Context) (*model.Activity, error) {
 		return gc.getActivityFromDb(ctx)
 	}
 
-	activity := model.Activity{}
+	activity := model.ActivityDetail{}
 	err := json.Unmarshal([]byte(result.(string)), &activity)
 	if err != nil {
 		logger.Infof("parsing erorr returning from db %s", err.Error())
@@ -51,26 +51,21 @@ func (gc *GetByIDCommand) Handle(ctx context.Context) (*model.Activity, error) {
 	return gc.getActivityFromDb(ctx)
 }
 
-func (gc *GetByIDCommand) getActivityFromDb(ctx context.Context) (*model.Activity, error) {
-	activity, err := gc.Repo.GetByID(ctx, gc.ActivityId)
-	if err != nil {
-		return nil, err
-	}
+func (gc *GetByIDCommand) getActivityFromDb(ctx context.Context) (*model.ActivityDetail, error) {
 
 	rules, err := gc.ActivityRulesRepo.GetActivityRules(ctx, gc.ActivityId)
 	if err != nil {
 		return nil, err
 	}
 
-	activity.Rules = rules
-
 	flow, err := gc.ActivityFlowRepo.GetActivityFlow(ctx, gc.ActivityId)
 	if err != nil {
 		return nil, err
 	}
 
-	activity.Flow = flow
-
-	return activity, nil
+	return &model.ActivityDetail{
+		Rules: rules,
+		Flow:  flow,
+	}, nil
 
 }

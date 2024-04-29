@@ -81,7 +81,7 @@ func (service ActivityService) GetParticipants(ctx context.Context, activityId i
 	return getParticipantsCommand.Handle(ctx)
 
 }
-func (service ActivityService) GetActivityById(ctx context.Context, activityId int64) (*model.Activity, error) {
+func (service ActivityService) GetActivityDetail(ctx context.Context, activityId int64) (*model.ActivityDetail, error) {
 	getCommand := &commands.GetByIDCommand{
 		Repo:              service.activityRepository,
 		ActivityRulesRepo: service.activityRulesRepository,
@@ -95,7 +95,7 @@ func (service ActivityService) GetActivityById(ctx context.Context, activityId i
 		return nil, err
 	}
 
-	participants, err := service.GetParticipants(ctx, activity.ID)
+	participants, err := service.GetParticipants(ctx, activityId)
 	activity.Participants = participants
 
 	if err != nil {
@@ -105,7 +105,7 @@ func (service ActivityService) GetActivityById(ctx context.Context, activityId i
 	return activity, nil
 }
 
-func (service ActivityService) GetActivitiesByLocation(ctx context.Context, loc model.Location) ([]model.Activity, error) {
+func (service ActivityService) GetActivitiesByLocation(ctx context.Context, loc model.Location) ([]model.GetActivityCommandResult, error) {
 	getCommand := &commands.GetByLocationCommand{
 		Location: loc,
 		Repo:     service.activityRepository,

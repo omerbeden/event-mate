@@ -69,15 +69,12 @@ func (cmd *CreateCommand) Handle(ctx context.Context) (bool, error) {
 		return false, fmt.Errorf("failed to commit transaction: %w", err)
 	}
 
-	jsonActivity, errMarshall := json.Marshal(activity)
-	if errMarshall != nil {
-		return false, errMarshall
-	}
+	jsonActivity, jsonActivityDetail, err := cmd.jsonfy(activity)
 
 	activityId := strconv.FormatInt(activity.ID, 10)
 	activityKey := fmt.Sprintf("%s:%s", cacheadapter.ACTIVITY_CACHE_KEY, activityId)
 
-	err = cmd.Redis.Set(ctx, activityKey, jsonActivity)
+	err = cmd.Redis.Set(ctx, activityKey, jsonActivityDetail)
 	if err != nil {
 		logger.Infof("activity could not inserted to Redis %s\n", activityId)
 	}
@@ -87,6 +84,7 @@ func (cmd *CreateCommand) Handle(ctx context.Context) (bool, error) {
 	go func() {
 		ctx := context.Background()
 		defer wg.Done()
+
 		err := cmd.addCityToRedis(ctx, activity.Location.City, jsonActivity)
 		if err != nil {
 			logger.Info("failed to add city to Redis %s\n", activity)
@@ -102,12 +100,47 @@ func (cmd *CreateCommand) Handle(ctx context.Context) (bool, error) {
 
 }
 
+func (cmd *CreateCommand) jsonfy(activity *model.Activity) ([]byte, []byte, error) {
+	sactivity := model.GetActivityCommandResult{
+		ID:                activity.ID,
+		Title:             activity.Title,
+		Category:          activity.Category,
+		CreatedBy:         activity.CreatedBy,
+		Location:          activity.Location,
+		StartAt:           activity.StartAt,
+		EndAt:             activity.EndAt,
+		Content:           activity.Content,
+		Quota:             activity.Quota,
+		GenderComposition: activity.GenderComposition,
+		ParticipantCount:  activity.ParticipantCount,
+	}
+	activityDetail := model.ActivityDetail{
+		Participants: activity.Participants,
+		Rules:        activity.Rules,
+		Flow:         activity.Flow,
+	}
+
+	jsonActivity, err := json.Marshal(sactivity)
+	if err != nil {
+		return nil, nil, err
+	}
+	jsonActivityDetail, err := json.Marshal(activityDetail)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return jsonActivity, jsonActivityDetail, nil
+
+}
+
 func (ccmd *CreateCommand) addCityToRedis(ctx context.Context, city string, valueJson []byte) error {
+	//city:V
 	cityKey := fmt.Sprintf("%s:%s", cacheadapter.CITY_CACHE_KEY, city)
 	return ccmd.Redis.AddMember(ctx, cityKey, valueJson)
 }
 
 func (command *CreateCommand) addCreatedActivityToRedis(ctx context.Context, createdBy int64, valueJSON []byte) error {
+	//userProfile:V:createdActivities
 	redisKey := fmt.Sprintf("%s:%d:%s", cache.USER_PROFILE_CACHE_KEY, createdBy, cache.CREATED_ACTIVITIES_CACHE_KEY)
 	return command.Redis.AddMember(ctx, redisKey, valueJSON)
 

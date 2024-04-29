@@ -19,6 +19,25 @@ type Activity struct {
 	ParticipantCount  int               `json:"participantCount"`
 }
 
+type ActivityDetail struct {
+	Participants []User   `json:"participants,omitempty"`
+	Rules        []string `json:"rules,omitempty"`
+	Flow         []string `json:"flow,omitempty"`
+}
+
+type GetActivityCommandResult struct {
+	ID                int64             `json:"id"`
+	Title             string            `json:"title"`
+	Category          string            `json:"category"`
+	CreatedBy         User              `json:"createdBy"`
+	Location          Location          `json:"location"`
+	StartAt           time.Time         `json:"startAt"`
+	EndAt             time.Time         `json:"endAt,omitempty"`
+	Content           string            `json:"content"`
+	Quota             int               `json:"quota"`
+	GenderComposition GenderComposition `json:"genderComposition"`
+	ParticipantCount  int               `json:"participantCount"`
+}
 type Location struct {
 	ActivityId  int64   `json:"-"`
 	City        string  `json:"city"`

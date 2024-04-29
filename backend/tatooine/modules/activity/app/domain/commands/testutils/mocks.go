@@ -10,10 +10,10 @@ import (
 
 type MockActivityRepo struct {
 	Activity            model.Activity
-	Activities          []model.Activity
+	Activities          []model.GetActivityCommandResult
 	CreateFunc          func(ctx context.Context, tx db.Tx, activity model.Activity) (*model.Activity, error)
 	GetByIDFunc         func(ctx context.Context, id int64) (*model.Activity, error)
-	GetByLocationFunc   func(ctx context.Context, location *model.Location) ([]model.Activity, error)
+	GetByLocationFunc   func(ctx context.Context, location *model.Location) ([]model.GetActivityCommandResult, error)
 	UpdateByIDFunc      func(ctx context.Context, activityId int64, activity model.Activity) (bool, error)
 	DeleteByIDFunc      func(ctx context.Context, activityId int64) (bool, error)
 	AddParticipantsFunc func(ctx context.Context, activityId int64, participants []model.User) error
@@ -33,7 +33,7 @@ func (m *MockActivityRepo) GetByID(ctx context.Context, activityId int64) (*mode
 	}
 	return &m.Activity, nil
 }
-func (m *MockActivityRepo) GetByLocation(ctx context.Context, location *model.Location) ([]model.Activity, error) {
+func (m *MockActivityRepo) GetByLocation(ctx context.Context, location *model.Location) ([]model.GetActivityCommandResult, error) {
 	if m.GetByLocationFunc != nil {
 		return m.GetByLocationFunc(ctx, location)
 	}

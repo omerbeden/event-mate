@@ -155,7 +155,7 @@ func (r *activityRepository) GetByID(ctx context.Context, id int64) (*model.Acti
 
 	return &activity, nil
 }
-func (r *activityRepository) GetByLocation(ctx context.Context, loc *model.Location) ([]model.Activity, error) {
+func (r *activityRepository) GetByLocation(ctx context.Context, loc *model.Location) ([]model.GetActivityCommandResult, error) {
 
 	q := `SELECT a.id, a.title, a.category,a.start_at,a.content,a.quota,a.gender_composition, a.participant_count,
 	u.id, u.name, u.last_name, u.user_name, u.profile_image_url,
@@ -167,14 +167,14 @@ func (r *activityRepository) GetByLocation(ctx context.Context, loc *model.Locat
 	LEFT JOIN activity_locations l ON a.id = l.activity_id
 	Where l.city= $1`
 
-	var activities []model.Activity
+	var activities []model.GetActivityCommandResult
 	rows, err := r.pool.Query(ctx, q, loc.City)
 	if err != nil {
 		return nil, fmt.Errorf("%s could not get activity by loc: id: %s  %w", errlogprefix, loc.City, err)
 	}
 
 	for rows.Next() {
-		var res model.Activity
+		var res model.GetActivityCommandResult
 		err := rows.Scan(&res.ID, &res.Title, &res.Category, &res.StartAt, &res.Content, &res.Quota, &res.GenderComposition, &res.ParticipantCount,
 			&res.CreatedBy.ID, &res.CreatedBy.Name, &res.CreatedBy.LastName, &res.CreatedBy.Username, &res.CreatedBy.ProfileImageUrl,
 			&res.CreatedBy.ProfilePoint,

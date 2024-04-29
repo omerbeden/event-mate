@@ -67,7 +67,7 @@ func TestGetActivitiesByLocation_Handle(t *testing.T) {
 			addmockToRedis: false,
 			wantError:      true,
 			setupGetByLocationFunc: func(mar *testutils.MockActivityRepo) {
-				mar.GetByLocationFunc = func(ctx context.Context, location *model.Location) ([]model.Activity, error) {
+				mar.GetByLocationFunc = func(ctx context.Context, location *model.Location) ([]model.GetActivityCommandResult, error) {
 					return nil, fmt.Errorf("an error occurred when getting activities")
 				}
 			},
@@ -78,7 +78,7 @@ func TestGetActivitiesByLocation_Handle(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			ctx := context.Background()
 			mockActivityRepo := &testutils.MockActivityRepo{
-				Activities: []model.Activity{
+				Activities: []model.GetActivityCommandResult{
 					{
 						ID:       1,
 						Location: tc.location,
