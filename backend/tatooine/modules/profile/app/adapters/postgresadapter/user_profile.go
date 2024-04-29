@@ -129,6 +129,37 @@ func (r *userProfileRepo) GetAttandedActivities(ctx context.Context, userId int6
 	return activities, nil
 }
 
+func (r *userProfileRepo) GetCreatedActivities(ctx context.Context, userId int64) ([]model.Activity, error) {
+	q := `SELECT a.id , a.title, a.category, a.content , a.start_at, a.gender_composition,a.quota,a.participant_count,
+	p.name, p.last_name, p.user_name, p.profile_image_url, ups.average_point,
+	loc.city
+	FROM activities
+	JOIN user_profiles p ON p.id = a.created_by
+	JOIN activity_locations loc ON loc.activity_id = a.id
+	JOIN user_profile_stats ups ON ups.profile_id = p.id
+	WHERE a.created_by = $1`
+
+	rows, err := r.pool.Query(ctx, q, userId)
+	if err != nil {
+		return nil, fmt.Errorf("%s could not get activities for user: %d %w", errlogprefix, userId, err)
+	}
+
+	var activities []model.Activity
+	for rows.Next() {
+		var activity model.Activity
+		err := rows.Scan(&activity.ID, &activity.Title, &activity.Category, &activity.Content, &activity.StartAt, &activity.GenderComposition, &activity.Quota, &activity.ParticipantCount,
+			&activity.CreatedBy.Name, &activity.CreatedBy.LastName, &activity.CreatedBy.UserName, &activity.CreatedBy.ProfileImageUrl, &activity.CreatedBy.Points,
+			&activity.Location.City)
+		if err != nil {
+			return nil, fmt.Errorf("%s error getting rows for user : %d %w", errlogprefix, userId, err)
+		}
+		activities = append(activities, activity)
+	}
+
+	return activities, nil
+
+}
+
 func (r *userProfileRepo) GetCurrentUserProfile(ctx context.Context, externalId string) (*model.UserProfile, error) {
 
 	q := `SELECT up.id, up.name, up.last_name, up.about, up.profile_image_url, up.external_id, up.user_name,email,up.is_verified,

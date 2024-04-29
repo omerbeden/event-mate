@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/adapters/cachedapter"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/model"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/ports/repositories"
 	"github.com/omerbeden/event-mate/backend/tatooine/pkg"
@@ -55,8 +54,8 @@ func (cmd *EvaluateUserCommand) updateCache(ctx context.Context, user *model.Use
 		return fmt.Errorf("parsing json error %w", err)
 	}
 
-	cacheKeyExternalId := fmt.Sprintf("%s:%s", cachedapter.USER_PROFILE_CACHE_KEY, user.ExternalId)
-	cacheKeyUserName := fmt.Sprintf("%s:%s", cachedapter.USER_PROFILE_CACHE_KEY, user.Header.UserName)
+	cacheKeyExternalId := fmt.Sprintf("%s:%s", cache.USER_PROFILE_CACHE_KEY, user.ExternalId)
+	cacheKeyUserName := fmt.Sprintf("%s:%s", cache.USER_PROFILE_CACHE_KEY, user.Header.UserName)
 
 	err = cmd.Cache.Set(ctx, cacheKeyExternalId, jsonValue)
 	if err != nil {

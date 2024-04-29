@@ -24,6 +24,11 @@ type MockUserRepository struct {
 	GetIdFunc                 func(ctx context.Context, externalId string) (int64, error)
 }
 
+// GetCreatedActivities implements repositories.UserProfileRepository.
+func (m *MockUserRepository) GetCreatedActivities(ctx context.Context, userId int64) ([]model.Activity, error) {
+	panic("unimplemented")
+}
+
 // GetUserProfileById implements repositories.UserProfileRepository.
 func (m *MockUserRepository) GetUserProfileById(ctx context.Context, id int64) (*model.UserProfile, error) {
 	panic("unimplemented")

@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/adapters/cachedapter"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/commands"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/mmap"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/model"
@@ -288,21 +287,31 @@ func (service *UserService) UpdateVerification(ctx context.Context, isVerified b
 	return errors.New("unverified account, verify account first")
 }
 
-func updateCache(ctx context.Context, cache cache.Cache, updatedUser *model.UserProfile) error {
-	cacheKeyExternalId := fmt.Sprintf("%s:%s", cachedapter.USER_PROFILE_CACHE_KEY, updatedUser.ExternalId)
-	cacheKeyUserName := fmt.Sprintf("%s:%s", cachedapter.USER_PROFILE_CACHE_KEY, updatedUser.Header.UserName)
+func (service UserService) GetCreatedActivities(ctx context.Context, userId int64) ([]model.Activity, error) {
+	cmd := &commands.GetCreatedActivitiesCommand{
+		Repo:   service.userRepository,
+		Cache:  &service.redisClient,
+		UserId: userId,
+	}
+
+	return cmd.Handle(ctx)
+}
+
+func updateCache(ctx context.Context, redis cache.Cache, updatedUser *model.UserProfile) error {
+	cacheKeyExternalId := fmt.Sprintf("%s:%s", cache.USER_PROFILE_CACHE_KEY, updatedUser.ExternalId)
+	cacheKeyUserName := fmt.Sprintf("%s:%s", cache.USER_PROFILE_CACHE_KEY, updatedUser.Header.UserName)
 
 	jsonValue, err := json.Marshal(updatedUser)
 	if err != nil {
 		return fmt.Errorf("parsing error while updating user profile on cache")
 	}
 
-	err = cache.Set(ctx, cacheKeyExternalId, jsonValue)
+	err = redis.Set(ctx, cacheKeyExternalId, jsonValue)
 	if err != nil {
 		return err
 	}
 
-	err = cache.Set(ctx, cacheKeyUserName, jsonValue)
+	err = redis.Set(ctx, cacheKeyUserName, jsonValue)
 	if err != nil {
 		return err
 	}

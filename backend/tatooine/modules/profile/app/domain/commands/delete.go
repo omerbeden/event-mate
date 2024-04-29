@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/adapters/cachedapter"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/ports/repositories"
 	"github.com/omerbeden/event-mate/backend/tatooine/pkg/cache"
 )
@@ -26,8 +25,8 @@ func (c *DeleteProfileCommand) Handle(ctx context.Context) error {
 }
 
 func (c *DeleteProfileCommand) deleteFromCache(ctx context.Context) error {
-	cacheKeyExternalId := fmt.Sprintf("%s:%s", cachedapter.USER_PROFILE_CACHE_KEY, c.ExternalId)
-	cacheKeyUserName := fmt.Sprintf("%s:%s", cachedapter.USER_PROFILE_CACHE_KEY, c.UserName)
+	cacheKeyExternalId := fmt.Sprintf("%s:%s", cache.USER_PROFILE_CACHE_KEY, c.ExternalId)
+	cacheKeyUserName := fmt.Sprintf("%s:%s", cache.USER_PROFILE_CACHE_KEY, c.UserName)
 
 	err := c.Cache.Delete(ctx, cacheKeyExternalId)
 	if err != nil {

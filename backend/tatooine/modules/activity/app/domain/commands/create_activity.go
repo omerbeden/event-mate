@@ -91,6 +91,10 @@ func (cmd *CreateCommand) Handle(ctx context.Context) (bool, error) {
 		if err != nil {
 			logger.Info("failed to add city to Redis %s\n", activity)
 		}
+		err = cmd.addCreatedActivityToRedis(ctx, activity.CreatedBy.ID, jsonActivity)
+		if err != nil {
+			logger.Info("failed to add created activity to Redis %s\n", activity)
+		}
 	}()
 
 	wg.Wait()
@@ -101,4 +105,10 @@ func (cmd *CreateCommand) Handle(ctx context.Context) (bool, error) {
 func (ccmd *CreateCommand) addCityToRedis(ctx context.Context, city string, valueJson []byte) error {
 	cityKey := fmt.Sprintf("%s:%s", cacheadapter.CITY_CACHE_KEY, city)
 	return ccmd.Redis.AddMember(ctx, cityKey, valueJson)
+}
+
+func (command *CreateCommand) addCreatedActivityToRedis(ctx context.Context, createdBy int64, valueJSON []byte) error {
+	redisKey := fmt.Sprintf("%s:%d:%s", cache.USER_PROFILE_CACHE_KEY, createdBy, cache.CREATED_ACTIVITIES_CACHE_KEY)
+	return command.Redis.AddMember(ctx, redisKey, valueJSON)
+
 }

@@ -14,7 +14,6 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/requestid"
 
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/omerbeden/event-mate/backend/tatooine/cmd/api/middleware/auth"
 	"github.com/omerbeden/event-mate/backend/tatooine/cmd/api/routes"
 	activityRepoAdapter "github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/adapters/postgresadapter"
 	activityServiceEntryPoints "github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/entrypoints"
@@ -68,7 +67,7 @@ func main() {
 
 	app := fiber.New()
 	app.Use(requestid.New())
-	app.Use(auth.New(firebaseApp))
+	//app.Use(auth.New(firebaseApp))
 	api := app.Group("/api")
 	routes.ActivityRouter(api, *activityService)
 	routes.ProfileRouter(api, *userService)

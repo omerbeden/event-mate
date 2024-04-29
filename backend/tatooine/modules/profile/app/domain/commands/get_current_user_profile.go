@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/adapters/cachedapter"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/model"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/profile/app/domain/ports/repositories"
 	"github.com/omerbeden/event-mate/backend/tatooine/pkg"
@@ -37,7 +36,7 @@ func (cmd *GetCurrentUserProfileCommand) Handle(ctx context.Context) (*model.Use
 }
 
 func (cmd *GetCurrentUserProfileCommand) getFromCache(ctx context.Context, externalId string) (*model.UserProfile, error) {
-	profileKey := fmt.Sprintf("%s:%s", cachedapter.USER_PROFILE_CACHE_KEY, externalId)
+	profileKey := fmt.Sprintf("%s:%s", cache.USER_PROFILE_CACHE_KEY, externalId)
 	cacheResult, err := cmd.Cache.Get(ctx, profileKey)
 	if err != nil {
 		return nil, fmt.Errorf("%s could not get user profile for key: %s ", errLogPrefixCurrentGetUserProfileCommand, profileKey)

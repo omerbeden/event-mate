@@ -11,6 +11,8 @@ import (
 var ErrRedisMember = errors.New("members Nil or Blank")
 
 const ATTANDED_ACTIVITIES_CACHE_KEY = "attandedActivities"
+const CREATED_ACTIVITIES_CACHE_KEY = "createdActivities"
+const USER_PROFILE_CACHE_KEY = "userProfile"
 
 type RedisOption struct {
 	*redis.Options
