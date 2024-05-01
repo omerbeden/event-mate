@@ -57,7 +57,7 @@ func TestCreateUserProfile(t *testing.T) {
 		ExternalId:      "7",
 		UserName:        "omrr7",
 		Email:           "test7",
-		Adress:          model.UserProfileAdress{City: "Sakarya"},
+		Adress:          model.UserProfileAdress{City: "Cupertino"},
 		ProfileImageUrl: "profileI1mage.png",
 		IsVerified:      true,
 	}

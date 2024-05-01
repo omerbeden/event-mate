@@ -11,6 +11,7 @@ func ProfileRouter(app fiber.Router, service entrypoints.UserService) {
 	app.Get("/profiles/:id", handlers.GetUserProfile(service))
 	app.Get("/profiles/currentUser/:externalId", handlers.GetCurrentUserProfile(service))
 	app.Get("/profiles/currentUser/badges/:externalId", handlers.GetProfileBadges(service))
+	app.Get("/profiles/currentUser/createdActivities/:userId", handlers.GetCreatedActivities(service))
 	app.Patch("/profiles/currentUser/:externalId/profile-image", handlers.UpdateProfileImageUrl(service))
 	app.Patch("/profiles/currentUser/:externalId/verification", handlers.UpdateProfileVerification(service))
 }

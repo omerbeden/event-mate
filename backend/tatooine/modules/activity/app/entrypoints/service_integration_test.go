@@ -61,7 +61,7 @@ func TestCreateActivity(t *testing.T) {
 			ID: 2,
 		},
 		Location: model.Location{
-			City:        "Sakarya",
+			City:        "Cupertino",
 			District:    "Hendek",
 			Description: "in front of the gas station",
 			Latitude:    41.000000,

@@ -133,7 +133,7 @@ func (r *userProfileRepo) GetCreatedActivities(ctx context.Context, userId int64
 	q := `SELECT a.id , a.title, a.category, a.content , a.start_at, a.gender_composition,a.quota,a.participant_count,
 	p.name, p.last_name, p.user_name, p.profile_image_url, ups.average_point,
 	loc.city
-	FROM activities
+	FROM activities a
 	JOIN user_profiles p ON p.id = a.created_by
 	JOIN activity_locations loc ON loc.activity_id = a.id
 	JOIN user_profile_stats ups ON ups.profile_id = p.id
