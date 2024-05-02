@@ -297,6 +297,15 @@ func (service UserService) GetCreatedActivities(ctx context.Context, userId int6
 	return cmd.Handle(ctx)
 }
 
+func (service UserService) GetEvaluations(ctx context.Context, userId int64) ([]model.GetUserEvaluations, error) {
+	cmd := &commands.GetEvaluationsCommand{
+		Repo: service.userStatRepository,
+		//Cache: &service.redisClient,
+	}
+
+	return cmd.Handle(ctx, userId)
+}
+
 func updateCache(ctx context.Context, redis cache.Cache, updatedUser *model.UserProfile) error {
 	cacheKeyExternalId := fmt.Sprintf("%s:%s", cache.USER_PROFILE_CACHE_KEY, updatedUser.ExternalId)
 	cacheKeyUserName := fmt.Sprintf("%s:%s", cache.USER_PROFILE_CACHE_KEY, updatedUser.Header.UserName)

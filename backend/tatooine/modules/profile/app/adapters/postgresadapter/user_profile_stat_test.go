@@ -24,8 +24,8 @@ func TestUserProfileStatRepo_EvaluateUser(t *testing.T) {
 			name:    "should insert a profile stat successfully",
 			wantErr: false,
 			evaluation: model.UserEvaluation{
-				GiverId:    "1",
-				ReceiverId: "2",
+				GiverId:    1,
+				ReceiverId: 2,
 				Points:     1,
 				Comment:    "test comment",
 			},
@@ -43,8 +43,8 @@ func TestUserProfileStatRepo_EvaluateUser(t *testing.T) {
 			name:    "should return error",
 			wantErr: true,
 			evaluation: model.UserEvaluation{
-				GiverId:    "1",
-				ReceiverId: "2",
+				GiverId:    1,
+				ReceiverId: 2,
 				Points:     1,
 				Comment:    "test comment",
 			},

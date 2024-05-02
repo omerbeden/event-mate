@@ -24,8 +24,8 @@ func TestEvaluateUser_Handle(t *testing.T) {
 			name:    "should evaluate user point successfully",
 			wantErr: false,
 			evaluation: model.UserEvaluation{
-				GiverId:    "1",
-				ReceiverId: "2",
+				GiverId:    1,
+				ReceiverId: 2,
 				Points:     1,
 				Comment:    "test comment",
 			},
@@ -34,8 +34,8 @@ func TestEvaluateUser_Handle(t *testing.T) {
 			name:    "should return an error when evaluateUser fails",
 			wantErr: true,
 			evaluation: model.UserEvaluation{
-				GiverId:    "1",
-				ReceiverId: "2",
+				GiverId:    1,
+				ReceiverId: 2,
 				Points:     1,
 				Comment:    "test comment",
 			},
@@ -47,8 +47,8 @@ func TestEvaluateUser_Handle(t *testing.T) {
 			name:    "should return an error when getUserProfile fails",
 			wantErr: true,
 			evaluation: model.UserEvaluation{
-				GiverId:    "1",
-				ReceiverId: "2",
+				GiverId:    1,
+				ReceiverId: 2,
 				Points:     1,
 				Comment:    "test comment",
 			},

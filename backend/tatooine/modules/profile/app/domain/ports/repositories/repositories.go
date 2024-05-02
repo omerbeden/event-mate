@@ -26,6 +26,7 @@ type UserProfileAddressRepository interface {
 }
 type UserProfileStatRepository interface {
 	EvaluateUser(ctx context.Context, eval model.UserEvaluation) error
+	GetEvaluations(ctx context.Context, userId int64) ([]model.GetUserEvaluations, error)
 }
 
 type ProfileBadgeRepository interface {

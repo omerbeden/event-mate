@@ -47,7 +47,7 @@ func (r *userProfileStatRepo) EvaluateUser(ctx context.Context, eval model.UserE
 				return customerrors.ErrDublicateKey
 			}
 		}
-		return fmt.Errorf("could not evaluate user %s , %w", eval.ReceiverId, err)
+		return fmt.Errorf("could not evaluate user %d , %w", eval.ReceiverId, err)
 	}
 
 	uq := `WITH average_points AS (
@@ -57,7 +57,7 @@ func (r *userProfileStatRepo) EvaluateUser(ctx context.Context, eval model.UserE
 				FROM
 					user_points upoints
 				JOIN
-					user_profiles up ON up.external_id = upoints.receiver_id
+					user_profiles up ON up.id = upoints.receiver_id
 				GROUP BY
 					up.id
 			)
@@ -72,7 +72,7 @@ func (r *userProfileStatRepo) EvaluateUser(ctx context.Context, eval model.UserE
 
 	_, err = tx.Exec(ctx, uq)
 	if err != nil {
-		return fmt.Errorf("failed to calculate average point")
+		return fmt.Errorf("failed to calculate average point %w", err)
 	}
 
 	err = tx.Commit(ctx)
@@ -81,4 +81,34 @@ func (r *userProfileStatRepo) EvaluateUser(ctx context.Context, eval model.UserE
 	}
 
 	return nil
+}
+
+func (r *userProfileStatRepo) GetEvaluations(ctx context.Context, userId int64) ([]model.GetUserEvaluations, error) {
+	q := `	SELECT
+		giver.user_name,
+		giver.profile_image_url,
+		pts.given_at,
+		pts.comment,
+		pts.points
+	FROM user_profiles p
+	JOIN user_points pts ON p.id = pts.receiver_id
+	JOIN user_profiles giver ON  giver.id = pts.giver_id
+	WHERE p.id = $1;`
+
+	rows, err := r.pool.Query(ctx, q, userId)
+	if err != nil {
+		return nil, fmt.Errorf("could not get evaluations for user: %d %w", userId, err)
+	}
+
+	var evaluations []model.GetUserEvaluations
+	for rows.Next() {
+		var eval model.GetUserEvaluations
+		err := rows.Scan(&eval.GiverUserName, &eval.GiverProfileImageUrl, &eval.GivenAt, &eval.Comment, &eval.GivenPoint)
+		if err != nil {
+			return nil, fmt.Errorf("error getting rows  evaluation for user: %w", err)
+		}
+		evaluations = append(evaluations, eval)
+	}
+
+	return evaluations, nil
 }

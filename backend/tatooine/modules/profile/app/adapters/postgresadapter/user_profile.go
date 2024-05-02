@@ -169,7 +169,7 @@ func (r *userProfileRepo) GetCurrentUserProfile(ctx context.Context, externalId 
 	FROM user_profiles up
 	JOIN user_profile_stats ups ON ups.profile_id = up.id
 	JOIN user_profile_addresses upa ON upa.profile_id = up.id
-	LEFT JOIN user_points ON up.external_id = receiver_id
+	LEFT JOIN user_points ON up.id = receiver_id
 	WHERE up.external_id = $1
 	`
 

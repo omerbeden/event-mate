@@ -123,6 +123,11 @@ type MockStatRepository struct {
 	EvaluateUserFunc func(ctx context.Context, eval model.UserEvaluation) error
 }
 
+// GetEvaluations implements repositories.UserProfileStatRepository.
+func (m *MockStatRepository) GetEvaluations(ctx context.Context, userId int64) ([]model.GetUserEvaluations, error) {
+	panic("unimplemented")
+}
+
 var _ repositories.UserProfileStatRepository = (*MockStatRepository)(nil)
 
 func (m *MockStatRepository) Insert(ctx context.Context, tx db.Tx, stat model.UserProfileStat) error {

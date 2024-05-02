@@ -324,3 +324,46 @@ func GetCreatedActivities(service entrypoints.UserService) fiber.Handler {
 		})
 	}
 }
+
+func GetEvaluations(service entrypoints.UserService) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		ctx, cancel := context.WithTimeout(c.Context(), time.Second*5)
+		defer cancel()
+
+		requestid, err := getRequestId(c)
+		if err != nil {
+			return err
+		}
+
+		newLogger := pkg.Logger().With(zap.String("requestid", requestid))
+		ctx = context.WithValue(ctx, pkg.LoggerKey, newLogger)
+
+		userIdStr := c.Params("userId")
+		userId, err := strconv.ParseInt(userIdStr, 10, 64)
+		if err != nil {
+			newLogger.Error(err)
+			return c.Status(fiber.StatusInternalServerError).JSON(presenter.BaseResponse{
+				APIVersion: presenter.APIVersion,
+				Data:       nil,
+				Error:      presenter.PARAM_PARSER_ERR,
+			})
+		}
+
+		result, err := service.GetEvaluations(ctx, userId)
+
+		if err != nil {
+			newLogger.Error(err)
+			return c.Status(fiber.StatusInternalServerError).JSON(presenter.BaseResponse{
+				APIVersion: presenter.APIVersion,
+				Data:       nil,
+				Error:      presenter.UNKNOW_ERR,
+			})
+		}
+
+		return c.Status(fiber.StatusOK).JSON(presenter.BaseResponse{
+			APIVersion: presenter.APIVersion,
+			Data:       result,
+			Error:      "",
+		})
+	}
+}

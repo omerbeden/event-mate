@@ -35,7 +35,7 @@ func (cmd *EvaluateUserCommand) Handle(ctx context.Context) (*model.UserProfile,
 		return nil, err
 	}
 
-	user, err := cmd.UserRepo.GetCurrentUserProfile(ctx, cmd.Evaluation.ReceiverId)
+	user, err := cmd.UserRepo.GetUserProfileById(ctx, cmd.Evaluation.ReceiverId)
 	if err != nil {
 		return nil, err
 	}

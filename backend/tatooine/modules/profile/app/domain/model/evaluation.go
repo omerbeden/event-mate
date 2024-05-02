@@ -1,9 +1,19 @@
 package model
 
+import "time"
+
 type UserEvaluation struct {
-	GiverId           string  `json:"giver_id"`
-	ReceiverId        string  `json:"receiver_id"`
+	GiverId           int64   `json:"giverId"`
+	ReceiverId        int64   `json:"receiverId"`
 	Points            float32 `json:"points"`
 	Comment           string  `json:"comment"`
-	RelatedActivityId int64   `json:"related_activity_id"`
+	RelatedActivityId int64   `json:"relatedActivityId"`
+}
+
+type GetUserEvaluations struct {
+	GiverUserName        string    `json:"giverUserName"`
+	GiverProfileImageUrl string    `json:"giverProfileImageUrl"`
+	GivenAt              time.Time `json:"givenAt"`
+	Comment              string    `json:"comment"`
+	GivenPoint           float32   `json:"givenPoint"`
 }

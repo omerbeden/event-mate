@@ -14,9 +14,9 @@ type UserProfile struct {
 }
 
 type UserProfileHeader struct {
-	UserName        string `json:"username"`
-	Name            string `json:"name"`
-	LastName        string `json:"lastName"`
-	ProfileImageUrl string `json:"profileImageUrl"`
-	Points          int    `json:"points"`
+	UserName        string  `json:"username"`
+	Name            string  `json:"name"`
+	LastName        string  `json:"lastName"`
+	ProfileImageUrl string  `json:"profileImageUrl"`
+	Points          float32 `json:"points"`
 }

@@ -54,9 +54,9 @@ func TestCreateActivity(t *testing.T) {
 		StartAt:  time.Now(),
 		EndAt:    time.Now().Add(time.Hour * 2),
 		Content:  "Test Content2",
-		Quota:    3,
+		Quota:    4,
 		Flow:     []string{"meet", "ice breaker", "running"},
-		Rules:    []string{"no dogs", "no cigarete", "no talking while running"},
+		Rules:    []string{"no dogss", "no cigarete", "no talking while running"},
 		CreatedBy: model.User{
 			ID: 2,
 		},

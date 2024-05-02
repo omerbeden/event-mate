@@ -54,8 +54,8 @@ func TestCreateUserProfile(t *testing.T) {
 		Name:            "ome1r",
 		LastName:        "be1den",
 		About:           "p1c",
-		ExternalId:      "7",
-		UserName:        "omrr7",
+		ExternalId:      "2",
+		UserName:        "omrr2",
 		Email:           "test7",
 		Adress:          model.UserProfileAdress{City: "Cupertino"},
 		ProfileImageUrl: "profileI1mage.png",
@@ -277,11 +277,11 @@ func TestEvaluateUser(t *testing.T) {
 	})
 
 	evaluation := model.UserEvaluation{
-		ReceiverId:        "e2",
-		GiverId:           "16",
+		ReceiverId:        1,
+		GiverId:           2,
 		Points:            8.7,
 		Comment:           "test comment",
-		RelatedActivityId: 2,
+		RelatedActivityId: 1,
 	}
 	pgxAdapter := postgres.NewPgxAdapter(pool)
 
