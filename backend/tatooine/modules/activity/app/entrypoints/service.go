@@ -2,10 +2,13 @@ package entrypoints
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/domain/commands"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/domain/model"
 	"github.com/omerbeden/event-mate/backend/tatooine/modules/activity/app/domain/ports/repositories"
+	notifierModel "github.com/omerbeden/event-mate/backend/tatooine/modules/notifier/app/domain/model"
+	"github.com/omerbeden/event-mate/backend/tatooine/modules/notifier/app/entrypoints"
 	"github.com/omerbeden/event-mate/backend/tatooine/pkg/cache"
 	"github.com/omerbeden/event-mate/backend/tatooine/pkg/db"
 )
@@ -68,6 +71,22 @@ func (service ActivityService) AddParticipant(ctx context.Context, participant m
 	}
 
 	return addParticipantCommand.Handle(ctx)
+}
+
+func (service ActivityService) SendAttandRequest() {
+	// validate , record request in case of FCM error
+
+	// send notification to user B
+	notifierS := entrypoints.NewNotifierService()
+	result, err := notifierS.Send(&notifierModel.PushMessage{
+		DeviceToken: "token",
+		Title:       "title",
+		Body:        "body",
+	})
+
+	fmt.Printf("error : %v\n", err)
+	fmt.Printf("result : %+v", result)
+
 }
 
 func (service ActivityService) GetParticipants(ctx context.Context, activityId int64) ([]model.User, error) {

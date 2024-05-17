@@ -1,4 +1,4 @@
-package pushnotification
+package port
 
 import "github.com/omerbeden/event-mate/backend/tatooine/modules/notifier/app/domain/model"
 
