@@ -215,3 +215,15 @@ func (r *activityRepository) DeleteByID(ctx context.Context, id int64) (bool, er
 
 	return true, nil
 }
+
+func (r *activityRepository) StoreAttendRequest(ctx context.Context, request model.AttendRequest) error {
+	q := `INSERT INTO 
+		attend_requests(sender_id,receiver_id)
+	 	VALUES ($1,$2)`
+
+	_, err := r.pool.Exec(ctx, q, request.SenderId, request.ReceiverId)
+	if err != nil {
+		return fmt.Errorf("%s could not store attend request  %w", errlogprefix, err)
+	}
+	return nil
+}

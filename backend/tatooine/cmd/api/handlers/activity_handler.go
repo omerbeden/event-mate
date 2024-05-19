@@ -96,7 +96,7 @@ func toActivity(request presenter.CreateActivityRequest) model.Activity {
 	}
 }
 
-func AddParticipant(service entrypoints.ActivityService) fiber.Handler {
+func SendAttendRequest(service entrypoints.ActivityService) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		logger := pkg.Logger()
 		activityId, err := c.ParamsInt("activityId")
@@ -109,7 +109,7 @@ func AddParticipant(service entrypoints.ActivityService) fiber.Handler {
 			})
 		}
 
-		var requestBody model.User
+		var requestBody model.AttendRequest
 		err = c.BodyParser(&requestBody)
 		if err != nil {
 			logger.Error(presenter.BODY_PARSER_ERR)
@@ -131,7 +131,11 @@ func AddParticipant(service entrypoints.ActivityService) fiber.Handler {
 		newLogger := logger.With(zap.String("requestid", requestid))
 		ctx = context.WithValue(ctx, pkg.LoggerKey, newLogger)
 
-		if err := service.AddParticipant(ctx, requestBody, int64(activityId)); err != nil { // unnecessary int64 id , can be use int instead
+		if err := service.SendAttendRequest(ctx, model.AttendRequest{
+			ActivityId: int64(activityId),
+			SenderId:   requestBody.ReceiverId,
+			ReceiverId: requestBody.ReceiverId,
+		}); err != nil {
 			logger.Error(err)
 			return c.Status(fiber.StatusInternalServerError).JSON(presenter.BaseResponse{
 				APIVersion: presenter.APIVersion,

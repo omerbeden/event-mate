@@ -10,9 +10,9 @@ type NotifierService struct {
 	notifier port.PushNotifier
 }
 
-func NewNotifierService() *NotifierService {
+func NewNotifierService(receiverId int64) *NotifierService {
 	return &NotifierService{
-		notifier: &firebaseadapter.FirebaseNotifier{},
+		notifier: firebaseadapter.NewFirebaseNotifier(receiverId),
 	}
 }
 

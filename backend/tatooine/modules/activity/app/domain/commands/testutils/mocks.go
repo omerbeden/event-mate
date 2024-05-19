@@ -9,16 +9,17 @@ import (
 )
 
 type MockActivityRepo struct {
-	Activity            model.Activity
-	Activities          []model.GetActivityCommandResult
-	CreateFunc          func(ctx context.Context, tx db.Tx, activity model.Activity) (*model.Activity, error)
-	GetByIDFunc         func(ctx context.Context, id int64) (*model.Activity, error)
-	GetByLocationFunc   func(ctx context.Context, location *model.Location) ([]model.GetActivityCommandResult, error)
-	UpdateByIDFunc      func(ctx context.Context, activityId int64, activity model.Activity) (bool, error)
-	DeleteByIDFunc      func(ctx context.Context, activityId int64) (bool, error)
-	AddParticipantsFunc func(ctx context.Context, activityId int64, participants []model.User) error
-	AddParticipantFunc  func(ctx context.Context, activityId int64, participant model.User) error
-	GetPartipantsFunc   func(ctx context.Context, activityId int64) ([]model.User, error)
+	Activity               model.Activity
+	Activities             []model.GetActivityCommandResult
+	CreateFunc             func(ctx context.Context, tx db.Tx, activity model.Activity) (*model.Activity, error)
+	GetByIDFunc            func(ctx context.Context, id int64) (*model.Activity, error)
+	GetByLocationFunc      func(ctx context.Context, location *model.Location) ([]model.GetActivityCommandResult, error)
+	UpdateByIDFunc         func(ctx context.Context, activityId int64, activity model.Activity) (bool, error)
+	DeleteByIDFunc         func(ctx context.Context, activityId int64) (bool, error)
+	AddParticipantsFunc    func(ctx context.Context, activityId int64, participants []model.User) error
+	AddParticipantFunc     func(ctx context.Context, activityId int64, participant model.User) error
+	GetPartipantsFunc      func(ctx context.Context, activityId int64) ([]model.User, error)
+	StoreAttendRequestFunc func(ctx context.Context, request model.AttendRequest) error
 }
 
 func (m *MockActivityRepo) Create(ctx context.Context, tx db.Tx, activity model.Activity) (*model.Activity, error) {
@@ -68,6 +69,12 @@ func (m *MockActivityRepo) GetParticipants(ctx context.Context, activityId int64
 		return m.GetPartipantsFunc(ctx, activityId)
 	}
 	return m.Activity.Participants, nil
+}
+func (m *MockActivityRepo) StoreAttendRequest(ctx context.Context, request model.AttendRequest) error {
+	if m.StoreAttendRequestFunc != nil {
+		return m.StoreAttendRequest(ctx, request)
+	}
+	return nil
 }
 
 type MockActivityRulesRepo struct {

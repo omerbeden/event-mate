@@ -16,6 +16,7 @@ type ActivityRepository interface {
 	AddParticipants(ctx context.Context, activityId int64, participants []model.User) error
 	AddParticipant(ctx context.Context, activityId int64, participant model.User) error
 	GetParticipants(ctx context.Context, activityId int64) ([]model.User, error)
+	StoreAttendRequest(ctx context.Context, request model.AttendRequest) error
 }
 
 type ActivityRulesRepository interface {
