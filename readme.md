@@ -1,4 +1,5 @@
 I personal project where I try new things/techs.
+Not finished yet
 
 ### Project 
 
